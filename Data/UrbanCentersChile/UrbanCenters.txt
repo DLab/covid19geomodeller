@@ -1,0 +1,8 @@
+{0: ['Iquique', 'Alto Hospicio'],
+ 1: ['La Serena', 'Coquimbo'],
+ 2: ['Valparaíso', 'Concón', 'Viña del Mar', 'Quilpué', 'Villa Alemana'],
+ 3: ['Rancagua', 'Machalí'],
+ 4: ['Linares'],
+ 5: ['Concepción','Coronel','Chiguayante','Hualqui','Lota','Penco','San Pedro de la Paz','Talcahuano','Tomé','Hualpén'],
+ 6: ['Temuco', 'Padre Las Casas'],
+ 7: ['Santiago','Cerrillos','Cerro Navia','Conchalí','El Bosque','Estación Central','Huechuraba','Independencia','La Cisterna','La Florida','La Granja','La Pintana','La Reina','Las Condes','Lo Barnechea','Lo Espejo','Lo Prado','Macul','Maipú','Ñuñoa','Pedro Aguirre Cerda','Peñalolén','Providencia','Pudahuel','Quilicura','Quinta Normal','Recoleta','Renca','San Joaquín','San Miguel','San Ramón','Vitacura','Puente Alto','Pirque','Colina','Lampa','Til Til','San Bernardo','Buin','Calera de Tango','Paine','Melipilla','Talagante','El Monte','Isla de Maipo','Padre Hurtado','Peñaflor']}
