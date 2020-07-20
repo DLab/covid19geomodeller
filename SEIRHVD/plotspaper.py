@@ -258,7 +258,7 @@ H0 = 0
 # Initial VMI 
 V0 = 0
 # UCI/UTI capacity per 100000 persons
-Htot_max = 50
+Htot_max = 60
 nm = int(population/100000)
 step = 2
 Htot = list(range(0*nm,Htot_max*nm+step*nm,step*nm))
@@ -305,6 +305,8 @@ ax.set_ylabel('Beds per 100.000')
 plt.show() 
 
 
+
+"""
 # Non parallel Simulation
 SHFR = np.zeros((len(Htot),len(alpha)))  
 sims = []
@@ -322,7 +324,7 @@ for i in range(len(Htot)):
         aux.append(simulation)
     sims.append(aux)        
 
-
+"""
 
 
 
