@@ -5,7 +5,6 @@ SEIRHVD Model
 """
 
 import numpy as np
-from scikits.odes.odeint import odeint
 from scipy.integrate import solve_ivp
 from scipy.special import expit
 from joblib import Parallel, delayed
@@ -529,6 +528,8 @@ class SEIRHUDV :
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,T] function doesn't
         #start. Or it's start if class object is initialze.
+        print('Import scikits-odes')
+        from scikits.odes.odeint import odeint
 
 
         if(not isinstance(self.S, np.ndarray)):
