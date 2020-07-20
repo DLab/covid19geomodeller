@@ -84,11 +84,11 @@ for i in Htot:
     for j in alpha:
         print("alpha")
         # Creación del objeto de simulación 
-        simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate)
+        simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate,I_as_prop = I_as_prop, I_mi_prop = I_mi_prop,I_se_prop = I_se_prop,I_cr_prop = I_cr_prop)
         quarantines = [[tsim, 0.85, j, 0.0, 0.0, tsim, 0.0]]
         simulation.inputarray = np.array(quarantines)
         simulation.addquarantine()
-        simulation.initialvalues(I_act0,dead0,population,H0,V0,i,Vtot,R=0,D=0,H_cr = 0,I_as_prop = I_as_prop, I_mi_prop = I_mi_prop,I_se_prop = I_se_prop,I_cr_prop = I_cr_prop)
+        simulation.initialvalues(I_act0,dead0,population,H0,V0,i,Vtot,R=0,D=0,H_cr = 0)
         simulation.simulate(v=3)
         if i > 0:
             aux.append(simulation)
@@ -97,17 +97,20 @@ for i in Htot:
     sims.append(aux)
 
 # Plots Generation:
-
+maxval = max([max([max(sims[i][j].D[0]) for j in range(Nalpha)]) for i in range(NHtot)])
+xlim = 600
 fig, axs = plt.subplots(NHtot, Nalpha)
 
 for i in range(NHtot):
     for j in range(Nalpha):
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_crD[0],label="H_cr to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].VD[0],label="V to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_crD[0],label="I_cr to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_seD[0],label="I_se to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].B[0],label="Deaths")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_crD_d[0],label="H_cr to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].VD_d[0],label="V to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_crD_d[0],label="I_cr to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_seD_d[0],label="I_se to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].D[0],label="Deaths")
         axs[i, j].set_title("Htot: "+str(Htot[i])+" | Alpha: "+str(alpha[j]))
+        axs[i, j].set_ylim([0,maxval*1.05])
+        axs[i, j].set_xlim([0,xlim])
 fig.suptitle('Axes values are scaled individually by default')
 #fig.tight_layout()
 lines, labels = fig.axes[-1].get_legend_handles_labels()
@@ -271,11 +274,11 @@ alpha = list(np.arange(0.05,1+step,step))
 # Simulation 
 num_cores = multiprocessing.cpu_count() 
 def SHFRsimulate(Htot,Vtot,alpha): 
-    simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate) 
+    simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate,I_as_prop = I_as_prop, I_mi_prop = I_mi_prop,I_se_prop = I_se_prop,I_cr_prop = I_cr_prop) 
     quarantines = [[tsim, 0.85, alpha, 0.0, 0.0, tsim, 0.0]] 
     simulation.inputarray = np.array(quarantines) 
     simulation.addquarantine() 
-    simulation.initialvalues(I_act0,dead0,population,H0,V0,Htot,Vtot,R=0,D=0,H_cr = 0,I_as_prop = I_as_prop, I_mi_prop = I_mi_prop,I_se_prop = I_se_prop,I_cr_prop = I_cr_prop) 
+    simulation.initialvalues(I_act0,dead0,population,H0,V0,Htot,Vtot,R=0,D=0,H_cr = 0)
     simulation.simulate(v=3)  
     return simulation #, simulation.SHFR[0]  
  

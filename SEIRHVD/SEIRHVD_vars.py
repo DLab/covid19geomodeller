@@ -142,6 +142,28 @@ class SEIRHVD_vars():
         self.SHFR = [self.totD[i]/(self.I_se_ac[i][-1]+self.I_cr_ac[i][-1]) for i in range(self.numescenarios)] 
         self.SHFR_d = [self.B[i]/(self.I_se_ac[i][-1]+self.I_cr_ac[i][-1]) for i in range(self.numescenarios)]
 
+        # ----------------- #
+        #    QA Variables   #
+        # ----------------- #
+        # Infected accumulated checksum
+        self.Iac_checksum = [[self.Iac[i][j] - self.I_as_ac[i][j] - self.I_mi_ac[i][j] - self.I_se_ac[i][j] - self.I_cr_ac[i][j] - self.I_act0 for j in range(len(self.t[i]))] for i in range(self.numescenarios)]
+        # Accumulated Infected proportion over time
+        self.I_as_ac_prop = [[self.I_as_ac[i][j]/self.Iac[i][j] for j in range(len(self.t[i]))] for i in range(self.numescenarios)]
+        self.I_mi_ac_prop = [[self.I_mi_ac[i][j]/self.Iac[i][j] for j in range(len(self.t[i]))] for i in range(self.numescenarios)]
+        self.I_se_ac_prop = [[self.I_se_ac[i][j]/self.Iac[i][j] for j in range(len(self.t[i]))] for i in range(self.numescenarios)]
+        self.I_cr_ac_prop = [[self.I_cr_ac[i][j]/self.Iac[i][j] for j in range(len(self.t[i]))] for i in range(self.numescenarios)]
+ 
+        # Accumulated Infected proportion sum - must be 1
+        self.Iac_prop = [self.I_as_ac_prop[i][-1] +self.I_mi_ac_prop[i][-1] +self.I_se_ac_prop[i][-1] +self.I_cr_ac_prop[i][-1] +self.I_act0/self.Iac[i][-1] for i in range(self.numescenarios)]
+
+        # Deaths
+        self.D_checksum = [max(self.VD_d[i]+self.H_crD_d[i]+self.I_seD_d[i]+self.I_crD_d[i] -self.D[i]) for i in range(self.numescenarios)]
+        #self.B_checksum = [max(self.VD[i]+self.H_crD[i]+self.I_seD[i]+self.I_crD[i]-self.B[i]) for i in range(self.numescenarios)]
+
+        # Population:
+        self.population_checksum = [max(self.S[i]+self.E_as[i]+self.E_sy[i]+self.I_as[i]+self.I_mi[i]+self.I_se[i]+self.I_cr[i]
+            +self.H_crin[i]+self.H_in[i]+self.H_out[i]+self.V[i]+self.R[i]+self.D[i]-self.population) for i in range(self.numescenarios)]
+
         # -------------- #
         #     Errores    #
         # -------------- #

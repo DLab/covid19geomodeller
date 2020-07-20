@@ -5,7 +5,7 @@ SEIRHVD Model
 """
 
 import numpy as np
-from scikits.odes.odeint import odeint
+
 from scipy.integrate import solve_ivp
 from scipy.special import expit
 from joblib import Parallel, delayed
@@ -135,10 +135,10 @@ class simSEIRHVD:
 
         case.setrelationalvalues()
         if self.intgr == 0:
-            print('Fast Solver')
+            print('Scipy Solver')
             case.integr_sci(0,tsim,0.1,False)        
         else:
-            print('Robust Solver')            
+            print('Scikits-odes solver (robust)')                  
             case.integr(0,tsim,0.1,False)
         out=[case,max_mov,rem_mov,qp,tsim]
         return(out)   
@@ -226,7 +226,7 @@ class SEIRHUDV :
         
         # Deaths
         # dD/dt: Death Rate
-        self.dD=lambda t,I_se,I_cr,H_in,H_cr,H_out,V,D: self.pVD/self.tVD*V+self.pcrD/self.tcrD*I_cr*(1-self.h_sat(H_in,H_cr,H_out,t)*(1-self.v_sat(V,t)))+\
+        self.dD=lambda t,I_se,I_cr,H_in,H_cr,H_out,V,D: self.pVD/self.tVD*V+self.pcrD/self.tcrD*I_cr*(1-self.h_sat(H_in,H_cr,H_out,t))*(1-self.v_sat(V,t))+\
             self.pseD/self.tseD*I_se*(1-self.h_sat(H_in,H_cr,H_out,t))+self.pcrinD/self.tcrinD*H_cr*(1-self.v_sat(V,t))-\
             self.pDB/self.tDB*D
         # dB/dt: Bury rate
@@ -253,7 +253,7 @@ class SEIRHUDV :
         self.dH_crD=lambda t,H_cr,V: self.pcrinD/self.tcrinD*H_cr*(1-self.v_sat(V,t)) 
         self.dVD=lambda t,V: self.pVD/self.tVD*V        
         self.dI_seD=lambda t,I_se,H_in,H_cr,H_out: self.pseD/self.tseD*I_se*(1-self.h_sat(H_in,H_cr,H_out,t))
-        self.dI_crD=lambda t,I_cr,H_in,H_cr,H_out: self.pcrD/self.tcrD*I_cr*(1-self.h_sat(H_in,H_cr,H_out,t))
+        self.dI_crD=lambda t,I_cr,H_in,H_cr,H_out,V: self.pcrD/self.tcrD*I_cr*(1-self.h_sat(H_in,H_cr,H_out,t))*(1-self.v_sat(V,t))
 
 
 
@@ -267,7 +267,7 @@ class SEIRHUDV :
         self.dH_crD_d=lambda t,H_cr,V,H_crD_d: self.pcrinD/self.tcrinD*H_cr*(1-self.v_sat(V,t)) - H_crD_d
         self.dVD_d=lambda t,V,VD_d: self.pVD/self.tVD*V - VD_d
         self.dI_seD_d=lambda t,I_se,H_in,H_cr,H_out,I_seD_d: self.pseD/self.tseD*I_se*(1-self.h_sat(H_in,H_cr,H_out,t)) - I_seD_d
-        self.dI_crD_d=lambda t,I_cr,H_in,H_cr,H_out,I_crD_d: self.pcrD/self.tcrD*I_cr*(1-self.h_sat(H_in,H_cr,H_out,t)) - I_crD_d
+        self.dI_crD_d=lambda t,I_cr,H_in,H_cr,H_out,V,I_crD_d: self.pcrD/self.tcrD*I_cr*(1-self.h_sat(H_in,H_cr,H_out,t))*(1-self.v_sat(V,t)) - I_crD_d
 
         
 
@@ -429,7 +429,7 @@ class SEIRHUDV :
 
         self.E_as=0.3*self.mu*self.I_act0
         self.E_sy=0.7*self.mu*self.I_act0 
-               
+
         # Hospitalizados
         #self.V+=(self.I_act0-(self.I_as+self.I_mi+self.I_cr+self.I_se))*0.05
         self.H_in=self.H0*0.42-self.H_cr/2 #+ (self.I_act0-(self.I_as+self.I_mi+self.I_cr+self.I_se))*0.1
@@ -538,6 +538,8 @@ class SEIRHUDV :
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,T] function doesn't
         #start. Or it's start if class object is initialze.
+        print('Import odeint')
+        from scikits.odes.odeint import odeint
 
 
         if(not isinstance(self.S, np.ndarray)):
@@ -673,7 +675,7 @@ class SEIRHUDV :
             ydot[23]=self.dH_crD(t,y[8],y[10])
             ydot[24]=self.dVD(t,y[10])
             ydot[25]=self.dI_seD(t,y[5],y[7],y[8],y[9])
-            ydot[26]=self.dI_crD(t,y[6],y[7],y[8],y[9])
+            ydot[26]=self.dI_crD(t,y[6],y[7],y[8],y[9],y[10])
 
             ydot[27]=self.dI_as_d(t,y[1],y[27])
             ydot[28]=self.dI_mi_d(t,y[2],y[28]) 
@@ -683,7 +685,7 @@ class SEIRHUDV :
             ydot[31]=self.dH_crD_d(t,y[8],y[10],y[31])
             ydot[32]=self.dVD_d(t,y[10],y[32])
             ydot[33]=self.dI_seD_d(t,y[5],y[7],y[8],y[9],y[33])
-            ydot[34]=self.dI_crD_d(t,y[6],y[7],y[8],y[9],y[34])                        
+            ydot[34]=self.dI_crD_d(t,y[6],y[7],y[8],y[9],y[10],y[34])
 
             
         initcond = np.array([S0,E_as0,E_sy0,I_as0,I_mi0,I_se0,I_cr0,
@@ -877,7 +879,7 @@ class SEIRHUDV :
             ydot[23]=self.dH_crD(t,y[8],y[10])
             ydot[24]=self.dVD(t,y[10])
             ydot[25]=self.dI_seD(t,y[5],y[7],y[8],y[9])
-            ydot[26]=self.dI_crD(t,y[6],y[7],y[8],y[9])
+            ydot[26]=self.dI_crD(t,y[6],y[7],y[8],y[9],y[10])
 
             ydot[27]=self.dI_as_d(t,y[1],y[27])
             ydot[28]=self.dI_mi_d(t,y[2],y[28]) 
@@ -887,7 +889,7 @@ class SEIRHUDV :
             ydot[31]=self.dH_crD_d(t,y[8],y[10],y[31])
             ydot[32]=self.dVD_d(t,y[10],y[32])
             ydot[33]=self.dI_seD_d(t,y[5],y[7],y[8],y[9],y[33])
-            ydot[34]=self.dI_crD_d(t,y[6],y[7],y[8],y[9],y[34])                             
+            ydot[34]=self.dI_crD_d(t,y[6],y[7],y[8],y[9],y[10],y[34])                             
                                           
             return(ydot)
         initcond = np.array([S0,E_as0,E_sy0,I_as0,I_mi0,I_se0,I_cr0,
