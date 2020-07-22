@@ -157,6 +157,23 @@ class SEIRHVD_importdata():
         print('Fallecidos Excesivos')
         return
 
+
+    # ---------------------------------------- #
+    #    Datos Infectados activos Minciencia   #
+    # ---------------------------------------- #
+    def importinfectadosactivosminciencia(self,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv' ):     
+        aux = pd.read_csv(endpoint)        
+        self.I_minciencia_r = aux.loc[aux['Codigo region']==int(self.tstate)].iloc[:,5:].sum()
+        
+        self.I_minciencia_r_dates = [datetime.strptime(self.I_minciencia_r.index[i],'%Y-%m-%d') for i in range(len(self.I_minciencia_r))]
+        index = np.where(np.array(self.I_minciencia_r_dates) >= self.initdate)[0][0] 
+        self.I_minciencia_r = self.I_minciencia_r[index:]
+        self.I_minciencia_r_dates = self.I_minciencia_r_dates[index:]
+        self.I_minciencia_r_tr = [(self.I_minciencia_r_dates[i]-self.initdate).days for i in range(len(self.I_minciencia_r))]
+        print('Infectados Activos Minciencia')
+        return
+
+
     # --------------------------- #
     #    Importar toda la data    #
     # --------------------------- #
@@ -166,8 +183,12 @@ class SEIRHVD_importdata():
         self.importfallecidosacumulados()
         self.importfallecidosexcesivos()
         self.importinfectadosactivos()
+        self.importinfectadosactivosminciencia()
         self.importsochimi()
         self.importpcrpop()
         self.importinfectadosdiarios()
         self.importinfectadosacumulados()
         print('Done')
+
+
+

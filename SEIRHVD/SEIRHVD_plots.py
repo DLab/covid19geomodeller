@@ -411,7 +411,7 @@ class SEIRHVD_plots():
     # ------------------------------ #
     #       Infectados Activos       #
     # ------------------------------ #
-    def plotinfectadosactivos(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
+    def plotinfectadosactivos(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True,minciencia = True):
         # -------- #
         #   Time   #
         # -------- #
@@ -437,7 +437,10 @@ class SEIRHVD_plots():
         # Reales
         if self.realdata:
             if reales:
-                plt.scatter(self.tr,self.Ir,label='Infectados Activos reales')
+                if minciencia:
+                    plt.scatter(self.tr,self.Ir,label='Infectados Activos reales')
+                else:
+                    plt.scatter(self.I_minciencia_r_tr,self.I_minciencia_r,label='Infectados Activos reales')
 
 
         # Inicio cuarentena general

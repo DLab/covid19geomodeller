@@ -126,3 +126,15 @@ simulation4.simulate(v=0)
 simulation4.plotseird()
 simulation4.peak
 simulation4.peak_t
+
+# Plots:
+
+plt.plot(simulation.t[0],simulation.I[0],label="k=0")
+plt.plot(simulation2.t[0],simulation2.I[0],label="k=0.1")
+plt.plot(simulation3.t[0],simulation3.I[0],label="k=1")
+plt.plot(simulation4.t[0],simulation4.I[0],label="k=10")
+plt.legend(loc=0)
+plt.ylabel('Infected')
+plt.xlabel('Days')
+plt.xlim(0,500)
+plt.show()

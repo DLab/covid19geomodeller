@@ -34,35 +34,39 @@ import matplotlib.pyplot as plt
 
 # Región Por CUT 
 tstate = '13'
-# Fecha Inicial
+# Fecha Inicial 
 initdate = datetime(2020,4,13)
 
 # Fecha de inicio de cuarentena
 qit =  datetime(2020,5,15)
 qit = (qit - initdate).days
 
+qfd = datetime(2020,7,24)
+qft = (qfd - initdate).days
 
 # Parametros del modelo
 beta = 0.117
-mu = 0.6 
+mu = 0.9 
 ScaleFactor = 1.9
-SeroPrevFactor = 0.22 # Sero Prevalence Factor. Permite ajustar la cantidad de gente que entra en la dinamica
+SeroPrevFactor = 1#0.22 # Sero Prevalence Factor. Permite ajustar la cantidad de gente que entra en la dinamica
 expinfection = 1 # Proporcion en la que contagian los expuestos
+k=10 # Factor de Saturación Cinética
 
 
 # Tiempo de simulacion
 tsim = 500 
 
+
 # Creación del objeto de simulación 
-simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate)
+simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate,k=k)
 
 # Creación del vector de cuarentenas
 # [Tsim, max_mov,rem_mov,quarantine period, quarantine initial time, quarantine final time, quarantine type]
-quarantines = [[500.0, 0.85, 0.6, 0.0, qit, 500.0, 0.0],
-              [500.0, 0.85, 0.65, 0.0,qit, 500.0, 0.0],
-              [500.0, 0.85, 0.7, 0.0, qit, 500.0, 0.0],
-              [500.0, 0.85, 0.75, 0.0,qit, 500.0, 0.0],
-              [500.0, 0.85, 0.4, 0.0,qit, 500.0, 0.0]]
+quarantines = [[500.0, 0.85, 0.6, 0.0, qit,qft, 0.0],
+               [500.0, 0.85, 0.65, 0.0,qit,qft, 0.0],
+               [500.0, 0.85, 0.7, 0.0, qit,qft, 0.0]]
+               #[500.0, 0.85, 0.75, 0.0,qit,qft, 0.0],
+               #[500.0, 0.85, 0.4, 0.0,qit, qft, 0.0]]
 simulation.inputarray = np.array(quarantines) # This will change during next update
 simulation.addquarantine()
 

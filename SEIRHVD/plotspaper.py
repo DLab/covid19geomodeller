@@ -69,8 +69,8 @@ Vtot = 10*nm
 
 #Movilty
 # From 0 to 1 in steps of:
-step = 0.25
-alpha = list(np.arange(0,1+step,step))
+step = 0.05
+alpha = list(np.arange(0.5,0.7+step,step))
 
 Nalpha = len(alpha)
 NHtot = len(Htot)
@@ -97,19 +97,21 @@ for i in Htot:
     sims.append(aux)
 
 # Plots Generation:
-maxval = max([max([max(sims[i][j].D[0]) for j in range(Nalpha)]) for i in range(NHtot)])
-xlim = 600
-fig, axs = plt.subplots(NHtot, Nalpha)
+maxval = max([max([max(sims[i][j].I_se[0]+sims[i][j].H_bed[0]+sims[i][j].I_seD_d[0]) for j in range(Nalpha)]) for i in range(NHtot)])
+xlim = tsim
 
+
+fig, axs = plt.subplots(NHtot, Nalpha)
 for i in range(NHtot):
     for j in range(Nalpha):
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_crD_d[0],label="H_cr to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].VD_d[0],label="V to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_crD_d[0],label="I_cr to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_seD_d[0],label="I_se to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].D[0],label="Deaths")
+        #axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_crD_d[0],label="H_cr to D")
+        #axs[i, j].plot(sims[i][j].t[0],sims[i][j].VD_d[0],label="V to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_bed[0]+sims[i][j].I_se[0]+sims[i][j].I_seD_d[0],label="Total Severe")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_bed[0],label="Hospitalized")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_se[0],label="I_se")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_seD_d[0],label="I_seD")
         axs[i, j].set_title("Htot: "+str(Htot[i])+" | Alpha: "+str(alpha[j]))
-        axs[i, j].set_ylim([0,maxval*1.05])
+        #axs[i, j].set_ylim([0,maxval*1.05])
         axs[i, j].set_xlim([0,xlim])
 fig.suptitle('Axes values are scaled individually by default')
 #fig.tight_layout()
@@ -201,10 +203,11 @@ fig, axs = plt.subplots(NHtot, Nalpha)
 
 for i in range(NVtot):
     for j in range(Nalpha):
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_crD[0],label="H_cr to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_cr[0],label="I_cr to D")
         axs[i, j].plot(sims[i][j].t[0],sims[i][j].VD[0],label="V to D")
         axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_crD[0],label="I_cr to D")
-        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_seD[0],label="I_se to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_cr[0],label="H_cr")
+
         axs[i, j].plot(sims[i][j].t[0],sims[i][j].B[0],label="Deaths")
         axs[i, j].set_title("Htot: "+str(Htot[i])+" | Alpha: "+str(alpha[j]))
 fig.suptitle('Axes values are scaled individually by default')
@@ -216,7 +219,27 @@ fig.legend(lines, labels,loc = 'best')
 fig.show()
 
 
-
+"""
+fig, axs = plt.subplots(NHtot, Nalpha)
+for i in range(NHtot):
+    for j in range(Nalpha):
+        #axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_crD_d[0],label="H_cr to D")
+        #axs[i, j].plot(sims[i][j].t[0],sims[i][j].VD_d[0],label="V to D")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_bed[0]+sims[i][j].I_se[0]+sims[i][j].I_seD_d[0],label="Total Severe")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_bed[0],label="Hospitalized")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_se[0],label="I_se")
+        axs[i, j].plot(sims[i][j].t[0],sims[i][j].I_seD_d[0],label="I_seD")
+        axs[i, j].set_title("Htot: "+str(Htot[i])+" | Alpha: "+str(alpha[j]))
+        #axs[i, j].set_ylim([0,maxval*1.05])
+        axs[i, j].set_xlim([0,xlim])
+fig.suptitle('Axes values are scaled individually by default')
+#fig.tight_layout()
+lines, labels = fig.axes[-1].get_legend_handles_labels()
+    
+#fig.legend(lines, labels, loc = 'upper center')
+fig.legend(lines, labels,loc = 'best')
+fig.show()
+"""
 
 
 # ------------------- #
@@ -230,8 +253,8 @@ initdate = datetime(2020,5,15)
 
 
 # Parametros del modelo
-beta = 0.12 # Tasa de contagio
-mu = 0.6 # Razon E0/I0
+beta = 0.2 # Tasa de contagio
+mu = 0 # Razon E0/I0
 ScaleFactor = 1 # Factor de Escala: Numero de infectados por sobre los reportados
 SeroPrevFactor = 1 # Sero Prevalence Factor. Permite ajustar la cantidad de gente que entra en la dinamica
 expinfection = 1 # Proporcion en la que contagian los expuestos

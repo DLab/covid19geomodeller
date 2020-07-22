@@ -40,7 +40,7 @@ class simSEIRHVD:
 
 
     def __init__(self,beta = 0.19, mu =2.6,inputarray = definputarray,B=221,D=26,V=758,I_act0=12642,R=0,Htot=None,Vtot=None,H_cr=80,H0=1720,tsat=30,Hmax=4000,Vmax=2000,expinfection=0,SeroPrevFactor=1,population=100000,
-    intgr = 0,I_as_ac =0, I_mi_ac = 0, I_se_ac = 0, I_cr_ac = 0,H_crD = 0, VD=0,I_crD=0,I_seD=0,I_as_prop = 0.35, I_mi_prop = 0.63,I_cr_prop = 0.007,I_se_prop = 0.013):
+    intgr = 0,I_as_ac =0, I_mi_ac = 0, I_se_ac = 0, I_cr_ac = 0,H_crD = 0, VD=0,I_crD=0,I_seD=0,I_as_prop = 0.35, I_mi_prop = 0.63,I_cr_prop = 0.007,I_se_prop = 0.013, k =0):
         self.mu = mu
         self.beta = beta 
         self.sims = []
@@ -86,12 +86,15 @@ class simSEIRHVD:
         self.I_as_d = 0
         self.I_mi_d = 0
         self.I_se_d = 0
-        self.I_cr_d = 0                
+        self.I_cr_d = 0
+
+        # Saturated Kinetics
+        self.k = k                        
 
          
     
     def sim_run(self,tsim,max_mov,rem_mov,qp,iqt=0,fqt = 300,movfunct = 0):       
-        case = SEIRHUDV(tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct)
+        case = SEIRHUDV(tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct,k=self.k)
         case.beta = self.beta       
         case.mu = self.mu
         case.B = self.B 
@@ -166,12 +169,13 @@ class simSEIRHVD:
 
 
 class SEIRHUDV :  
-    def __init__(self,tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct):
+    def __init__(self,tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct,k=0):
         #print(max_mov)
         self.setparams()
         self.setinitvalues()  
         #print(max_mov)
-        self.setscenario(tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct)        
+        self.setscenario(tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct)
+        self.k=k        
         #global mobility reduction parameters
         #self.alpha=alpha
         # total Hostipatl beds
@@ -185,14 +189,14 @@ class SEIRHUDV :
         
         # Susceptibles
         # dS/dt:
-        self.dS=lambda t,S,E_as,E_sy,I_as,I_mi,D,R: -self.alpha(t)*self.beta*S*(self.expinfection*(E_as+E_sy)+I_as+I_mi)/self.N-self.betaD*D+self.eta*R
+        self.dS=lambda t,S,E_as,E_sy,I_as,I_mi,D,R: -self.alpha(t)*self.beta*S*(self.expinfection*(E_as+E_sy)+I_as+I_mi)/(self.N+self.k*(I_as+I_mi))-self.betaD*D+self.eta*R
         
         # Exposed
         # dE_as/dt
-        self.dE_as=lambda t,S,E_as,E_sy,I_as,I_mi: self.pSas/self.tSas*self.alpha(t)*self.beta*S*(self.expinfection*(E_as+E_sy)+I_as+I_mi)/self.N\
+        self.dE_as=lambda t,S,E_as,E_sy,I_as,I_mi: self.pSas/self.tSas*self.alpha(t)*self.beta*S*(self.expinfection*(E_as+E_sy)+I_as+I_mi)/(self.N+self.k*(I_as+I_mi))\
             -self.pasas/self.tasas*E_as
         # dE_sy/dt
-        self.dE_sy=lambda t,S,E_as,E_sy,I_as,I_mi: self.pSsy/self.tSsy*self.alpha(t)*self.beta*S*(self.expinfection*(E_as+E_sy)+I_as+I_mi)/self.N\
+        self.dE_sy=lambda t,S,E_as,E_sy,I_as,I_mi: self.pSsy/self.tSsy*self.alpha(t)*self.beta*S*(self.expinfection*(E_as+E_sy)+I_as+I_mi)/(self.N+self.k*(I_as+I_mi))\
             -self.psymi/self.tsymi*E_sy-self.psyse/self.tsyse*E_sy-self.psycr/self.tsycr*E_sy
         
         # Infected
