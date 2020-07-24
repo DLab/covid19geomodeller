@@ -131,6 +131,7 @@ class SEIRHVD_vars():
         #self.population = self.sims[0][0].population
         self.infectedsusc = [100*((self.S[i][0] - self.S[i][-1])/self.S[i][0]) for i in range(self.numescenarios)] 
         self.infectedpop = [100*((self.S[i][0] - self.S[i][-1]))/self.population for i in range(self.numescenarios)]
+        self.infectedpop_norm = [100*((self.S[i][0] - self.S[i][-1]))/(self.population*self.ScaleFactor) for i in range(self.numescenarios)]
 
 
         # Indicadores:
@@ -175,7 +176,9 @@ class SEIRHVD_vars():
             
             # Infecatos Activos
             idx = [np.searchsorted(self.t[i],self.tr) for i in range(self.numescenarios)]
-            self.err_Iactives = [LA.norm(self.Ir-self.I[i][idx[i]])/LA.norm(self.Ir) for i in range(self.numescenarios)]    
+            self.err_Iactives = [LA.norm(self.Ir-self.I[i][idx[i]])/LA.norm(self.Ir) for i in range(self.numescenarios)]
+            idx = [np.searchsorted(self.t[i],self.I_minciencia_r_tr) for i in range(self.numescenarios)]
+            self.err_Iactives_minciencia = [LA.norm(self.I_minciencia_r-self.I[i][idx[i]])/LA.norm(self.Ir) for i in range(self.numescenarios)]
             
             # Infectados acumulados
             #idx = [np.searchsorted(t[i],tr) for i in range(self.numescenarios)]

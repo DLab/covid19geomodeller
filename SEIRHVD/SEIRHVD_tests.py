@@ -45,17 +45,15 @@ qfd = datetime(2020,7,24)
 qft = (qfd - initdate).days
 
 # Parametros del modelo
-beta = 0.117
-mu = 0.9 
-ScaleFactor = 1.9
+beta = 0.24#25#15#15#2#117
+mu = 0.1#5 
+ScaleFactor = 3
 SeroPrevFactor = 1#0.22 # Sero Prevalence Factor. Permite ajustar la cantidad de gente que entra en la dinamica
 expinfection = 1 # Proporcion en la que contagian los expuestos
-k=10 # Factor de Saturación Cinética
-
+k=35 # Factor de Saturación Cinética
 
 # Tiempo de simulacion
-tsim = 500 
-
+tsim = 1000 
 
 # Creación del objeto de simulación 
 simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate,k=k)
@@ -73,7 +71,9 @@ simulation.addquarantine()
 simulation.simulate(v=3)
 
 # Plots de ejemplo:
-simulation.plotinfectadosacumulados() 
+simulation.plotinfectadosactivos(scalefactor=True,ylim=200000) 11
+
+simulation.plotinfectadosactivos() 
 simulation.plotventiladores()
 simulation.plotfallecidosacumulados()
 

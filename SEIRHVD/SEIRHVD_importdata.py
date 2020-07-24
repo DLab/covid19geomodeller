@@ -50,7 +50,7 @@ class SEIRHVD_importdata():
     # -------------------------------- #
     #    Datos Infectados acumulados   #
     # -------------------------------- #
-    def importinfectadosacumulados(self,qlendpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
+    def importinfectadosacumulados(self,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
         aux = pd.read_csv(endpoint)        
         self.I_ac_r = aux.loc[aux['Codigo region']==int(self.tstate)].iloc[:,5:-1].sum()
         

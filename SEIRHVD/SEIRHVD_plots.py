@@ -430,17 +430,36 @@ class SEIRHVD_plots():
         #     Plot    #
         # ----------- #
         # Error
-        if self.realdata:
+        if self.realdata:                        
+            if minciencia:
+                for i in range(self.numescenarios):
+                    plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives_minciencia[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+
+            else:
+                for i in range(self.numescenarios):
+                    plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+
+        # Parametros:
+        plt.plot([], [], ' ', label='beta: '+str(self.beta))
+        plt.plot([], [], ' ', label='mu: '+str(self.mu))
+        plt.plot([], [], ' ', label='ScaleFactor: '+str(self.ScaleFactor))
+        plt.plot([], [], ' ', label='k: '+str(self.k))
+        plt.plot([], [], ' ', label='seroprev: '+str(self.SeroPrevFactor))
+        if scalefactor:
             for i in range(self.numescenarios):
-                plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+                plt.plot([], [], ' ', label='SeroPrev Norm: '+str(round(self.infectedpop_norm[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+        else:
+            for i in range(self.numescenarios):
+                plt.plot([], [], ' ', label='SeroPrev: '+str(round(self.infectedpop[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+
 
         # Reales
         if self.realdata:
             if reales:
                 if minciencia:
-                    plt.scatter(self.tr,self.Ir,label='Infectados Activos reales')
+                    plt.scatter(self.I_minciencia_r_tr,self.I_minciencia_r,label='Infectados Activos Minciencia')
                 else:
-                    plt.scatter(self.I_minciencia_r_tr,self.I_minciencia_r,label='Infectados Activos reales')
+                    plt.scatter(self.tr,self.Ir,label='Infectados Activos reales')                    
 
 
         # Inicio cuarentena general
@@ -462,6 +481,84 @@ class SEIRHVD_plots():
         if ylim >0:
             plt.ylim(0,ylim)            
         self.plot(title = 'Activos',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
+
+
+    # --------------------------------------- #
+    #       Infectados Activos Reportados     #
+    # --------------------------------------- #
+    def plotinfectadosactivosreportados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True,minciencia = True,mildfound=1):
+        # -------- #
+        #   Time   #
+        # -------- #
+        if days == 0:
+            days = (enddate-self.initdate).days
+        if days < 0:
+            days = self.tsim
+        endD = [np.searchsorted(self.t[i],days) for i in range(self.numescenarios)]
+
+        Isf = norm    
+        if scalefactor:
+            Isf = self.ScaleFactor*norm
+
+
+        # ----------- #
+        #     Plot    #
+        # ----------- #
+        # Error
+        if self.realdata:                        
+            if minciencia:
+                for i in range(self.numescenarios):
+                    plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives_minciencia[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+
+            else:
+                for i in range(self.numescenarios):
+                    plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+
+        # Parametros:
+        plt.plot([], [], ' ', label='beta: '+str(self.beta))
+        plt.plot([], [], ' ', label='mu: '+str(self.mu))
+        plt.plot([], [], ' ', label='UnderReportFactor: '+str(self.ScaleFactor))
+        plt.plot([], [], ' ', label='k: '+str(self.k))
+        plt.plot([], [], ' ', label='seroprev: '+str(self.SeroPrevFactor))
+        if scalefactor:
+            for i in range(self.numescenarios):
+                plt.plot([], [], ' ', label='SeroPrev Norm: '+str(round(self.infectedpop_norm[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+        else:
+            for i in range(self.numescenarios):
+                plt.plot([], [], ' ', label='SeroPrev: '+str(round(self.infectedpop[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+
+
+        # Reales
+        if self.realdata:
+            if reales:
+                if minciencia:
+                    plt.scatter(self.I_minciencia_r_tr,self.I_minciencia_r,label='Infectados Activos Minciencia')
+                else:
+                    plt.scatter(self.tr,self.Ir,label='Infectados Activos reales')                    
+
+
+        # Inicio cuarentena general
+        for i in range(self.numescenarios):
+            plt.axvline(x=self.inputarray[i][4],linestyle = 'dashed',color = 'grey')
+        # Fin cuarentena general
+        plt.axvline(x=self.inputarray[0][5],linestyle = 'dotted',color = 'grey')
+
+        # Infectados
+        linestyle = ['dashed','solid','dashed','dotted','dotted']
+        #linestyle = ['dashed','solid','dashed','solid','dotted']
+        colors = ['red','blue','green','purple','black']
+        #colors = ['lime','lime','purple','purple','black']
+        I_reported = [self.I_se[i]+self.I_cr[i]+mildfound*self.I_mi[i] for i in range(self.numescenarios)]
+
+        for i in range(self.numescenarios):        
+            plt.plot(self.t[i],I_reported[i]/Isf,label='Infectados Mov = '+str(self.inputarray[i][2]),color = colors[i],linestyle=linestyle[i],linewidth=2)
+
+        if days >0:
+            plt.xlim(0,days)
+        if ylim >0:
+            plt.ylim(0,ylim)            
+        self.plot(title = 'Activos Reportados',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
+
 
 
     # ------------------------------------------ #
@@ -531,6 +628,12 @@ class SEIRHVD_plots():
         #for i in range(self.numescenarios):
         #    plt.plot([], [], ' ', label='err: '+str(round(100*self.err[i],2))+'%')    
 
+        # Inicio cuarentena general
+        for i in range(self.numescenarios):
+            plt.axvline(x=self.inputarray[i][4],linestyle = 'dashed',color = 'grey')
+        # Fin cuarentena general
+        plt.axvline(x=self.inputarray[0][5],linestyle = 'dotted',color = 'grey')        
+
         # Reales
         if self.realdata:
             if reales:
@@ -542,6 +645,8 @@ class SEIRHVD_plots():
 
         if days >0:
             plt.xlim(0,days)
+        if ylim >0:
+            plt.ylim(0,ylim)            
         self.plot(title = 'Infectados Acumulados',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'))  
 
 
