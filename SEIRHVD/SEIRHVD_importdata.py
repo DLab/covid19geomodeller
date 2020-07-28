@@ -63,7 +63,6 @@ class SEIRHVD_importdata():
         return
 
 
-
     # -------------------------------- #
     #    Datos Infectados diarios   #
     # -------------------------------- #
@@ -181,7 +180,7 @@ class SEIRHVD_importdata():
     def importdata(self):
         print('Importando Datos')
         self.importfallecidosacumulados()
-        self.importfallecidosexcesivos()
+        #self.importfallecidosexcesivos()
         self.importinfectadosactivos()
         self.importinfectadosactivosminciencia()
         self.importsochimi()

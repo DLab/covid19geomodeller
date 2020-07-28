@@ -2,27 +2,29 @@
 
 ## Install Dependencies
 
-### For remote execution
+Clone this repository in your computer
 
-Install pip and ipython3 
+Open a terminal and go to repository's directory.
 
-`sudo apt-get install ipython3 pip3`
+Execute:
 
-Install python dependencies using pip3
+`chmod +x install.sh`
 
-`pip3 install --user pandas dill joblib scipy numpy multiprocessing scikits matplotlib ipython jupyter pandas sympy nose datetime` 
+`./install.sh`
 
 
 
-### For local execution
-
-Install remote execution dependencies plus:
+### For a more robust simulation install scikit-odes (Advanced)
 
 #### Scikits-odes:
 
 https://scikits-odes.readthedocs.io/en/latest/installation.html
 
-## For parameter optimization:
+
+
+
+
+## For parameter optimization (beta):
 
 ### Pygmo:
 
