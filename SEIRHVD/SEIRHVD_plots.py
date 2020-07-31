@@ -411,7 +411,7 @@ class SEIRHVD_plots():
     # ------------------------------ #
     #       Infectados Activos       #
     # ------------------------------ #
-    def plotinfectadosactivos(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True,minciencia = True):
+    def plotinfectadosactivos(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True,minciencia = True):
         # -------- #
         #   Time   #
         # -------- #
@@ -469,9 +469,9 @@ class SEIRHVD_plots():
         plt.axvline(x=self.inputarray[0][5],linestyle = 'dotted',color = 'grey')
 
         # Infectados
-        linestyle = ['dashed','solid','dashed','dotted','dotted']
+        linestyle = ['dashed','solid','dashed','dotted','dotted','dashed','solid','dashed','dotted','dotted']
         #linestyle = ['dashed','solid','dashed','solid','dotted']
-        colors = ['red','blue','green','purple','black']
+        colors = ['red','blue','green','purple','black','lime','cyan','m','indigo','orange','orangered','wheat','salmon']
         #colors = ['lime','lime','purple','purple','black']
         for i in range(self.numescenarios):        
             plt.plot(self.t[i],self.I_act[i]/Isf,label='Infectados Mov = '+str(self.inputarray[i][2]),color = colors[i],linestyle=linestyle[i],linewidth=2)
@@ -606,7 +606,7 @@ class SEIRHVD_plots():
     #       Infectados Acumulados      #
     # -------------------------------- #
     # No esta listo
-    def plotinfectadosacumulados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False):
+    def plotinfectadosacumulados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False):
         # -------- #
         #   Time   #
         # -------- #
@@ -654,7 +654,7 @@ class SEIRHVD_plots():
     #       Infectados Acumulados  Desagregados    #
     # -------------------------------------------- #
     
-    def plotinfectadosacumuladosdesagregados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False):
+    def plotinfectadosacumuladosdesagregados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False):
         # -------- #
         #   Time   #
         # -------- #
@@ -697,7 +697,7 @@ class SEIRHVD_plots():
     # ------------------------------ #
     #       Infectados Diarios       #
     # ------------------------------ #    
-    def plotinfectadosdiarios(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False):
+    def plotinfectadosdiarios(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False):
         # -------- #
         #   Time   #
         # -------- #
@@ -735,7 +735,7 @@ class SEIRHVD_plots():
     #       Infectados Diarios  Desagregados     #
     # ------------------------------------------ #
     
-    def plotinfectadosdiariosdesagregados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False):
+    def plotinfectadosdiariosdesagregados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False):
         # -------- #
         #   Time   #
         # -------- #
@@ -784,7 +784,7 @@ class SEIRHVD_plots():
     # --------------------------------- #
     #      Fallecidos  acumulados       #
     # --------------------------------- #
-    def plotfallecidosacumulados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
+    def plotfallecidosacumulados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
         # -------- #
         #   Time   #
         # -------- #
@@ -846,7 +846,7 @@ class SEIRHVD_plots():
     # ----------------------------- #
     #       Fallecidos diarios      #
     # ----------------------------- #
-    def plotfallecidosdiarios(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
+    def plotfallecidosdiarios(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
         # -------- #
         #   Time   #
         # -------- #
@@ -869,7 +869,7 @@ class SEIRHVD_plots():
     # ------------------------------------------- #
     #       Fallecidos Desagregados Acumulados    #
     # ------------------------------------------- #
-    def plotfallecidosdesagregados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
+    def plotfallecidosdesagregados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
         # -------- #
         #   Time   #
         # -------- #
@@ -903,7 +903,7 @@ class SEIRHVD_plots():
     # ------------------------------------------------ #
     #     Infectados Críticos Fallecidos acumulados    #
     # ------------------------------------------------ #
-    def plotfallecidosIcriticos(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
+    def plotfallecidosIcriticos(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
         # -------- #
         #   Time   #
         # -------- #
@@ -930,7 +930,7 @@ class SEIRHVD_plots():
     # ------------------------------------------------ #
     #     Infectados Severos Fallecidos acumulados    #
     # ------------------------------------------------ #
-    def plotfallecidosIseveros(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
+    def plotfallecidosIseveros(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
         # -------- #
         #   Time   #
         # -------- #
@@ -958,7 +958,7 @@ class SEIRHVD_plots():
     # --------------------------------------- #
     #     Ventilados Fallecidos acumulados    #
     # --------------------------------------- #
-    def plotfallecidosventilados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
+    def plotfallecidosventilados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
         # -------- #
         #   Time   #
         # -------- #
@@ -985,7 +985,7 @@ class SEIRHVD_plots():
     # ------------------------------------------- #
     #     Hospitalizados Fallecidos acumulados    #
     # ------------------------------------------- #
-    def plotfallecidoshospitalizados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
+    def plotfallecidoshospitalizados(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True, accumulated = True):
         # -------- #
         #   Time   #
         # -------- #
@@ -1014,7 +1014,7 @@ class SEIRHVD_plots():
     #       Letalidad        #
     # ---------------------- #
 
-    def plotletalidad(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
+    def plotletalidad(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
         # -------- #
         #   Time   #
         # -------- #
@@ -1085,7 +1085,7 @@ class SEIRHVD_plots():
     # ------------------ #
     #     Expuestos      #
     # ------------------ #
-    def plotexpuestos(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
+    def plotexpuestos(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
         # -------- #
         #   Time   #
         # -------- #
@@ -1179,7 +1179,7 @@ class SEIRHVD_plots():
     # ------------------------- #
     #       Plot Cuarentenas    #
     # ------------------------- #
-    def plotcuarentenas(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False):
+    def plotcuarentenas(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False):
         # -------- #
         #   Time   #
         # -------- #
