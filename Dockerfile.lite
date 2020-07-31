@@ -1,0 +1,13 @@
+# Use Python 3.8 base image
+FROM python:3.8
+
+# Copy files to container
+COPY . /app
+WORKDIR /app
+
+# Install Python dependencies
+RUN pip3 install -r requirements.lite.txt
+
+# Run example to test the dependencies were installed successfully
+WORKDIR /app/SEIRHVD
+RUN python example.py

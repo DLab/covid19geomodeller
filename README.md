@@ -30,3 +30,15 @@ https://scikits-odes.readthedocs.io/en/latest/installation.html
 
 ​	 https://esa.github.io/pygmo2/install.html
 
+
+## Running the app from a Docker container
+
+### Full version (with scikits.odes and pygmo)
+
+1. Build docker image: `docker build -t cv19gm:0.3 .`
+2. Run docker container (command for Linux based distributions): `docker run -it --rm --name cv19gm -e DISPLAY -v "$HOME/.Xauthority:/root/.Xauthority" --net=host cv19gm:0.3 /bin/bash`
+
+### Lite version (without scikits.odes and pygmo)
+
+1. Build docker image: `docker build -t cv19gm-lite:0.1 -f Dockerfile.lite .`
+2. Run docker container (command for Linux based distributions): `docker run -it --rm --name cv19gm -e DISPLAY -v "$HOME/.Xauthority:/root/.Xauthority" --net=host cv19gm-lite:0.1 /bin/bash`
