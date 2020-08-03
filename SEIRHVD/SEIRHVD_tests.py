@@ -37,6 +37,9 @@ tstate = '13'
 # Fecha Inicial 
 initdate = datetime(2020,4,13)
 
+# Tiempo de simulacion
+tsim = 1000 
+
 # Fecha de inicio de cuarentena
 qit =  datetime(2020,5,15)
 qit = (qit - initdate).days
@@ -44,16 +47,17 @@ qit = (qit - initdate).days
 qfd = datetime(2020,7,24)
 qft = (qfd - initdate).days
 
+qit = 0
+qft = tsim
+
 # Parametros del modelo
-beta = 0.24#25#15#15#2#117
+beta = 0.2#25#15#15#2#117
 mu = 0.1#5 
 ScaleFactor = 3
 SeroPrevFactor = 1#0.22 # Sero Prevalence Factor. Permite ajustar la cantidad de gente que entra en la dinamica
 expinfection = 1 # Proporcion en la que contagian los expuestos
-k=35 # Factor de Saturación Cinética
 
-# Tiempo de simulacion
-tsim = 1000 
+k=10 # Factor de Saturación Cinética
 
 # Creación del objeto de simulación 
 simulation = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate,k=k)
@@ -70,6 +74,27 @@ simulation.addquarantine()
 
 simulation.simulate(v=3)
 
+
+k=0 # Factor de Saturación Cinética
+
+# Creación del objeto de simulación 
+simulation2 = SEIRHVD_local(beta = beta,mu = mu,ScaleFactor=ScaleFactor,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,initdate = initdate, tsim = tsim,tstate=tstate,k=k)
+
+# Creación del vector de cuarentenas
+# [Tsim, max_mov,rem_mov,quarantine period, quarantine initial time, quarantine final time, quarantine type]
+quarantines = [[500.0, 0.85, 0.6, 0.0, qit,qft, 0.0]]#,
+               #[500.0, 0.85, 0.65, 0.0,qit,qft, 0.0],
+               #[500.0, 0.85, 0.7, 0.0, qit,qft, 0.0]]
+               #[500.0, 0.85, 0.75, 0.0,qit,qft, 0.0],
+               #[500.0, 0.85, 0.4, 0.0,qit, qft, 0.0]]
+simulation2.inputarray = np.array(quarantines) # This will change during next update
+simulation2.addquarantine()
+
+simulation2.simulate(v=3)
+
+
+plt.plot(simulation.t[0],simulation.I[0])
+plt.plot(simulation2.t[0],simulation2.I[0])
 # Plots de ejemplo:
 simulation.plotinfectadosactivos(scalefactor=True,ylim=200000) 11
 
@@ -81,6 +106,10 @@ simulation.plotfallecidosacumulados()
 # ------------------..........--------------- #
 #        Simulación Datos Artificiales        #
 # ------------------------------------------- #
+from SEIRHVD_local import SEIRHVD_local
+import numpy as np
+from datetime import datetime
+import matplotlib.pyplot as plt
 
 tstate = ''
 # Fecha Inicial

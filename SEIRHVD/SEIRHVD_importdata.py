@@ -64,7 +64,7 @@ class SEIRHVD_importdata():
 
 
     # -------------------------------- #
-    #    Datos Infectados diarios   #
+    #    Datos Infectados diarios      #
     # -------------------------------- #
     def importinfectadosdiarios(self,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
         aux = pd.read_csv(endpoint)        
