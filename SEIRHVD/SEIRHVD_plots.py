@@ -88,6 +88,32 @@ class SEIRHVD_plots():
           
         self.plot(title = 'Activos Reales',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
 
+    def plotdatosacumulados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
+        if not self.realdata:
+            return('No real data')        
+        # Reales
+        if reales:
+            plt.scatter(self.I_ac_r_tr,self.I_ac_r,label='Infectados Acumulados reales')
+
+        # Inicio cuarentena general
+        for i in range(self.numescenarios):
+            plt.axvline(x=self.inputarray[i][4],linestyle = 'dashed',color = 'grey')
+          
+        self.plot(title = 'Infectados Acumulados Reales - EPI',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
+
+    def plotdatosdiarios(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
+        if not self.realdata:
+            return('No real data')        
+        # Reales
+        if reales:
+            plt.scatter(self.I_d_r_tr,self.I_d_r,label='Infectados diarios reales')
+
+        # Inicio cuarentena general
+        for i in range(self.numescenarios):
+            plt.axvline(x=self.inputarray[i][4],linestyle = 'dashed',color = 'grey')
+          
+        self.plot(title = 'Infectados Diarios Reales - EPI',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
+
 
 
 

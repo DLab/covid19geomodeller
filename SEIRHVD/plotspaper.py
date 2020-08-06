@@ -45,7 +45,7 @@ def ParallelSimulation(Htot,Vtot,alpha,k=0, qp = 0, qt = 0,iqt = 0,fqt = 500):
 """
 
 # Parametros del modelo
-beta = 0.117 # Tasa de contagio
+beta = 0.2 # Tasa de contagio
 mu = 0.6 # Razon E0/I0
 ScaleFactor = 1 # Factor de Escala: Numero de infectados por sobre los reportados
 SeroPrevFactor = 1 # Sero Prevalence Factor. Permite ajustar la cantidad de gente que entra en la dinamica
@@ -112,7 +112,7 @@ for i in Htot:
 
 # Plots Generation:
 maxval = max([max([max(sims[i][j].I_se[0]+sims[i][j].H_bed[0]+sims[i][j].I_seD_d[0]) for j in range(Nalpha)]) for i in range(NHtot)])
-xlim = tsim
+xlim = 500#tsim
 
 
 fig, axs = plt.subplots(NHtot, Nalpha)
@@ -272,8 +272,9 @@ fig.show()
     ejes: VMI totales vs infectados severos 
 
 """
+
 # Parametros del modelo
-beta = 0.117 # Tasa de contagio
+beta = 0.2 # Tasa de contagio
 mu = 0.6 # Razon E0/I0
 ScaleFactor = 1 # Factor de Escala: Numero de infectados por sobre los reportados
 SeroPrevFactor = 1 # Sero Prevalence Factor. Permite ajustar la cantidad de gente que entra en la dinamica
@@ -310,7 +311,7 @@ Vtot = list(range(0*nm,Vtot_max*nm+step,step))
 
 # From 0 to 1 in steps of:
 step = 0.25
-alpha = list(np.arange(0,1+step,step))
+alpha = list(np.arange(0.5,0.7+step,step))
 Nalpha = len(alpha)
 NVtot = len(Vtot)
 
@@ -336,7 +337,7 @@ for i in Vtot:
 
 # Plots Generation:
 
-maxval = max([max([max(sims[i][j].I_se[0]+sims[i][j].H_bed[0]+sims[i][j].I_seD_d[0]) for j in range(Nalpha)]) for i in range(NVtot)])
+maxval = max([max([max(sims[i][j].I_cr[0]) for j in range(Nalpha)]) for i in range(NVtot)])
 xlim = tsim
 
 fig, axs = plt.subplots(NVtot, Nalpha)
@@ -349,8 +350,8 @@ for i in range(NVtot):
         axs[i, j].plot(sims[i][j].t[0],sims[i][j].H_crin[0],label="Critical Hospitalized")
         axs[i, j].plot(sims[i][j].t[0],sims[i][j].V[0],label="VMI")        
         axs[i, j].set_title("Vtot: "+str(Vtot[i])+" | Alpha: "+str(alpha[j]))
-        #axs[i, j].set_ylim([0,maxval*1.05])
-        #axs[i, j].set_xlim([0,xlim])        
+        axs[i, j].set_ylim([0,maxval*1.05])
+        axs[i, j].set_xlim([0,xlim])        
 
 lines, labels = fig.axes[-1].get_legend_handles_labels()  
 fig.legend(lines, labels,loc = 'best')
@@ -580,7 +581,7 @@ for i in range(len(Htot)):
 fig,ax=plt.subplots(1,1)
 cp = ax.contourf(alpha,Htot_per100M,SHFR) 
 fig.colorbar(cp) # Add a colorbar to a plot
-ax.set_title('SHFR Mass Action Dynamics - Total Quarantine)
+ax.set_title('SHFR Mass Action Dynamics - Total Quarantine')
 ax.set_xlabel('Mobility')
 ax.set_ylabel('Beds per 100.000')
 plt.show() 
@@ -745,9 +746,9 @@ Htot = 50*nm
 # VMI Capacity
 Vtot = Htot/2
 
-# Movility
-step = 0.01
-alpha = list(np.arange(0.3,0.4+step,step))
+# Mobility
+step = 0.05
+alpha = list(np.arange(0.5,0.75+step,step))
 
 # Saturation Kinetics Factor
 step = 2
@@ -759,7 +760,7 @@ k = [0,5,10,20,30,40]#list(np.arange(0,kmax+step,step))
 #        Plot 1: MAD vs SKD -Total Quarantine       #
 # ------------------------------------------------- # 
 
-qt = 1
+qt = 0
 qp = 14
 iqt = 0
 fqt = tsim
@@ -774,12 +775,12 @@ for i in k:
 
 # Euclidian Distance for each alpha for diferent T 
 
-ED = []
-for i in range(len(k)):
-    aux = []
-    for j in range(len(alpha)):
-        aux.append(LA.norm(sims[i][j].I[0]-sims[0][j].I[0]))
-    ED.append(aux)
+#ED = []
+#for i in range(len(k)):
+#    aux = []
+#    for j in range(len(alpha)):
+#        aux.append(LA.norm(sims[i][j].I[0]-sims[0][j].I[0]))
+#    ED.append(aux)
         
 
 # Peak size proportion
@@ -919,6 +920,12 @@ plt.show()
 
 # Comparaciones de todos los graficos anteriores para mass action y saturated kinetics también con distintas cuarentenas
 # Fittear datos chilenos 
+
+
+
+
+
+
 
 
 

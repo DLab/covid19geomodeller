@@ -5,6 +5,7 @@ import json
 import requests
 import pandas as pd
 from datetime import datetime
+from datetime import timedelta
 import numpy as np
 
 """   
@@ -36,7 +37,7 @@ class SEIRHVD_importdata():
                 actives.append(mydict['actives'])
                 #data=pd.DataFrame(mydict)
         self.Ir = (np.array(actives)).sum(axis=0)
-        self.Ir_dates = [datetime.strptime(mydict['dates'][i],'%Y-%m-%d') for i in range(len(mydict['dates']))]
+        self.Ir_dates = [datetime.strptime(mydict['dates'][i][:10],'%Y-%m-%d') for i in range(len(mydict['dates']))]
 
         index = np.where(np.array(self.Ir_dates) >= self.initdate)[0][0]     
         self.Ir=self.Ir[index:]
@@ -66,15 +67,32 @@ class SEIRHVD_importdata():
     # -------------------------------- #
     #    Datos Infectados diarios      #
     # -------------------------------- #
+    # Falta interpolar
     def importinfectadosdiarios(self,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
         aux = pd.read_csv(endpoint)        
-        self.I_d_r = aux.loc[aux['Codigo region']==int(self.tstate)].iloc[:,5:-1].sum().diff()
+        I_ac_r = aux.loc[aux['Codigo region']==int(self.tstate)].iloc[:,5:-1].sum()
         
-        self.I_d_r_dates = [datetime.strptime(self.I_d_r.index[i],'%Y-%m-%d') for i in range(len(self.I_d_r))]
-        index = np.where(np.array(self.I_d_r_dates) >= self.initdate)[0][0] 
-        self.I_d_r = self.I_d_r[index:]
-        self.I_d_r_dates = self.I_d_r_dates[index:]
-        self.I_d_r_tr = [(self.I_d_r_dates[i]-self.initdate).days for i in range(len(self.I_d_r))]
+        I_ac_r_dates = [datetime.strptime(I_ac_r.index[i],'%Y-%m-%d') for i in range(len(I_ac_r))]
+        index = np.where(np.array(I_ac_r_dates) >= self.initdate)[0][0] 
+        I_ac_r = I_ac_r[index:]
+        I_ac_r_dates = I_ac_r_dates[index:]
+        I_ac_r_tr = [(I_ac_r_dates[i]-self.initdate).days for i in range(len(I_ac_r))]
+
+        self.I_d_r = np.diff(np.interp(list(range(I_ac_r_tr[-1])),I_ac_r_tr,I_ac_r))
+        self.I_d_r_tr = list(range(len(self.I_d_r)))
+        self.I_d_r_dates = [self.initdate + timedelta(days=i) for i in range(len(self.I_d_r_tr))]
+
+
+        #aux = pd.read_csv(endpoint)        
+        #I_ac_r = aux.loc[aux['Codigo region']==int(self.tstate)].iloc[:,5:-1].sum() #.diff()        
+        #I_ac_r_dates = [datetime.strptime(I_ac_r.index[i],'%Y-%m-%d') for i in range(len(I_ac_r))]
+        #I_ac_r_tr = [(I_ac_r_dates[i]-self.initdate).days for i in range(len(I_ac_r))]
+        #
+
+        #index = np.where(np.array(I_ac_r_dates) >= self.initdate)[0][0] 
+        #self.I_d_r = self.I_d_r[index:]
+        #self.I_d_r_dates = self.I_d_r_dates[index:]
+        #self.I_d_r_tr = [(self.I_d_r_dates[i]-self.initdate).days for i in range(len(self.I_d_r))]
         print('Infectados diarios')
         return
 

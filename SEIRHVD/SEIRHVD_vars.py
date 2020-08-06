@@ -165,6 +165,8 @@ class SEIRHVD_vars():
         self.population_checksum = [max(self.S[i]+self.E_as[i]+self.E_sy[i]+self.I_as[i]+self.I_mi[i]+self.I_se[i]+self.I_cr[i]
             +self.H_crin[i]+self.H_in[i]+self.H_out[i]+self.V[i]+self.R[i]+self.D[i]-self.population) for i in range(self.numescenarios)]
 
+        # plots de la suma de todos los estados del sistema
+
         # -------------- #
         #     Errores    #
         # -------------- #
