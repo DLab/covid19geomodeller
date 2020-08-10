@@ -7,14 +7,19 @@
 #                   #
 # ----------------- #
 
-
-
-from SEIRHVD_local import SEIRHVD_local
+import sys
+from pathlib import Path
+sys.path.insert(1, '../SEIR/')
+sys.path.insert(1, 'SEIR/')
+from SEIRmodel import SEIRmodel
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
+#%matplotlib tk
 from joblib import Parallel, delayed
 import multiprocessing
+
+#from SEIRHVD_local import SEIRHVD_local
 
 
 

@@ -38,8 +38,8 @@ class simSEIRHVD:
             [500,0.4,0.4,0,0,500,0]])            
 
 
-    def __init__(self,beta = 0.19, mu =2.6,inputarray = definputarray,B=221,D=26,V=758,I_act0=12642,R=0,Htot=None,Vtot=None,H_cr=80,H0=1720,tsat=30,Hmax=4000,Vmax=2000,expinfection=0,SeroPrevFactor=1,population=100000,
-    intgr = 0,I_as_ac =0, I_mi_ac = 0, I_se_ac = 0, I_cr_ac = 0,H_crD = 0, VD=0,I_crD=0,I_seD=0,I_as_prop = 0.35, I_mi_prop = 0.63,I_cr_prop = 0.007,I_se_prop = 0.013, k =0):
+    def __init__(self,beta = 0.15, mu =1,inputarray = definputarray,B=0,D=0,V=0,I_act0=0,R=0,Htot=None,Vtot=None,H_cr=0,H0=0,tsat=30,Hmax=4000,Vmax=2000,expinfection=1,SeroPrevFactor=1,population=100000,
+    intgr = 0,I_as_ac =0, I_mi_ac = 0, I_se_ac = 0, I_cr_ac = 0,H_crD = 0, VD=0,I_crD=0,I_seD=0,I_as_prop = 1, I_mi_prop = 0,I_cr_prop = 0,I_se_prop = 0, k =0):
         self.mu = mu
         self.beta = beta 
         self.sims = []
