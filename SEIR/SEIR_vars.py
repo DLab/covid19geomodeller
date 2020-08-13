@@ -140,8 +140,8 @@ class SEIR_vars():
         self.totD =  [self.B[i][-1] for i in range(self.numescenarios)]
         
         #self.SHFR = [self.totD[i]/(self.I_se_ac[i][-1]+self.I_cr_ac[i][-1]) if self.totD[i]>15 else 0.15 for i in range(self.numescenarios)] 
-        self.SHFR = [self.totD[i]/(self.I_se_ac[i][-1]+self.I_cr_ac[i][-1]) for i in range(self.numescenarios)] 
-        self.SHFR_d = [self.B[i]/(self.I_se_ac[i][-1]+self.I_cr_ac[i][-1]) for i in range(self.numescenarios)]
+        #self.SHFR = [self.totD[i]/(self.I_se_ac[i][-1]+self.I_cr_ac[i][-1]) for i in range(self.numescenarios)] 
+        #self.SHFR_d = [self.B[i]/(self.I_se_ac[i][-1]+self.I_cr_ac[i][-1]) for i in range(self.numescenarios)]
 
         # ----------------- #
         #    QA Variables   #

@@ -370,24 +370,16 @@ class SEIRHUDV :
             
     def setinitvalues(self):
         # 15 de Mayo
-        self.I_act0 = 12642
+        self.I_act0 = 100
         self.res=1 
         self.muS=self.mu        
-        self.H_incr = 34
-        self.H_incr2 = 0
-        self.H_incr3 = 0
-        self.V_incr = 17
-        self.V_incr2 = 0
-        self.V_incr3 = 0
-        self.Vc0 = 1029
-        self.Hc0 = 1980
-        self.H0=1720 #1980#1903.0
-        self.H_cr=80.0
+        self.H0=0 #1980#1903.0
+        self.H_cr=0
         self.gw=10
-        self.D=26.0
-        self.B=221.0
+        self.D=0
+        self.B=0
         self.R=0.0
-        self.V=758.0#846.0
+        self.V=0
         self.mu=1.4
         self.t=400.0
         self.CV=0
@@ -395,11 +387,11 @@ class SEIRHUDV :
         self.ACV=0
         self.ACH=0
         self.SeroPrevFactor = 1
-        self.population = 8125072
+        self.population = 1000000
         
         self.Hmax = 3000
         self.Vmax = 1500
-        self.expinfection = 0
+        self.expinfection = 1
         
         # Accumulated Infected
         self.I_as_ac = 0

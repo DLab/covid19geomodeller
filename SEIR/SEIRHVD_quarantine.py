@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
+from scipy import signal
 
 """
 # ------------------------------------------------- #   
@@ -54,3 +55,93 @@ class SEIRHVD_quarantine():
     def showscenarios(self):        
         print(self.inputarray)
         return()
+
+
+    def setscenario(self,tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct):
+        self.tsim = tsim
+        self.max_mov = max_mov
+        self.rem_mov = rem_mov
+        self.qp = qp
+        self.iqt = iqt
+        self.fqt = fqt
+        if movfunct == 0:
+            self.movfunct = 'once'
+        elif movfunct == 1:
+            self.movfunct = 'square'
+        elif movfunct == 2:
+            self.movfunct = 'sawtooth'
+        else:
+            self.movfunct = 'once'
+        
+        self.alpha = self.alphafunct(self.max_mov,self.rem_mov,self.qp,self.iqt,self.fqt,self.movfunct)
+        return() 
+        
+
+
+    def alphafunct(self,max_mov,rem_mov,qp,iqt=0,fqt=300,movfunct = 'once'):
+        """    
+        # max_mov: Movilidad sin cuarentena
+        # rem_mov: Movilidad con cuarentena
+        # qp: Periodo cuarentena dinamica 
+        #          - qp >0 periodo Qdinamica 
+        #          - qp = 0 sin qdinamica
+        # iqt: Initial quarantine time. Tiempo inicial antes de cuarentena dinamica
+        #          - iqt>0 inicia con cuarentena total hasta iqt
+        #          - iqt<0 sin cuarentena hasta iqt
+        # fqt: Final quarantine time. Duracion tiempo cuarentena 
+        # movfunct: Tipo de cuarentena dinamica desde iqt
+        #          - once: una vez durante qp dias 
+        #          - total: total desde iqt
+        #          - sawtooth: diente de cierra
+        #          - square: onda cuadrada
+        """
+        def alpha(t):             
+            if 'square' in movfunct:
+               def f(t): 
+                   return signal.square(t)
+               if t<abs(iqt):
+                   if iqt>0:
+                       return(rem_mov)
+                   else:
+                       return(max_mov)
+               else:
+                   if qp == 0:
+                       return(max_mov)
+                   elif t<fqt:
+                       return((max_mov-rem_mov)/2*(f(np.pi / qp * t - np.pi))+(max_mov+rem_mov)/2)
+                   else:
+                       return(max_mov)   
+
+
+            elif 'once' in movfunct:        
+                if t<iqt:
+                    return(max_mov)
+                elif t>fqt:
+                    return(max_mov)
+                else:
+                    return(rem_mov)
+
+
+            elif 'sawtooth' in movfunct:
+               def f(t): 
+                   return signal.sawtooth(t)
+               if t<abs(iqt):
+                   if iqt>0:
+                       return(rem_mov)
+                   else:
+                       return(max_mov)
+               else:
+                   if qp == 0:
+                       return(max_mov)
+                   elif t<fqt:
+                       return((max_mov-rem_mov)/2*(f(np.pi / qp * t - np.pi))+(max_mov+rem_mov)/2)
+                   else:
+                       return(max_mov)   
+                     
+        return(alpha)
+
+
+
+    def get_conditions(self):
+        # This function will return a text explaining the different simulation scenarios currently placed as inputs            
+        return
