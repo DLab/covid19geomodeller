@@ -45,24 +45,24 @@ https://scikits-odes.readthedocs.io/en/latest/installation.html
 
 
 # Repo Structure
-Home/
-├── Examples/
-├── Tests/
-├── Documents/
-├── Data/ (En duda)
-├── SRC/
-   ├── SEIR/
-   ├── SEIRHVD/
-   ├── SEIRStar/
-   ├── SEIR/
-   ├── utils/
-      ├── plots.py
-      ├── utils.py       
-Readme.md
-Install.sh
-requirements.txt
-Docker
-Licence 
-etc
+Home/  
+├── Examples/  
+├── Tests/  
+├── Documents/  
+├── Data/ (En duda)  
+├── SRC/  
+   ├── SEIR/  
+   ├── SEIRHVD/  
+   ├── SEIRStar/  
+   ├── SEIR/  
+   ├── utils/  
+      ├── plots.py  
+      ├── utils.py         
+Readme.md  
+Install.sh  
+requirements.txt  
+Docker  
+Licence   
+etc.  
 
  
