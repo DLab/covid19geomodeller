@@ -31,8 +31,8 @@ Contour:
 """
 import sys
 from pathlib import Path
-sys.path.insert(1, '../src/')
-sys.path.insert(1, 'src/')
+sys.path.insert(1, '../src/SEIRHVD/')
+sys.path.insert(1, 'src/SEIRHVD/')
 from SEIRHVD_local import SEIRHVD_local
 import numpy as np
 from datetime import datetime
