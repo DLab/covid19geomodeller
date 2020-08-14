@@ -44,24 +44,25 @@ https://scikits-odes.readthedocs.io/en/latest/installation.html
 2. Run docker container (command for Linux based distributions): `docker run -it --rm --name cv19gm -e DISPLAY -v "$HOME/.Xauthority:/root/.Xauthority" --net=host cv19gm-lite:0.1 /bin/bash`
 
 
+# Repo Structure
+Home/
+├── Examples/
+├── Tests/
+├── Documents/
+├── Data/ (En duda)
+├── SRC/
+   ├── SEIR/
+   ├── SEIRHVD/
+   ├── SEIRStar/
+   ├── SEIR/
+   ├── utils/
+      ├── plots.py
+      ├── utils.py       
+Readme.md
+Install.sh
+requirements.txt
+Docker
+Licence 
+etc
 
-Home: 
- Examples/
- Tests/
- Documents/
- *Data/
- SRC/
-   ./SEIR/
-   ./SEIRHVD/
-   ./SEIRStar/
-   ./SEIR/
-   ./utils/
-        plots.py
-        utils.py
- Licence 
- Readme
- Docker
- Install
- etc
-   
  
