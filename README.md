@@ -55,7 +55,7 @@ Home/
    ├── SEIR/  
    ├── SEIRHVD/  
    ├── SEIRStar/  
-   ├── SEIR/  
+   ├── SEIRHDVStar/  
    ├── utils/  
       ├── plots.py  
       ├── utils.py         
