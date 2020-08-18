@@ -37,7 +37,7 @@ class Quarantine():
         self.fqt = fqt
         self.movfunct = movfunct
 
-        self.alpha = self.alphafunct
+        self.alpha = self.alphafunct()
 
 
     def alphafunct(self):
@@ -56,8 +56,11 @@ class Quarantine():
         #          - total: total desde iqt
         #          - sawtooth: diente de cierra
         #          - square: onda cuadrada
+
+
+        # FQT no funciona en las ondas periódicas
         """
-        def alpha(self,t):             
+        def alpha(t):             
             if 'square' in self.movfunct or self.movfunct == 1:
                def f(t): 
                    return signal.square(t)
@@ -78,7 +81,7 @@ class Quarantine():
             elif 'once' in self.movfunct or self.movfunct == 0:        
                 if t<self.iqt:
                     return(self.max_mov)
-                elif t>self.qt:
+                elif t>self.fqt:
                     return(self.max_mov)
                 else:
                     return(self.rem_mov)

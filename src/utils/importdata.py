@@ -7,12 +7,13 @@ import pandas as pd
 from datetime import datetime
 from datetime import timedelta
 import numpy as np
+from os import path
 
 """   
    SEIRHDV Import data
 """
 
-class SEIR_importdata():
+class ImportData():
     # ------------------------------- #
     #        Importar Data Real       #
     # ------------------------------- #
@@ -52,7 +53,7 @@ class SEIR_importdata():
         else:        
             return population
 
-    def importinfectadosactivos(self=None,tstate = '',initdate=None,endpoint = "http://192.168.2.223:5006/getActiveNewCasesByComuna?comuna="):
+    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = "http://192.168.2.223:5006/getActiveNewCasesByComuna?comuna="):
         """
             Import Active infected
             input: 
@@ -70,24 +71,22 @@ class SEIR_importdata():
         # ---------------------- # 
         #   Infectados Activos   #
         # ---------------------- #
-        cutlist = []
-        cutlistpath = "../Data/cutlist.csv"
-        cutlist = pd.read_csv(cutlistpath, header = None,dtype=str)
+
+        cutlistendpoint = 'http://192.168.2.220:8080/covid19/selectComunas' 
+        cutlist  = pd.read_json(cutlistendpoint)[['cut','idState']]        
 
         actives = []
         mydict = None
         if type(tstate) == list:
             for i in tstate:
-                if len(i)==2:
-                    for index, row in cutlist.iterrows():    
-                        state = str(row[0])[0:2]
-                        comuna = str(row[0])
-                        if i == state:
-                            auxendpoint = endpoint+comuna
-                            r = requests.get(auxendpoint) 
-                            mydict = r.json()
-                            actives.append(mydict['actives'])
-                            #data=pd.DataFrame(mydict)
+                if len(i)<=2:
+                    aux = cutlist[cutlist['idState']==int(i)]
+                    for j in aux['cut']:    
+                        auxendpoint = endpoint+str(j)
+                        r = requests.get(auxendpoint) 
+                        mydict = r.json()
+                        actives.append(mydict['actives'])
+                        #data=pd.DataFrame(mydict)
                     #Ir = (np.array(actives)).sum(axis=0)
                 elif len(i)>2:
                     auxendpoint = endpoint+i
@@ -97,16 +96,14 @@ class SEIR_importdata():
                     #Ir = np.array(mydict['actives'])
                 Ir = (np.array(actives)).sum(axis=0)
         else:
-            if len(tstate)==2:
-                for index, row in cutlist.iterrows():    
-                    state = str(row[0])[0:2]
-                    comuna = str(row[0])
-                    if tstate == state:
-                        auxendpoint = endpoint+comuna
-                        r = requests.get(auxendpoint) 
-                        mydict = r.json()
-                        actives.append(mydict['actives'])
-                        #data=pd.DataFrame(mydict)
+            if len(tstate)<=2:
+                aux = cutlist[cutlist['idState']==int(tstate)]
+                for j in aux['cut']:
+                    auxendpoint = endpoint+str(j)
+                    r = requests.get(auxendpoint) 
+                    mydict = r.json()
+                    actives.append(mydict['actives'])
+                    
                 Ir = (np.array(actives)).sum(axis=0)
             elif len(tstate)>2:
                 auxendpoint = endpoint+tstate
@@ -128,12 +125,12 @@ class SEIR_importdata():
         else:        
             return Ir,tr,Ir_dates
 
-
+    #self.importinfectadosactivos = self.importActiveInfected
 
     # -------------------------------- #
     #    Datos Infectados acumulados   #
     # -------------------------------- #
-    def importinfectadosacumulados(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv'):     
+    def importAcumulatedInfected(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv'):     
         """
             Import acumulated infected
             input: 
@@ -179,13 +176,13 @@ class SEIR_importdata():
         else:        
             return I_ac_r,I_ac_r_tr,I_ac_r_dates
 
-
+    #self.importinfectadosacumulados = self.importAcumulatedInfected
 
     # -------------------------------- #
     #    Datos Infectados diarios      #
     # -------------------------------- #
     # Falta interpolar
-    def importinfectadosdiarios(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
+    def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
         """
             Import daily infected
             input: 
@@ -235,10 +232,12 @@ class SEIR_importdata():
             return
         else:        
             return I_d_r, I_d_r_tr, I_d_r_dates
+    
+    #self.importinfectadosdiarios = self.importDailyInfected
 
-        # ------------------ #
-        #    Datos Sochimi   #
-        # ------------------ #
+    # ------------------ #
+    #    Datos Sochimi   #
+    # ------------------ #
     def importsochimi(self=None,tstate = '', initdate = None, endpoint = "http://192.168.2.223:5006/getBedsAndVentilationByState?state="):
         """
         Import SOCHIMI data por región. Falta incorporar la opción de conseguir data por sector de salud.
@@ -297,7 +296,7 @@ class SEIR_importdata():
     # -------------------------------- #
     #    Datos Fallecidos acumulados   #
     # -------------------------------- #
-    def importfallecidosacumulados(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto14/FallecidosCumulativo.csv' ):     
+    def importAcumulatedDeaths(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto14/FallecidosCumulativo.csv' ):     
         """
             Import Acumulated Deaths
             input: 
@@ -337,11 +336,12 @@ class SEIR_importdata():
         else:        
             return Br,Br_tr,Br_dates
 
+    #self.importfallecidosacumulados = self.importAcumulatedDeaths
 
     # ---------------------------------------- #
     #    Datos Infectados activos Minciencia   #
     # ---------------------------------------- #
-    def importinfectadosactivosminciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv' ):     
+    def importActiveInfectedMinciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv' ):     
         """
             Import Active infected Minciencia
             input: 
@@ -392,11 +392,12 @@ class SEIR_importdata():
         else:        
             return I_minciencia_r, I_minciencia_r_tr, I_minciencia_r_dates 
 
+    #self.importinfectadosactivosminciencia = self.importActiveInfectedMinciencia
 
     # ---------------------------------------- #
     #       Datos Subreporte de Infectados     #
     # ---------------------------------------- #
-    def importSubreporte(self = None,tstate = '', initdate = None):
+    def importInfectedSubreport(self = None,tstate = '', initdate = None):
         if self:
             tstate = self.tstate
             initdate = self.initdate
@@ -424,7 +425,7 @@ class SEIR_importdata():
         else:        
             return subreporte, np.array(subreporte['estimate']), subreporte_date, subreporte_tr
 
-
+    #self.importSubreporte = self.importInfectedSubreport
 
     # -------------------------- #
     #    Fallecidos excesivos    #
@@ -471,14 +472,30 @@ class SEIR_importdata():
 
     def importdata(self):
         print('Importando Datos')
-        self.importfallecidosacumulados()
-        self.importinfectadosactivosminciencia()
-        self.importsochimi()
         self.importPopulation()
-        self.importinfectadosactivos()
-        self.importinfectadosdiarios()
-        self.importinfectadosacumulados()
-        #self.importSubreporte()
+        self.importActiveInfected()
+        self.importAcumulatedInfected()
+        self.importDailyInfected()
+        self.importsochimi()
+        self.importAcumulatedDeaths()
+        self.importActiveInfectedMinciencia()
+        #self.importInfectedSubreport()
+        #self.importpcrpop()        
         #self.importfallecidosexcesivos()
-        #self.importpcrpop()
+        
         print('Done')
+
+
+#self.importfallecidosacumulados()
+#self.importinfectadosactivosminciencia()
+#self.importsochimi()
+#self.importPopulation()
+#self.importinfectadosactivos()
+#self.importinfectadosdiarios()
+#self.importinfectadosacumulados()        
+##self.importSubreporte()        
+        
+        
+        
+        
+        
