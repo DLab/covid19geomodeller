@@ -105,10 +105,11 @@ class Quarantine():
                      
         return(alpha)
 
-    def plot(self,endtime):
-        t = range(endtime)
+    def plot(self,endtime=100):
+        t = list(range(endtime))
         mobility = [self.alpha(i) for i in t]
-        plt.plot(t,mobility,legend='Mobility function')
+        plt.plot(list(t),mobility,label='Mobility function')
+        #plt.legend(loc=0)
         plt.show()
 
 
