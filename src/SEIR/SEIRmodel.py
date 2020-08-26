@@ -18,6 +18,8 @@ import SEIRHVD_quarantine
 #                                             #
 # ------------------------------------------- #
 
+Old version that uses parallelization inside class_SEIR.py
+
 """
 
 class SEIRmodel(SEIR_plots.SEIR_plots,SEIR_vars.SEIR_vars,SEIRHVD_quarantine.SEIRHVD_quarantine,SEIR_importdata.SEIR_importdata):        

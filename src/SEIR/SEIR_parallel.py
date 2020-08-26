@@ -18,18 +18,6 @@ Luego hay que resolver como generar los meta-plots: Normales, grillas, contour, 
                                                    
 
 
-Diseño: 
-
-src/
-   covid19geomodeller.py (Archivo general de librerías)
-   SEIR/
-   SEIRHDV/
-   SEIRStar/
-   SEIRHDVStar/
-   DataTools/
-   utils/ (quizás es un archivo y no una carpeta)
-examples/
-
 """
 
 
@@ -44,7 +32,7 @@ import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 import multiprocessing
 
-from class_SEIR2 import SEIR
+from class_SEIR import SEIR
 
 
 
@@ -57,6 +45,9 @@ class seirMetaAnalysis:
                 
     
     def sim_run(self,tsim,alpha,beta,mu,k=0,I=100,I_ac=0,I_d=0,R=0,population=1000000,expinfection = 1, SeroPrevFactor=1,intgr=0): 
+        """
+            Single SEIR Model simulation
+        """
         model = SEIR(tsim,alpha,beta,mu,k=k,I=I,I_ac=I_ac,I_d=I_d,R=R,population=population,expinfection = expinfection, SeroPrevFactor=SeroPrevFactor)      
         if intgr == 0:
             print('Fast Solver')
@@ -68,6 +59,10 @@ class seirMetaAnalysis:
         return(out)   
     
     def simulate_k(self,tsim,alpha,beta,mu,k=0,I=100,I_ac=0,I_d=0,R=0,population=1000000,expinfection = 1, SeroPrevFactor=1,intgr=0):
+        """
+            Multi SEIR Model simulation
+            
+        """        
         self.sims=[]                
         self.sims = (Parallel(n_jobs=self.num_cores, verbose=50)(delayed(self.simulate)(tsim,alpha,beta,mu,k=i,I=I,I_ac=I_ac,I_d=I_d,R=R,population=population,expinfection =expinfection, SeroPrevFactor=SeroPrevFactor,intgr=intgr) for i in k))
         

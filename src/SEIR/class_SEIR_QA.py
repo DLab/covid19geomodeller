@@ -2,7 +2,7 @@
 
 """
 
- SEIR 2 tests debug y QA
+ SEIR tests debug y QA
 
 """
 
@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from class_SEIR2 import SEIR
+from class_SEIR import SEIR
 from Quarantine import Quarantine
 
 
