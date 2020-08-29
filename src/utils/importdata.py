@@ -82,7 +82,7 @@ class ImportData():
                 if len(i)<=2:
                     aux = cutlist[cutlist['idState']==int(i)]
                     for j in aux['cut']:    
-                        auxendpoint = endpoint+str(j)
+                        auxendpoint = endpoint+str(j).zfill(5)
                         r = requests.get(auxendpoint) 
                         mydict = r.json()
                         actives.append(mydict['actives'])
@@ -99,7 +99,7 @@ class ImportData():
             if len(tstate)<=2:
                 aux = cutlist[cutlist['idState']==int(tstate)]
                 for j in aux['cut']:
-                    auxendpoint = endpoint+str(j)
+                    auxendpoint = endpoint+str(j).zfill(5)
                     r = requests.get(auxendpoint) 
                     mydict = r.json()
                     actives.append(mydict['actives'])
@@ -178,10 +178,11 @@ class ImportData():
 
     #self.importinfectadosacumulados = self.importAcumulatedInfected
 
+
     # -------------------------------- #
-    #    Datos Infectados diarios      #
+    #      Daily infected Smoothed     #
     # -------------------------------- #
-    # Falta interpolar
+    # Created by Felipe Castillo
     def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
         """
             Import daily infected
@@ -220,9 +221,18 @@ class ImportData():
         I_ac_r_dates = I_ac_r_dates[index:]
         I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]    
 
+        # Create daily infected from Interpolating and diferentiating the acumulated infected
         I_d_r = np.diff(np.interp(list(range(I_ac_r_tr[-1])),I_ac_r_tr,I_ac_r))
         I_d_r_tr = list(range(len(I_d_r)))
         I_d_r_dates = [initdate + timedelta(days=i) for i in range(len(I_d_r_tr))]
+
+        outliers_init = (datetime(2020,6,15)-initdate).days
+        outliers_end = (datetime(2020,6,19)-initdate).days
+
+        I_d_r_smooth=pd.DataFrame(I_d_r)
+
+        I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
+        I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
         print('Infectados diarios')
         if self:
@@ -231,14 +241,83 @@ class ImportData():
             self.I_d_r_dates = I_d_r_dates
             return
         else:        
-            return I_d_r, I_d_r_tr, I_d_r_dates
+            return I_d_r_smooth, I_d_r_tr, I_d_r_dates
+                
+
+    # ----------------------------------------------------- #
+    #      Daily infected Smoothed with backpropagation     #
+    # ----------------------------------------------------- #
+    # Created by Felipe Castillo
+    def importDailyInfectedBackprop(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
+        """
+            Import daily infected smoothed with Backpropagation
+            This function smoothes the daily infected thata and distributes homogeneously the 30k excess cases added in ~2020-6-16
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - I_d_r: Real Daily infected
+                - I_d_r_tr: days from simulation first day
+                - I_d_r_dates: data dates
+        """
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
+        
+        aux = pd.read_csv(endpoint)
+        
+        if type(tstate) == list:            
+            I_ac_r = aux.loc[aux['Codigo region'].isin(tstate)].iloc[:,5:-1]            
+            I_ac_r = I_ac_r.append(aux.loc[aux['Codigo comuna'].isin(tstate)].iloc[:,5:-1])
+            I_ac_r = I_ac_r.sum()
+        else:                        
+            I_ac_r = aux.loc[aux['Codigo region']==int(tstate)].iloc[:,5:-1]
+            I_ac_r = I_ac_r.append(aux.loc[aux['Codigo comuna']==int(tstate)].iloc[:,5:-1])
+            I_ac_r = I_ac_r.sum()
+        
+        I_ac_r_dates = [datetime.strptime(I_ac_r.index[i],'%Y-%m-%d') for i in range(len(I_ac_r))]
+        index = np.where(np.array(I_ac_r_dates) >= initdate)[0][0] 
+        I_ac_r = I_ac_r[index:]
+        I_ac_r_dates = I_ac_r_dates[index:]
+        I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]    
+
+        # Create daily infected from Interpolating and diferentiating the acumulated infected
+        I_d_r = np.diff(np.interp(list(range(I_ac_r_tr[-1])),I_ac_r_tr,I_ac_r))
+        I_d_r_tr = list(range(len(I_d_r)))
+        I_d_r_dates = [initdate + timedelta(days=i) for i in range(len(I_d_r_tr))]
+
+        outliers_init = (datetime(2020,6,15)-initdate).days
+        outliers_end = (datetime(2020,6,19)-initdate).days
+
+        I_d_r_smooth=pd.DataFrame(I_d_r)
+
+        I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
+        I_d_r_smooth[:outliers_end] += np.round(I_d_r_smooth[:outliers_end]*31412/np.sum(I_d_r_smooth[:outliers_end]))
+        I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
+
+        print('Infectados diarios')
+        if self:
+            self.I_d_r = I_d_r
+            self.I_d_r_tr = I_d_r_tr
+            self.I_d_r_dates = I_d_r_dates
+            return
+        else:        
+            return I_d_r_smooth, I_d_r_tr, I_d_r_dates
+                
     
+
     #self.importinfectadosdiarios = self.importDailyInfected
 
     # ------------------ #
     #    Datos Sochimi   #
     # ------------------ #
-    def importsochimi(self=None,tstate = '', initdate = None, endpoint = "http://192.168.2.223:5006/getBedsAndVentilationByState?state="):
+    def importSOCHIMI(self=None,tstate = '', initdate = None, endpoint = "http://192.168.2.223:5006/getBedsAndVentilationByState?state="):
         """
         Import SOCHIMI data por región. Falta incorporar la opción de conseguir data por sector de salud.
         input:
@@ -476,7 +555,7 @@ class ImportData():
         self.importActiveInfected()
         self.importAcumulatedInfected()
         self.importDailyInfected()
-        self.importsochimi()
+        self.importSOCHIMI()
         self.importAcumulatedDeaths()
         self.importActiveInfectedMinciencia()
         #self.importInfectedSubreport()
@@ -497,5 +576,61 @@ class ImportData():
         
         
         
+
+    # -------------------------------- #
+    #    Datos Infectados diarios      #
+    # -------------------------------- #
+    # Falta interpolar
+    """
+    def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
+ 
+            #Import daily infected
+            #input: 
+            #    - tstate: [string or string list] CUT por comuna o región
+            #    - initdate: datetime object with the initial date
+            #    - endpoint (optional): 
+            #output: 
+            #    - I_d_r: Real Daily infected
+            #    - I_d_r_tr: days from simulation first day
+            #    - I_d_r_dates: data dates
         
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
         
+        aux = pd.read_csv(endpoint)
+        
+        if type(tstate) == list:            
+            I_ac_r = aux.loc[aux['Codigo region'].isin(tstate)].iloc[:,5:-1]            
+            I_ac_r = I_ac_r.append(aux.loc[aux['Codigo comuna'].isin(tstate)].iloc[:,5:-1])
+            I_ac_r = I_ac_r.sum()
+        else:                        
+            I_ac_r = aux.loc[aux['Codigo region']==int(tstate)].iloc[:,5:-1]
+            I_ac_r = I_ac_r.append(aux.loc[aux['Codigo comuna']==int(tstate)].iloc[:,5:-1])
+            I_ac_r = I_ac_r.sum()
+        
+        I_ac_r_dates = [datetime.strptime(I_ac_r.index[i],'%Y-%m-%d') for i in range(len(I_ac_r))]
+        index = np.where(np.array(I_ac_r_dates) >= initdate)[0][0] 
+        I_ac_r = I_ac_r[index:]
+        I_ac_r_dates = I_ac_r_dates[index:]
+        I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]    
+
+        I_d_r = np.diff(np.interp(list(range(I_ac_r_tr[-1])),I_ac_r_tr,I_ac_r))
+        I_d_r_tr = list(range(len(I_d_r)))
+        I_d_r_dates = [initdate + timedelta(days=i) for i in range(len(I_d_r_tr))]
+
+        print('Infectados diarios')
+        if self:
+            self.I_d_r = I_d_r
+            self.I_d_r_tr = I_d_r_tr
+            self.I_d_r_dates = I_d_r_dates
+            return
+        else:        
+            return I_d_r, I_d_r_tr, I_d_r_dates
+
+    """
