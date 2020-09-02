@@ -14,6 +14,9 @@ from os import path
 """
 
 class ImportData():
+    def __init__(self,tstate,initdate):
+        self.tstate = tstate
+        self.initdate = initdate
     # ------------------------------- #
     #        Importar Data Real       #
     # ------------------------------- #
@@ -545,6 +548,84 @@ class ImportData():
         return
 
 
+    # ----------------------------- #
+    #    Import Adjacency Matrix    #
+    # ----------------------------- #
+    def importAdjacencyRegional(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getRegionalAdjacencyMatrix', N = 0):
+        """
+        Import adjacency data 
+        N is the adjacency order, with 0 meaning the immediate neighbors, 1 the neighbor's neighbors, and so on.
+        """
+        if self:
+            tstate = self.tstate            
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+        Data = pd.read_json(endpoint)
+        if type(tstate) == list:
+            adjacency = tstate
+            adjacency_lvl = tstate
+        else:
+            adjacency = [tstate]
+            adjacency_lvl = [tstate]
+        adjacency_lvl.append(Data.loc[int(tstate)][0])
+        adjacency.extend((Data.loc[int(tstate)][0]))
+        for j in range(1,N):
+            aux = [] 
+            for i in adjacency_lvl[j]:
+                aux.extend(Data.loc[int(i)][0])
+                # Remove duplicates                
+                aux = [k for k in aux if k not in adjacency]
+                aux = list(set(aux))
+            if len(aux)>0:                
+                adjacency_lvl.append(aux)
+                adjacency.extend(aux)
+            else:
+                break
+        if self:
+            self.adjacencyR = adjacency
+            self.adjacencyR_lvl = adjacency_lvl
+        else:        
+            return adjacency, adjacency_lvl
+
+
+    def importAdjacencyNational(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getNationalAdjacencyMatrix', N = 1):
+        """
+        Import adjacency data 
+        N is the adjacency order, with 0 meaning the immediate neighbors, 1 the neighbor's neighbors, and so on.
+        """
+        if self:
+            tstate = self.tstate            
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+        Data = pd.read_json(endpoint)
+        if type(tstate) == list:
+            adjacency = tstate
+            adjacency_lvl = tstate
+        else:
+            adjacency = [tstate]
+            adjacency_lvl = [tstate]
+        adjacency_lvl.append(Data.loc[int(tstate)][0])
+        adjacency.extend((Data.loc[int(tstate)][0]))
+        for j in range(1,N):
+            aux = [] 
+            for i in adjacency_lvl[j]:
+                aux.extend(Data.loc[int(i)][0])
+                # Remove duplicates                
+                aux = [k for k in aux if k not in adjacency]
+                aux = list(set(aux))
+            if len(aux)>0:                
+                adjacency_lvl.append(aux)
+                adjacency.extend(aux)
+            else:
+                break
+        if self:
+            self.adjacency = adjacency
+            self.adjacency_lvl = adjacency_lvl
+        else:        
+            return adjacency, adjacency_lvl
+
     # --------------------------- #
     #    Importar toda la data    #
     # --------------------------- #
@@ -560,8 +641,7 @@ class ImportData():
         self.importActiveInfectedMinciencia()
         #self.importInfectedSubreport()
         #self.importpcrpop()        
-        #self.importfallecidosexcesivos()
-        
+        #self.importfallecidosexcesivos()        
         print('Done')
 
 
