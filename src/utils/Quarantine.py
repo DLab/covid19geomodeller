@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 # ------------------------------------------------- #
 
 Quarantine array:
-np.array([tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct])
+np.array([tsim,max_mob,rem_mob,qp,iqt,fqt,movfunct])
 
 * tsim: Tiempo de simulación
-* max_mov: Movilidad máxima durante tiempo sin cuarentena
-* rem_mov: Movilidad remanente durante tiempo de cuarentena
+* max_mob: Movilidad máxima durante tiempo sin cuarentena
+* rem_mob: Movilidad remanente durante tiempo de cuarentena
 * qp: Periodo de Cuarentena para cuarentenas alternantes - qp días con cuarentena, luego qp días sin cuarentena
 * iqt: Día de inicio de cuarentena (desde el inicio de la simulación)
 * fqt: Día de fin de cuarentena (desde el inicio de la simulación)
@@ -29,9 +29,19 @@ np.array([tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct])
 """
 
 class Quarantine():
-    def __init__(self,rem_mov,max_mov=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
-        self.rem_mov = rem_mov
-        self.max_mov = max_mov
+    """
+    Quarantine Object
+        input: 
+            rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'
+        output:
+            Quarantine.plot()
+            Quarantine.alpha()
+        Usage example:
+            alpha = Quarantine(rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once').alpha(t)
+    """
+    def __init__(self,rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
+        self.rem_mob = rem_mob
+        self.max_mob = max_mob
         self.qp = qp
         self.iqt = iqt
         self.fqt = fqt
@@ -42,8 +52,8 @@ class Quarantine():
 
     def alphafunct(self):
         """    
-        # max_mov: Movilidad sin cuarentena
-        # rem_mov: Movilidad con cuarentena
+        # max_mob: Movilidad sin cuarentena
+        # rem_mob: Movilidad con cuarentena
         # qp: Periodo cuarentena dinamica 
         #          - qp >0 periodo Qdinamica 
         #          - qp = 0 sin qdinamica
@@ -66,25 +76,25 @@ class Quarantine():
                    return signal.square(t)
                if t<abs(self.iqt):
                    if self.iqt>0:
-                       return(self.rem_mov)
+                       return(self.rem_mob)
                    else:
-                       return(self.max_mov)
+                       return(self.max_mob)
                else:
                    if self.qp == 0:
-                       return(self.max_mov)
+                       return(self.max_mob)
                    elif t<self.fqt:
-                       return((self.max_mov-self.rem_mov)/2*(f(np.pi / qp * t - np.pi))+(self.max_mov+self.rem_mov)/2)
+                       return((self.max_mob-self.rem_mob)/2*(f(np.pi / self.qp * t - np.pi))+(self.max_mob+self.rem_mob)/2)
                    else:
-                       return(self.max_mov)   
+                       return(self.max_mob)   
 
 
             elif 'once' in self.movfunct or self.movfunct == 0:        
                 if t<self.iqt:
-                    return(self.max_mov)
+                    return(self.max_mob)
                 elif t>self.fqt:
-                    return(self.max_mov)
+                    return(self.max_mob)
                 else:
-                    return(self.rem_mov)
+                    return(self.rem_mob)
 
 
             elif 'sawtooth' in self.movfunct or self.movfunct == 2:
@@ -92,16 +102,16 @@ class Quarantine():
                    return signal.sawtooth(t)
                if t<abs(self.iqt):
                    if self.iqt>0:
-                       return(self.rem_mov)
+                       return(self.rem_mob)
                    else:
-                       return(self.max_mov)
+                       return(self.max_mob)
                else:
                    if self.qp == 0:
-                       return(self.max_mov)
+                       return(self.max_mob)
                    elif t<self.fqt:
-                       return((self.max_mov-self.rem_mov)/2*(f(np.pi / qp * t - np.pi))+(self.max_mov+self.rem_mov)/2)
+                       return((self.max_mob-self.rem_mob)/2*(f(np.pi / self.qp * t - np.pi))+(self.max_mob+self.rem_mob)/2)
                    else:
-                       return(self.max_mov)   
+                       return(self.max_mob)   
                      
         return(alpha)
 
@@ -114,10 +124,10 @@ class Quarantine():
 
 
 
-def alphafunct(rem_mov,max_mov=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
+def alphafunct(rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
     """    
-    # max_mov: Movilidad sin cuarentena
-    # rem_mov: Movilidad con cuarentena
+    # max_mob: Movilidad sin cuarentena
+    # rem_mob: Movilidad con cuarentena
     # qp: Periodo cuarentena dinamica 
     #          - qp >0 periodo Qdinamica 
     #          - qp = 0 sin qdinamica
@@ -137,25 +147,25 @@ def alphafunct(rem_mov,max_mov=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
                 return signal.square(t)
             if t<abs(iqt):
                 if iqt>0:
-                    return(rem_mov)
+                    return(rem_mob)
                 else:
-                    return(max_mov)
+                    return(max_mob)
             else:
                 if qp == 0:
-                    return(max_mov)
+                    return(max_mob)
                 elif t<fqt:
-                    return((max_mov-rem_mov)/2*(f(np.pi / qp * t - np.pi))+(max_mov+rem_mov)/2)
+                    return((max_mob-rem_mob)/2*(f(np.pi / qp * t - np.pi))+(max_mob+rem_mob)/2)
                 else:
-                    return(max_mov)   
+                    return(max_mob)   
 
 
         elif 'once' in movfunct or movfunct == 0:        
             if t<iqt:
-                return(max_mov)
+                return(max_mob)
             elif t>fqt:
-                return(max_mov)
+                return(max_mob)
             else:
-                return(rem_mov)
+                return(rem_mob)
 
 
         elif 'sawtooth' in movfunct or movfunct == 2:
@@ -163,15 +173,15 @@ def alphafunct(rem_mov,max_mov=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
                 return signal.sawtooth(t)
             if t<abs(iqt):
                 if iqt>0:
-                    return(rem_mov)
+                    return(rem_mob)
                 else:
-                    return(max_mov)
+                    return(max_mob)
             else:
                 if qp == 0:
-                    return(max_mov)
+                    return(max_mob)
                 elif t<fqt:
-                    return((max_mov-rem_mov)/2*(f(np.pi / qp * t - np.pi))+(max_mov+rem_mov)/2)
+                    return((max_mob-rem_mob)/2*(f(np.pi / qp * t - np.pi))+(max_mob+rem_mob)/2)
                 else:
-                    return(max_mov)   
+                    return(max_mob)   
                     
     return(alpha)
