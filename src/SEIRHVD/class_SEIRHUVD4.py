@@ -185,7 +185,7 @@ class SEIRHVD:
             Htot: Hospital capacity, either an int or a function(t)
             Vtot: VMI capacity, either an int or a function(t)
     """
-    def __init__(self,tsim,beta,mu,alpha,k=0,Htot=30,Vtot=20,H0=0,V0=0,B0=0,D0=0,R0=0,I0=100,I_d0=10,I_ac0=100,SeroPrevFactor=1,expinfection=0,population=1000000,InitialConditions=None, initdate = None):
+    def __init__(self,tsim,beta,mu,alpha,k=0,Htot=30,Vtot=20,H0=0,V0=0,B0=0,D0=0,R0=0,I0=100,I_d0=10,I_ac0=100,SeroPrevFactor=1,expinfection=0,population=1000000,InitialConditions=None, initdate = None,Imi_det = 1,Ias_det = 1):
 
         self.tsim = tsim 
         self.beta = beta 
@@ -195,6 +195,22 @@ class SEIRHVD:
 
         self.SeroPrevFactor = SeroPrevFactor
         self.expinfection = expinfection
+
+        self.Imi_det = Imi_det # Fraction of mild infected detected
+        self.Ias_det = Ias_det # Fraction of asymptomatic infected detected
+        """
+        I0 = Imi_det*Imi + Ias_det*Ias + Icr + Ise 
+        Itot = Imi +  Icr + Ise  + Iac 
+        Ias = Itot * pas
+        Imi = Itot * pmi
+        Ise = Itot * pse
+        Icr = Itot * pcr
+
+        I0 = Imi_det*Itot*pmi + Itot*(pcr + pse) + Ias_det*Itot*pas
+        I0 = Itot(Imi_det*pmi + Ias_det*pas + pcr + pse)
+        
+        Itot = I0/(Imi_det*pmi + Ias_det*pas + pcr + pse)
+        """
 
         self.initdate = initdate 
         # Initial Conditions:        
@@ -221,8 +237,8 @@ class SEIRHVD:
             self.D = IC.Br[1]-IC.Br[0]
             self.R = 0
             self.I0 = IC.Ir[0]
-            self.I_d = IC.I_d_r[0]
-            self.I_ac = IC.I_ac_r[0]
+            self.I_d0 = IC.I_d_r[0]
+            self.I_ac0 = IC.I_ac_r[0]
             self.population = IC.population
             self.initdate = IC.initdate
 
@@ -234,8 +250,8 @@ class SEIRHVD:
             self.D = D0
             self.R = R0
             self.I0 = I0
-            self.I_d = I_d0
-            self.I_ac = I_ac0
+            self.I_d0 = I_d0
+            self.I_ac0 = I_ac0
             self.population = population
 
             # Build Hospital Capacities
@@ -249,9 +265,10 @@ class SEIRHVD:
             else:
                 self.Vtot = Vtot            
 
-
+        
         self.setparams()
-        self.setequations()
+        self.setequations()       
+        
         self.setrelationalvalues()
 
         self.gw=10
@@ -521,25 +538,28 @@ class SEIRHVD:
 
         self.setrelationalvalues()
 
-    def setrelationalvalues(self):       
+    def setrelationalvalues(self):
+        self.I = self.I0/(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
         # Active infected
-        self.Ias= self.pE_Ias*self.I0
-        self.Imi= self.pE_Imi*self.I0
-        self.Icr= self.pE_Icr*self.I0
-        self.Ise = self.pE_Ise*self.I0
+        self.Ias= self.pE_Ias*self.I
+        self.Imi= self.pE_Imi*self.I
+        self.Icr= self.pE_Icr*self.I
+        self.Ise = self.pE_Ise*self.I
 
+        self.I_d = self.I_d0/(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
         self.Ias_d = self.pE_Ias*self.I_d
         self.Imi_d = self.pE_Imi*self.I_d
         self.Icr_d = self.pE_Icr*self.I_d
         self.Ise_d = self.pE_Ise*self.I_d
 
+        self.I_ac = self.I_ac0/(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr)
         self.Ias_ac = self.pE_Ias*self.I_ac
         self.Imi_ac = self.pE_Imi*self.I_ac
         self.Icr_ac = self.pE_Icr*self.I_ac
         self.Ise_ac = self.pE_Ise*self.I_ac
         
         # Exposed
-        self.E = self.mu*self.I0
+        self.E = self.mu*self.I
         
         # Hospitalizados        
         self.Hse = self.H0*self.pE_Ise/(self.pE_Ise+self.pE_Icr) 
@@ -548,7 +568,7 @@ class SEIRHVD:
         # Valores globales
         self.N = self.SeroPrevFactor*self.population
         self.S = self.N-self.H0-self.V-self.D-self.E-(self.Ias+self.Icr+self.Ise+self.Imi)        
-        self.I = self.I0
+        #self.I = self.I
 
         #constructor of SEIR class elements, it's initialized when a parameter
         #miminization is performed to adjust the best setting of the actual infected
@@ -1084,6 +1104,11 @@ class SEIRHVD:
         self.peak_t = self.t[self.peakindex]
         if self.initdate:
             self.peak_date = self.initdate+timedelta(days=round(self.peak_t))
+
+        # Detected Cases
+        self.I_det = self.I*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
+        self.I_d_det = self.I_d*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
+        self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
 
         return(sol)
 
