@@ -465,3 +465,103 @@ axs[2,1].scatter(RM.sochimi_tr,RM.Vr,label='Real Data')
 axs[2,1].scatter(RM.sochimi_tr,RM.Vr_tot,label='Capacity Data',color = 'red')
 axs[2,1].set_title('UCI/UTI Usage')
 axs[2,1].axvline(x = t_end, linestyle = 'dotted',color = 'grey')
+
+
+
+Htot=30
+Vtot=20
+H0=simulation1.H
+V0=0
+B0=0
+D0=0
+R0=0
+I0=100
+I_d0=10
+I_ac0=100
+SeroPrevFactor=1
+expinfection=0
+population=1000000
+
+initdate = initdate2
+Imi_det = 1
+Ias_det = 1
+Einit=True
+E0=simulation1.E[-1]
+E_d0=simulation1.E_d[-1]
+E_ac0=simulation1.E_ac[-1]
+
+
+""" 
+Sero Prev Reinitialization
+
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import datetime
+from numpy import linalg as LA
+
+import platform
+OS = platform.system()
+
+import matplotlib.pyplot as plt
+if OS == 'Linux':    
+    %matplotlib tk
+    print('Linux')
+elif OS == 'Windows':
+    %matplotlib qt
+    print('Windows')
+else:
+    print('OS not detected :-|')
+
+import sys
+from pathlib import Path
+sys.path.insert(1, '../src/SEIRHVD/')
+sys.path.insert(1, '../src/utils/')
+sys.path.insert(1, 'src/SEIRHVD/')
+sys.path.insert(1, 'src/utils/')
+
+from class_SEIRHUVD4 import SEIRHVD 
+from Quarantine import Quarantine
+from importdata import ImportData
+
+initdate = datetime(2020,5,15)
+initdate2 = datetime(2020,8,15)
+currentdate = datetime.now()
+currentday = (currentdate - initdate).days
+
+tstate = '13'
+
+# Import Data
+RM = ImportData(tstate=tstate,initdate = initdate)
+RM.importdata()
+
+# Simulation parameters
+tsim1 = (initdate2 - initdate).days #1000
+
+tsim2 = 1000-tsim1
+beta = 0.2
+mu = 0.8
+k = 0.1
+
+SeroPrevFactor=0.05 # SeroPrevalence Factor (The proportion of the population that participates in the dynamics)
+expinfection=0 # Proportion in which the exposed infect - 0: nothing, 1: equally as Infected
+
+# Quarantines 
+max_mob1 = 0.55
+rem_mob = 0.45
+t_end_date=datetime(2020,8,25)
+t_end=(t_end_date-initdate).days
+#alpha = Quarantine(rem_mob,max_mob=max_mob,qp=0,iqt=0,fqt=1000,movfunct = 'once').alpha(t)
+alpha1 = Quarantine(rem_mob,max_mob1,qp=0,iqt=0,fqt=t_end).alpha
+
+
+Imi_det = 0.56
+Ias_det = 0
+
+simulation1 = SEIRHVD(tsim1,beta,mu,alpha1,k=k,SeroPrevFactor=SeroPrevFactor,expinfection=expinfection,RealIC = RM,Imi_det = Imi_det,Ias_det = Ias_det)
+simulation1.integr_sci(0,tsim,0.1)
+
+simulation2 = SEIRHVD(tsim2,beta,mu,alpha1,k=k,SeroPrevFactor=SeroPrevFactor,Imi_det = Imi_det,Ias_det = Ias_det,SimIC=simulation1,initdate=initdate2)
+simulation2.integr_sci(0,tsim,0.1)

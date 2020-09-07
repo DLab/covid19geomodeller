@@ -33,143 +33,7 @@ Instructions:
         - movfunct: 
 
 """
-"""
-class simSEIRHVD:
-    
-    # Parallel simulation class: Soon to be migrated
-    
-    definputarray=np.array([
-            [500,0.8,0.6,0,0,500,0],
-            [500,0.6,0.5,0,0,500,0],
-            [500,0.4,0.4,0,0,500,0]])            
 
-
-    def __init__(self,beta = 0.19, mu =2.6,inputarray = definputarray,B=221,D=26,V=758,I_act0=12642,R=0,Htot=None,Vtot=None,H_cr=80,H0=1720,tsat=30,Hmax=4000,Vmax=2000,expinfection=0,SeroPrevFactor=1,population=100000,
-    intgr = 0,Ias_ac =0, Imi_ac = 0, Ise_ac = 0, Icr_ac = 0,H_crD = 0, VD=0,IcrD=0,Ise_D=0,Ias_prop = 0.35, Imi_prop = 0.63,Icr_prop = 0.007,Ise_prop = 0.013, k =0):
-        self.mu = mu
-        self.beta = beta 
-        self.sims = []
-        self.inputarray=inputarray
-        self.simulated = False
-        self.B = B
-        self.D = D
-        self.V = V
-        self.I_act0 = I_act0        
-        self.R  = R    
-        self.H_cr = H_cr # Hospitalizados criticos dia 0
-        self.H0 = H0 # Hospitalizados totales dia 0
-        
-        self.Hmax = Hmax
-        self.Vmax = Vmax
-        self.expinfection = expinfection 
-        self.SeroPrevFactor=SeroPrevFactor
-        self.population = population
-        self.Htot = Htot
-        self.Vtot = Vtot
-        self.intgr = intgr
-
-        # Accumulated Infected
-        self.Ias_ac = Ias_ac
-        self.Imi_ac = Imi_ac
-        self.Ise_ac = Ise_ac
-        self.Icr_ac = Icr_ac
-
-        # Deaths
-        self.H_crD = H_crD
-        self.VD = VD
-        self.Ise_D = Ise_D
-        self.IcrD = IcrD
-
-        # Initial Infected proportion
-        self.Ias_prop = Ias_prop
-        self.Imi_prop = Imi_prop
-        self.Icr_prop = Icr_prop
-        self.Ise_prop = Ise_prop
-
-
-        # dayly Infected
-        self.Ias_d = 0
-        self.Imi_d = 0
-        self.Ise_d = 0
-        self.Icr_d = 0
-
-        # Saturated Kinetics
-        self.k = k                        
-
-         
-    
-    def sim_run(self,tsim,max_mov,rem_mov,qp,iqt=0,fqt = 300,movfunct = 0):       
-        case = SEIRHUDV(tsim,max_mov,rem_mov,qp,iqt,fqt,movfunct,k=self.k)
-        case.beta = self.beta       
-        case.mu = self.mu
-        case.B = self.B 
-        case.D = self.D 
-        case.V = self.V 
-        case.I_act0 = self.I_act0 
-        case.R  = self.R 
-        case.Htot = self.Htot
-        case.Vtot = self.Vtot         
-        case.H_cr = self.H_cr  # Hospitalizados criticos dia 0
-        case.H0 = self.H0  # Hospitalizados totales dia 0
-        
-        case.Hmax = self.Hmax
-        case.Vmax = self.Vmax
-        case.expinfection = self.expinfection
-        case.SeroPrevFactor = self.SeroPrevFactor
-        case.population = self.population 
-
-        # Accumulated Infected
-        case.Ias_ac = self.Ias_ac 
-        case.Imi_ac = self.Imi_ac 
-        case.Ise_ac = self.Ise_ac 
-        case.Icr_ac = self.Icr_ac 
-
-        # Deaths
-        case.H_crD = self.H_crD
-        case.VD = self.VD
-        case.Ise_D = self.Ise_D
-        case.IcrD = self.IcrD
-
-        case.Ias_d = self.Ias_d
-        case.Imi_d = self.Imi_d
-        case.Ise_d = self.Ise_d
-        case.Icr_d = self.Icr_d
-
-        case.Ias_prop=self.Ias_prop
-        case.Imi_prop=self.Imi_prop
-        case.Icr_prop=self.Icr_prop
-        case.Ise_prop=self.Ise_prop
-        
-
-        case.setrelationalvalues()
-        if self.intgr == 0:
-            print('Scipy Solver')
-            case.integr_sci(0,tsim,0.1,False)        
-        else:
-            print('Scikits-odes solver (robust)')                  
-            case.integr(0,tsim,0.1,False)
-        out=[case,max_mov,rem_mov,qp,tsim]
-        return(out)   
-
-
-        # Agregar un codigo numerico para que solo haya 1 vector de simulacion
-        #['once','once','once','once','once','once','square','square','once','once','once','once','once','once','square','square']
-        
-    def setparameters(self):
-        return
-    def simulate(self,intgr=0):
-        num_cores = multiprocessing.cpu_count()
-        #params=Parallel(n_jobs=num_cores, verbose=50)(delayed(ref_test.refinepso_all)(Ir,tr,swarmsize=200,maxiter=50,omega=0.5, phip=0.5, phig=0.5,eta_r=[0,1],Q_r=[0,1],obj_func='IN')for i in range(int(rep)))
-        self.sims=Parallel(n_jobs=num_cores, verbose=50)(delayed(self.sim_run)(self.inputarray[i,0],self.inputarray[i,1],self.inputarray[i,2],self.inputarray[i,3],self.inputarray[i,4],self.inputarray[i,5],self.inputarray[i,6]) for i in range(self.inputarray.shape[0]))
-        self.simulated = True
-        return(self.sims)
-
-    def getscenarios(self):
-        return()
-    def addscenario(self,inputarray):
-        return()
-
-"""
 
 class SEIRHVD:  
     """
@@ -185,7 +49,7 @@ class SEIRHVD:
             Htot: Hospital capacity, either an int or a function(t)
             Vtot: VMI capacity, either an int or a function(t)
     """
-    def __init__(self,tsim,beta,mu,alpha,k=0,Htot=30,Vtot=20,H0=0,V0=0,B0=0,D0=0,R0=0,I0=100,I_d0=10,I_ac0=100,SeroPrevFactor=1,expinfection=0,population=1000000,InitialConditions=None, initdate = None,Imi_det = 1,Ias_det = 1):
+    def __init__(self,tsim,beta,mu,alpha,k=0,Htot=30,Vtot=20,H0=0,V0=0,B0=0,D0=0,R0=0,I0=100,I_d0=10,I_ac0=100,SeroPrevFactor=1,expinfection=0,population=1000000,RealIC=None, initdate = None,Imi_det = 1,Ias_det = 1,SimIC=None):
 
         self.tsim = tsim 
         self.beta = beta 
@@ -198,6 +62,8 @@ class SEIRHVD:
 
         self.Imi_det = Imi_det # Fraction of mild infected detected
         self.Ias_det = Ias_det # Fraction of asymptomatic infected detected
+
+        self.SimIC = SimIC
         """
         I0 = Imi_det*Imi + Ias_det*Ias + Icr + Ise 
         Itot = Imi +  Icr + Ise  + Iac 
@@ -211,12 +77,13 @@ class SEIRHVD:
         
         Itot = I0/(Imi_det*pmi + Ias_det*pas + pcr + pse)
         """
+        self.gw=10
 
         self.initdate = initdate 
         # Initial Conditions:        
         #self.setinitvalues()  
-        if InitialConditions:
-            IC = InitialConditions
+        if RealIC:
+            IC = RealIC
             # Use initial conditions object/dictionary with realworld imported initial conditions
             
             # Aproximate Hospitals capacity:
@@ -242,7 +109,111 @@ class SEIRHVD:
             self.population = IC.population
             self.initdate = IC.initdate
 
+            self.Ise_D_d = 0
+            self.Icr_D_d = 0
+            self.Hse_D_d = 0
+            self.V_D_d = 0
+
+            self.Ise_D_ac = 0
+            self.Icr_D_ac = 0
+            self.Hse_D_ac = 0
+            self.V_D_ac = 0
+
+            self.R_d = 0
+
+            self.Hse_d = 0
+            self.Hout_d = 0
+            self.V_d = 0
+
+            self.Hse_ac = 0
+            self.Hout_ac = 0
+            self.V_ac = 0
+            
+            self.setparams()
+            self.Einit = False
+            self.setrelationalvalues()
+            self.setequations()
             print('InitialCondition Object Data')
+
+        elif SimIC:
+            self.SimICinitdate = SimIC.initdate
+            self.population = SimIC.population
+            
+            # New Susceptible:
+            self.S = SimIC.S[-1] + SimIC.population*(1-SimIC.SeroPrevFactor)*self.SeroPrevFactor
+            self.N = SimIC.SeroPrevFactor*self.population + self.population*(1-SimIC.SeroPrevFactor)*self.SeroPrevFactor #Past simulation + added now
+
+            # Exposed: 
+            self.E = SimIC.E[-1]
+            self.E_d = SimIC.E_d[-1]
+            self.E_ac = SimIC.E_ac[-1]
+
+            self.I = SimIC.I[-1]
+            self.I_d = SimIC.I_d[-1]
+            self.I_ac = SimIC.I_ac[-1]
+
+            self.Ias = SimIC.Ias[-1]
+            self.Imi = SimIC.Imi[-1]
+            self.Ise = SimIC.Ise[-1]
+            self.Icr = SimIC.Icr[-1]
+
+            self.Ias_d = SimIC.Ias_d[-1]
+            self.Imi_d = SimIC.Imi_d[-1]
+            self.Ise_d = SimIC.Ise_d[-1]
+            self.Icr_d = SimIC.Icr_d[-1]
+
+            self.Ias_ac = SimIC.Ias_ac[-1]
+            self.Imi_ac = SimIC.Imi_ac[-1]
+            self.Ise_ac = SimIC.Ise_ac[-1]
+            self.Icr_ac = SimIC.Icr_ac[-1]
+
+            self.R = SimIC.R[-1]
+            self.R_d = SimIC.R_d[-1]
+
+            self.Hse = SimIC.Hse[-1]
+            self.Hout = SimIC.Hout[-1]
+            self.V = SimIC.V[-1]
+            
+            self.Hse_d = SimIC.Hse_d[-1]
+            self.Hout_d = SimIC.Hout_d[-1]
+            self.V_d = SimIC.V_d[-1]
+
+            self.Hse_ac = SimIC.Hse_ac[-1]            
+            self.Hout_ac = SimIC.Hout_ac[-1]            
+            self.V_ac = SimIC.V_ac[-1]              
+
+            self.R = SimIC.R[-1]
+            self.R_d = SimIC.R_d[-1] 
+
+            self.D = SimIC.D[-1]
+            self.B = SimIC.B[-1]
+
+            self.Ise_D_d = SimIC.Ise_D_d[-1]
+            self.Icr_D_d = SimIC.Icr_D_d[-1]
+            self.Hse_D_d = SimIC.Hse_D_d[-1]
+            self.V_D_d = SimIC.V_D_d[-1]
+
+            self.Ise_D_ac = SimIC.Ise_D_ac[-1]
+            self.Icr_D_ac = SimIC.Icr_D_ac[-1]
+            self.Hse_D_ac = SimIC.Hse_D_ac[-1]
+            self.V_D_ac = SimIC.V_D_ac[-1]
+
+            self.Einit = True
+
+            # Falta trasladarlo en el tiempo
+            self.T_delta = (self.initdate - SimIC.initdate).days
+
+            self.Htot = self.Htot_SimIC(SimIC)
+            self.Vtot = self.Vtot_SimIC(SimIC)
+
+            self.alpha = self.alpha_SimIC(SimIC)
+
+            self.setparams()
+            self.setequations()              
+
+
+
+
         else:
             self.H0 = H0
             self.V = V0
@@ -265,13 +236,54 @@ class SEIRHVD:
             else:
                 self.Vtot = Vtot            
 
-        
-        self.setparams()
-        self.setequations()       
-        
-        self.setrelationalvalues()
+            self.Ise_D_d = 0
+            self.Icr_D_d = 0
+            self.Hse_D_d = 0
+            self.V_D_d = 0
 
-        self.gw=10
+            self.Ise_D_ac = 0
+            self.Icr_D_ac = 0
+            self.Hse_D_ac = 0
+            self.V_D_ac = 0
+
+            self.Hse_d = 0
+            self.Hout_d = 0
+            self.V_d = 0
+
+            self.Hse_ac = 0
+            self.Hout_ac = 0
+            self.V_ac = 0            
+
+            self.R_d = 0
+
+            self.setparams()
+            self.Einit = False
+            self.setrelationalvalues()
+            self.setequations() 
+
+
+    def alpha_SimIC(self,SimIC):
+        def funct(t):
+            return SimIC.alpha(t+self.T_delta)
+        return funct    
+
+
+    def Htot_SimIC(self,SimIC):
+        def funct(t):
+            return SimIC.Htot(t+self.T_delta)
+        return funct
+        
+
+    def Vtot_SimIC(self,SimIC):
+        def funct(t):
+            return SimIC.Vtot(t+self.T_delta)
+        return funct
+        #return(SimIC.Vtot(t-self.T_delta))               
+
+    def setnewparams(self):
+        self.setequations()
+        if not self.SimIC:
+            self.setrelationalvalues()
 
 
     def setequations(self):
@@ -559,10 +571,12 @@ class SEIRHVD:
         self.Ise_ac = self.pE_Ise*self.I_ac
         
         # Exposed
-        self.E = self.mu*self.I
-        
+        if not self.Einit:
+            self.E = self.mu*self.I
+            self.E_d=self.mu*(self.I_d)                
+            self.E_ac=self.mu*(self.I_ac)
         # Hospitalizados        
-        self.Hse = self.H0*self.pE_Ise/(self.pE_Ise+self.pE_Icr) 
+        self.Hse = self.H0*self.pE_Ise/(self.pE_Ise+self.pE_Icr)
         self.Hout = self.H0*self.pE_Icr/(self.pE_Ise+self.pE_Icr)
        
         # Valores globales
@@ -631,9 +645,14 @@ class SEIRHVD:
             else:
                 E0 = self.E
                 E_d0 = self.mu*(self.I_d)
-                E_ac0 ==self.mu*(self.I_ac)                
+                E_ac0 = self.mu*(self.I_ac)                
 
             S0=self.S
+
+            E0=self.E
+            E_d0=self.E_d
+            E_ac0=self.E_ac
+
             Ias0=self.Ias
             Imi0=self.Imi
             Ise0=self.Ise
@@ -653,29 +672,30 @@ class SEIRHVD:
             Hout0=self.Hout
             V0=self.V
 
-            Hse_d0=0
-            Hout_d0=0
-            V_d0=0
+            Hse_d0= self.Hse_d
+            Hout_d0= self.Hout_d
+            V_d0= self.V_d
 
-            Hse_ac0=0
-            Hout_ac0=0
-            V_ac0=0
+            Hse_ac0= self.Hse_ac
+            Hout_ac0= self.Hout_ac
+            V_ac0= self.V_ac
 
             R0=self.R
-            R_d0=0
+            R_d0=self.R_d
 
             D0=self.D
             B0=self.B
 
-            Ise_D_d0 = 0
-            Icr_D_d0 = 0
-            Hse_D_d0 = 0
-            V_D_d0 = 0
+            Ise_D_d0 = self.Ise_D_d
+            Icr_D_d0 = self.Icr_D_d
+            Hse_D_d0 = self.Hse_D_d
+            V_D_d0 = self.V_D_d
 
-            Ise_D_ac0 = 0
-            Icr_D_ac0 = 0
-            Hse_D_ac0 = 0
-            V_D_ac0 = 0
+            Ise_D_ac0 = self.Ise_D_ac
+            Icr_D_ac0 = self.Icr_D_ac
+            Hse_D_ac0 = self.Hse_D_ac
+            V_D_ac0 = self.V_D_ac
+
 
 
             self.t=np.arange(t0,T+h,h)
@@ -800,7 +820,7 @@ class SEIRHVD:
         initcond = np.array([S0,E0,E_d0,E_ac0,Ias0,Imi0,Ise0,Icr0,Ias_d0,Imi_d0,Ise_d0,Icr_d0,Ias_ac0,Imi_ac0,Ise_ac0,Icr_ac0,Hse0,Hout0,V0,Hse_d0,Hout_d0,V_d0,Hse_ac0,
             Hout_ac0,V_ac0,R0,R_d0,D0,B0,Ise_D_d0,Icr_D_d0,Hse_D_d0,V_D_d0,Ise_D_ac0,Icr_D_ac0,Hse_D_ac0,V_D_ac0])
             
-
+        print('Solving ODE')
         sol = odeint(model_SEIR_graph, self.t, initcond,method='admo')
         
         self.t=sol.values.t 
@@ -853,7 +873,35 @@ class SEIRHVD:
         self.Icr_D_ac=sol.values.y[:,34]
         self.Hse_D_ac=sol.values.y[:,35]
         self.V_D_ac=sol.values.y[:,36]
-               
+
+
+
+        self.I = self.Ias + self.Imi + self.Ise + self.Icr
+        self.I_d = self.Ias_d + self.Imi_d + self.Ise_d + self.Icr_d
+        self.I_ac = self.Ias_ac + self.Imi_ac + self.Ise_ac + self.Icr_ac
+
+        self.H = self.Hse + self.Hout
+        self.H_d = self.Hse_d + self.Hout_d
+        self.H_ac = self.Hse_ac + self.Hout_ac
+
+        self.H_sat = [self.h_sat(self.Hse[i],self.Hout[i],self.t[i]) for i in range(len(self.t))]
+        self.V_sat = [self.v_sat(self.V[i],self.t[i]) for i in range(len(self.t))]
+
+        self.V_cap = [self.Vtot(i) for i in self.t]
+        self.H_cap = [self.Htot(i) for i in self.t]
+
+        #Cálculo de la fecha del Peak  
+        self.peakindex = np.where(self.I==max(self.I))[0][0]
+        self.peak = max(self.I)
+        self.peak_t = self.t[self.peakindex]
+        if self.initdate:
+            self.peak_date = self.initdate+timedelta(days=round(self.peak_t))
+
+        # Detected Cases
+        self.I_det = self.I*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
+        self.I_d_det = self.I_d*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
+        self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
+
         return(sol)
 
     def integr_sci(self,t0,T,h,E0init=False):
@@ -873,6 +921,11 @@ class SEIRHVD:
                 E_ac0 = self.mu*(self.I_ac)
 
             S0=self.S
+
+            E0=self.E
+            E_d0=self.E_d
+            E_ac0=self.E_ac
+
             Ias0=self.Ias
             Imi0=self.Imi
             Ise0=self.Ise
@@ -892,29 +945,29 @@ class SEIRHVD:
             Hout0=self.Hout
             V0=self.V
 
-            Hse_d0=0
-            Hout_d0=0
-            V_d0=0
+            Hse_d0= self.Hse_d
+            Hout_d0= self.Hout_d
+            V_d0= self.V_d
 
-            Hse_ac0=0
-            Hout_ac0=0
-            V_ac0=0
+            Hse_ac0= self.Hse_ac
+            Hout_ac0= self.Hout_ac
+            V_ac0= self.V_ac
 
             R0=self.R
-            R_d0=0
+            R_d0=self.R_d
 
             D0=self.D
             B0=self.B
 
-            Ise_D_d0 = 0
-            Icr_D_d0 = 0
-            Hse_D_d0 = 0
-            V_D_d0 = 0
+            Ise_D_d0 = self.Ise_D_d
+            Icr_D_d0 = self.Icr_D_d
+            Hse_D_d0 = self.Hse_D_d
+            V_D_d0 = self.V_D_d
 
-            Ise_D_ac0 = 0
-            Icr_D_ac0 = 0
-            Hse_D_ac0 = 0
-            V_D_ac0 = 0                         
+            Ise_D_ac0 = self.Ise_D_ac
+            Icr_D_ac0 = self.Icr_D_ac
+            Hse_D_ac0 = self.Hse_D_ac
+            V_D_ac0 = self.V_D_ac
 
             self.t=np.arange(t0,T+h,h)
             
@@ -1111,6 +1164,7 @@ class SEIRHVD:
         self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
 
         return(sol)
+
 
 
 
