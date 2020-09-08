@@ -565,3 +565,73 @@ simulation1.integr_sci(0,tsim,0.1)
 
 simulation2 = SEIRHVD(tsim2,beta,mu,alpha1,k=k,SeroPrevFactor=SeroPrevFactor,Imi_det = Imi_det,Ias_det = Ias_det,SimIC=simulation1,initdate=initdate2)
 simulation2.integr_sci(0,tsim,0.1)
+
+
+
+
+
+
+
+
+
+fig, axs = plt.subplots(3, 3)
+axs[0,0].set_xlim(0,days)
+axs[0,0].scatter(RM.tr,RM.Ir,label='Real Active Data')
+axs[0,0].plot(simulation1.t,simulation1.I_det,label='Infected')
+axs[0,0].plot(simulation2.t+tsim1,simulation2.I_det,label='Infected')
+axs[0,0].set_title('Active Infected')
+axs[0,0].axvline(x = t_end, linestyle = 'dotted',color = 'grey')
+
+
+axs[0,1].set_xlim(0,days)
+axs[0,1].plot(simulation2.t+tsim1,simulation2.I_d_det,label='sim2')
+axs[0,1].plot(simulation1.t,simulation1.I_d_det,label='sim1')
+axs[0,1].scatter(RM.I_d_r_tr,RM.I_d_r,label='Daily Real Data')
+axs[0,1].set_title('Daily infected')
+axs[0,1].axvline(x = t_end, linestyle = 'dotted',color = 'grey')
+
+
+axs[0,2].set_xlim(0,days)
+axs[0,2].plot(simulation2.t+tsim1,simulation2.I_ac_det,label='sim2')
+axs[0,2].plot(simulation1.t,simulation1.I_ac_det,label='sim1')
+axs[0,2].scatter(RM.I_ac_r_tr,RM.I_ac_r,label='Accumulated Real Data')
+axs[0,2].set_title('Accumulated Infected')
+axs[0,2].axvline(x = t_end, linestyle = 'dotted',color = 'grey')
+
+
+axs[1,0].set_xlim(0,days)
+axs[1,0].plot(simulation2.t+tsim1,simulation2.B,label='sim2')
+axs[1,0].plot(simulation1.t,simulation1.B,label='sim1')
+axs[1,0].scatter(RM.Br_tr,RM.Br,label='Real Data')
+axs[1,0].set_title('Acmulated Deaths')
+axs[1,0].axvline(x = t_end, linestyle = 'dotted',color = 'grey')
+
+
+axs[1,1].set_xlim(0,days)
+axs[1,1].plot(simulation1.t,simulation1.Hse+simulation1.Hout,label='UCI/UTI Beds')
+axs[1,1].plot(simulation2.t+tsim1,simulation2.Hse+simulation2.Hout,label='UCI/UTI Beds')
+axs[1,1].scatter(RM.sochimi_tr,RM.Hr,label='Real Data')
+axs[1,1].scatter(RM.sochimi_tr,RM.Hr_tot,label='Capacity Data', color = 'red')
+axs[1,1].set_title('UCI/UTI Usage')
+axs[1,1].axvline(x = t_end, linestyle = 'dotted',color = 'grey')
+
+
+axs[1,2].set_xlim(0,days)
+axs[1,2].plot(simulation2.t+tsim1,simulation2.V,label='VSat sim2')
+axs[1,2].plot(simulation1.t,simulation1.V,label='Vsat sim1')
+axs[1,2].scatter(RM.sochimi_tr,RM.Vr,label='Real Data')
+axs[1,2].scatter(RM.sochimi_tr,RM.Vr_tot,label='Capacity Data',color = 'red')
+axs[1,2].set_title('VMI Usage')
+axs[1,2].axvline(x = t_end, linestyle = 'dotted',color = 'grey')
+
+
+axs[2,1].plot(simulation2.t+tsim1,simulation2.V_D_d,label='V_D sim2')
+axs[2,1].plot(simulation2.t+tsim1,simulation2.Hse_D_d,label='Hse_D sim2')
+axs[2,1].plot(simulation2.t+tsim1,simulation2.Icr_D_d,label='Icr_D sim2')
+axs[2,1].plot(simulation2.t+tsim1,simulation2.Ise_D_d,label='Ise_D sim2')
+axs[2,1].plot(simulation1.t,simulation1.V_D_d,label='V_D sim1')
+axs[2,1].plot(simulation1.t,simulation1.Hse_D_d,label='Hse_D sim1')
+axs[2,1].plot(simulation1.t,simulation1.Icr_D_d,label='Icr_D sim1')
+axs[2,1].plot(simulation1.t,simulation1.Ise_D_d,label='Ise_D sim1')
+axs[2,1].set_title('VMI Usage')
+axs[2,1].axvline(x = t_end, linestyle = 'dotted',color = 'grey')

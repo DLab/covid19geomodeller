@@ -77,7 +77,7 @@ class SEIRHVD:
         
         Itot = I0/(Imi_det*pmi + Ias_det*pas + pcr + pse)
         """
-        self.gw=10
+        self.gw=20
 
         self.initdate = initdate 
         # Initial Conditions:        
@@ -284,6 +284,7 @@ class SEIRHVD:
         self.setequations()
         if not self.SimIC:
             self.setrelationalvalues()
+        print('Compartimental model State parameters changed')
 
 
     def setequations(self):
