@@ -434,59 +434,59 @@ class SEIRHVD:
         return(expit(-self.gw*(V-self.Vtot(t))))
 
     def setparams(self):
-        self.pE_Ias = 0.4# Transicion de Expuesto a Infectado asintomatico
+        self.pE_Ias = 0.4  # Transition from exposed to Asymptomatic Infected
         self.tE_Ias = 5.0
 
-        self.pE_Imi = 0.55#78 # Transicion de Expuesto a Infectado Mild
+        self.pE_Imi = 0.55 # Transition from exposed to  Mild Infected
         self.tE_Imi = 5.0
 
-        self.pE_Icr = 0.01666#8 # Transicion de Expuesto a Infectado critico
+        self.pE_Icr = 0.01666 # Transition from exposed to  Critical Infected
         self.tE_Icr = 3.0
 
-        self.pE_Ise = 0.03334#14 # Transicion de Expuesto a Infectado Severo
+        self.pE_Ise = 0.03334 ## Transition from exposed to  Serious Infected
         self.tE_Ise = 3.0
 
-        self.pIas_R = 1.0   # Transicion de Infectado asintomatico a Recuperado
+        self.pIas_R = 1.0   # Transition from Asymptomatic Infected to Recovered
         self.tIas_R = 10.0 
 
-        self.pImi_R = 1.0  # Transicion de Infectado mild a Recuperado
+        self.pImi_R = 1.0  # Transition from Mild Infected to Recovered
         self.tImi_R = 15.0
 
-        self.pIse_Hse = 1.0  # Transicion de Infectado serio a Hospitalizado (si no ha colapsado Htot)
+        self.pIse_Hse = 1.0 # Transition from Serious Infected to Serious Hospitalized (When Hospital capacity is not saturated)
         self.tIse_Hse = 3.0 
 
-        self.pIse_D = 1.0  # Transicion de Infectado serio a Hospitalizado (si no ha colapsado Htot)
+        self.pIse_D = 1.0  # Transition from Serious Infected to Death (When Hospital capacity is saturated)
         self.tIse_D = 3.0         
 
-        self.pIcr_V = 1.0 # Transicion de Hospitalizado critico a Ventilado (si no ha colapsado V)
+        self.pIcr_V = 1.0  # Transition from Critical Infected to Ventilator (When Ventilators capacity is not saturated)
         self.tIcr_V = 3.0 
 
-        self.pIcr_D = 1.0 # Transicion de Hospitalizado critico a Ventilado (si no ha colapsado V)
+        self.pIcr_D = 1.0  # Transition from Serious Infected to Death (When Ventilators capacity is saturated)
         self.tIcr_D = 3.0         
 
-        self.pHse_R = 0.97 # Transicion de Hospitalizado a Hospitalizado Critico (si no ha colapsado Htot)
+        self.pHse_R = 0.97 # Transition from Serious Hospitalized to Recovered
         self.tHse_R = 11.0
 
-        self.pHse_V = 0.03 # Transicion de Hospitalizado a VMI (si no ha colapsado VMI)
+        self.pHse_V = 0.03 # Transition from Serious Hospitalized to Ventilators (When Ventilators capacity is not saturated)
         self.tHse_V = 3.0
 
-        self.pHse_D = 0.03 # Transicion de Hospitalizado a Hospitalizado Critico (si no ha colapsado Htot)
+        self.pHse_D = 0.03 # Transition from Serious Hospitalized to Death (When Ventilators capacity is saturated)
         self.tHse_D = 3.0        
 
-        self.pV_Hout = 0.5 # Mejora de ventilado hospitalizado, transita a Hout
+        self.pV_Hout = 0.5  # Transition from Ventilators to Hospital Recovery (Hout) 
         self.tV_Hout = 15.0
 
-        self.pV_D = 0.5 # VMI to Death
+        self.pV_D = 0.5 # Transition from Ventilators to Death
         self.tV_D = 15.0
 
-        self.pHout_R = 1.0 # Mejora del paciente hospitalizado, Hout a R
+        self.pHout_R = 1.0 # Transition from Hospital Recovery (Hout) to Recovered
         self.tHout_R = 4.0
 
-        self.pD_B = 1.0 # Entierros
+        self.pD_B = 1.0 # Transition from Dead to buried
         self.tD_B = 1.0 
 
-        self.betaD = 0
-        self.eta = 0.0 # tasa de perdida de inmunidad (1/periodo)
+        self.betaD = 0 # Contagion by deads rate
+        self.eta = 0.0 # Immunity loss rate
 
 
         # ------------------- #
