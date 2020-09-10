@@ -14,6 +14,18 @@ from os import path
 """
 
 class ImportData():
+    """
+        DLab Import Data Library
+        input: 
+            - tstate: [string or string list] CUT por comuna o región
+            - initdate: [datetime object] Initial date
+        output:
+            - ImportData Object.
+
+        Usage Example: 
+        a = ImportData(tstate='13', initdate=datetime(2020,5,15))
+        a.importdata()
+    """    
     def __init__(self,tstate,initdate):
         self.tstate = tstate
         self.initdate = initdate
@@ -400,6 +412,100 @@ class ImportData():
         else:        
             return sochimi,sochimi_dates ,sochimi_tr,Hr, Hr_tot, Vr ,Vr_tot
 
+
+
+    # ------------------ #
+    #    Datos Sochimi   #
+    # ------------------ #
+    def importSOCHIMI2(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto48/SOCHIMI.csv'):
+        """
+        Import SOCHIMI data per state.
+        Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
+        input:
+            - tstate: región
+            - initdate: Fecha de inicio
+            - endpoint: Data endpoint
+        output:
+            - sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot, 
+             (data frame, fechas, dias desde inicio sim, Hospitalizados, capacidad hospitalizados, ventilados, capacidad ventilados) 
+        
+        Normal Usage:
+            sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot = importSOCHIMI(tstate = '13', initdate = datetime(2020,5,15))
+        """
+        print('Importing Sochimi Data 2') 
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")        
+        if type(tstate) == list:
+            tstate = tstate[0]
+        
+        sochimi = pd.read_csv(endpoint)
+
+        sochimi = sochimi.loc[sochimi['Codigo region'] == int(tstate)]
+
+        UCI = sochimi.loc[sochimi['Serie'] == 'Camas ocupadas intermedio'].iloc[:,4:].sum()
+        UCI_tot = sochimi.loc[sochimi['Serie'] == 'Camas totales intermedio'].iloc[:,4:].sum()
+        UTI = sochimi.loc[sochimi['Serie'] == 'Camas ocupadas intensivo'].iloc[:,4:].sum()
+        UTI_tot = sochimi.loc[sochimi['Serie'] == 'Camas totales intensivo'].iloc[:,4:].sum()
+        
+        VMI = sochimi.loc[sochimi['Serie'] == 'Vmi ocupados'].iloc[:,4:].sum()
+        VMI_tot = sochimi.loc[sochimi['Serie'] == 'Vmi totales'].iloc[:,4:].sum()
+
+        VMI_sospechoso = sochimi.loc[sochimi['Serie'] == 'Vmi covid19 sospechosos'].iloc[:,4:].sum()
+        VMI_confirmado = sochimi.loc[sochimi['Serie'] == 'Vmi covid19 confirmados'].iloc[:,4:].sum()
+
+        
+        sochimi_dates = [datetime.strptime( sochimi.columns[4:].tolist()[i],'%Y-%m-%d') for i in range(len(sochimi.columns[4:].tolist()))]        
+        index = np.where(np.array(sochimi_dates) >= initdate)[0][0] 
+
+        
+        UCI = list(UCI[index:])
+        UCI_tot = list(UCI_tot[index:])
+        UTI = list(UTI[index:])
+        UTI_tot = list(UTI_tot[index:])
+
+        VMI = list(VMI[index:])
+        VMI_tot = list(VMI_tot[index:])
+        VMI_sospechoso = list(VMI_sospechoso[index:])
+        VMI_confirmado = list(VMI_confirmado[index:])
+
+        sochimi_dates = list(sochimi_dates[index:])
+        sochimi_tr = [(sochimi_dates[i]-initdate).days for i in range(len(sochimi_dates))]
+        sochimi = sochimi[index:] 
+
+        Hr = np.array(UCI) #+ np.array(UTI)
+        Hr_tot = np.array(UCI_tot)# + np.array(UTI_tot)
+        
+               
+        if self:
+            self.UCI = UCI
+            self.UCI_tot = UCI_tot
+            self.UTI = UTI
+            self.UTI_tot = UTI_tot
+            self.VMI = VMI
+            self.VMI_tot = VMI_tot
+            self.VMI_sospechoso = VMI_sospechoso
+            self.VMI_confirmado = VMI_confirmado
+            self.sochimi_dates = sochimi_dates
+            self.sochimi_tr = sochimi_tr
+            self.sochimi = sochimi
+            self.Hr = Hr
+            self.Hr_tot = Hr_tot
+            self.Vr = VMI
+            self.Vr_tot = VMI_tot
+
+            return
+        else:        
+            return UCI, UCI_tot, UTI, UTI_tot, VMI, VMI_tot, VMI_sospechoso, VMI_confirmado, sochimi_dates, sochimi_tr, sochimi, Hr, Hr_tot
+
+
+
+
     # -------------------------------- #
     #    Datos Fallecidos acumulados   #
     # -------------------------------- #
@@ -448,6 +554,79 @@ class ImportData():
             return Br,Br_tr,Br_dates
 
     #self.importfallecidosacumulados = self.importAcumulatedDeaths
+
+    # -------------------------------- #
+    #    Datos Fallecidos acumulados   #
+    # -------------------------------- #
+    def importDeathsHospitalized(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv' ):     
+        """
+            Import Acumulated Deaths
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - Dr_hosp: Hospitalized deaths
+                - Dr_Nonhosp: Non Hospitalized deaths                
+                - Br_hosp: Hospitalized Accumulated deaths
+                - Br_Nonhosp: Non Hospitalized Accumulated deaths
+                - Br_hosp_tr: Days since initdate
+                - Dr_hosp_dates: Dates
+            Usage:
+                Dr_hosp, Dr_Nonhosp,Br_hosp, Br_Nonhosp, hosp_tr, hosp_dates =importAcumulatedDeathsHospitalized(tstate = '13',initdate = datetime(2020,5,15))
+        """
+        
+        print('Importing Hospitalized/NonHospitalized Deaths')
+
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")      
+
+
+        aux = pd.read_csv(endpoint)
+        aux = aux.loc[aux['Region'] == 'Metropolitana']
+        Dr_hosp = aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['2020-09-09']
+        Dr_Nonhosp = aux.loc[aux['Hospitalizacion'] == 'FALSO']['2020-09-09']
+        hosp_dates =  [datetime.strptime(aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['Fecha'].tolist()[i], '%Y-%m-%d') for i in range(len(Dr_hosp))]
+        
+        Br_hosp = Dr_hosp.cumsum()
+        Br_Nonhosp = Dr_Nonhosp.cumsum()
+
+        index = np.where(np.array(hosp_dates) >= initdate)[0][0]
+        
+        Dr_hosp = Br_hosp[index:]
+        Dr_Nonhosp = Br_Nonhosp[index:]
+        
+        Br_hosp = Br_hosp[index:]
+        Br_Nonhosp = Br_Nonhosp[index:]
+
+        hosp_dates = hosp_dates[index:]
+        hosp_tr = [(hosp_dates[i]-initdate).days for i in range(len(hosp_dates))]
+        
+        #V_F = [Br_Nonhosp.iloc[i]/Br_hosp.iloc[i] for i in range(len(Br_Nonhosp))]
+        
+      
+        if self:
+            self.Dr_hosp = Dr_hosp
+            self.Dr_Nonhosp = Dr_Nonhosp            
+            self.Br_hosp = Br_hosp
+            self.Br_Nonhosp = Br_Nonhosp
+
+            self.hosp_dates = hosp_dates
+            self.hosp_tr = hosp_tr
+            return
+        else:        
+            return Dr_hosp, Dr_Nonhosp,Br_hosp, Br_Nonhosp, hosp_tr, hosp_dates            
+
+
+
+    #self.importfallecidosacumulados = self.importAcumulatedDeaths
+
 
     # -------------------------------- #
     #            DEIS Deaths           #
@@ -760,9 +939,12 @@ class ImportData():
         self.importActiveInfected()
         self.importAcumulatedInfected()
         self.importDailyInfected()
-        self.importSOCHIMI()
+        #self.importSOCHIMI()
+        self.importSOCHIMI2()
         self.importAcumulatedDeaths()
         self.importActiveInfectedMinciencia()
+
+        self.importDeathsHospitalized()
         #self.importInfectedSubreport()
         #self.importpcrpop()        
         #self.importfallecidosexcesivos()        
@@ -783,6 +965,5 @@ class ImportData():
 #self.importinfectadosdiarios()
 #self.importinfectadosacumulados()        
 ##self.importSubreporte()        
-        
         
         
