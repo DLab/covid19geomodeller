@@ -3,6 +3,7 @@
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
+from scipy.special import expit
 
 """
 # ------------------------------------------------- #   
@@ -185,3 +186,13 @@ def alphafunct(rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
                     return(max_mob)   
                     
     return(alpha)
+
+
+
+def SeroPrevDynamics(t0,t1,dailyincrease = 1):
+    def chi(t):
+        return(dailyincrease*(expit(10*(t-t0)) - expit(10*(t-t1))))
+    
+    return chi
+
+

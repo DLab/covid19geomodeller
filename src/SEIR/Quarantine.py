@@ -73,7 +73,7 @@ class Quarantine():
                    if self.qp == 0:
                        return(self.max_mov)
                    elif t<self.fqt:
-                       return((self.max_mov-self.rem_mov)/2*(f(np.pi / qp * t - np.pi))+(self.max_mov+self.rem_mov)/2)
+                       return((self.max_mov-self.rem_mov)/2*(f(np.pi / self.qp * t - np.pi))+(self.max_mov+self.rem_mov)/2)
                    else:
                        return(self.max_mov)   
 
@@ -99,7 +99,7 @@ class Quarantine():
                    if self.qp == 0:
                        return(self.max_mov)
                    elif t<self.fqt:
-                       return((self.max_mov-self.rem_mov)/2*(f(np.pi / qp * t - np.pi))+(self.max_mov+self.rem_mov)/2)
+                       return((self.max_mov-self.rem_mov)/2*(f(np.pi / self.qp * t - np.pi))+(self.max_mov+self.rem_mov)/2)
                    else:
                        return(self.max_mov)   
                      

@@ -555,9 +555,9 @@ class ImportData():
 
     #self.importfallecidosacumulados = self.importAcumulatedDeaths
 
-    # -------------------------------- #
-    #    Datos Fallecidos acumulados   #
-    # -------------------------------- #
+    # ------------------------------------ #
+    #    Datos Fallecidos Hospitalizados   #
+    # ------------------------------------ #
     def importDeathsHospitalized(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv' ):     
         """
             Import Acumulated Deaths
@@ -586,12 +586,40 @@ class ImportData():
                 raise Exception("State code missing")
             if not initdate:
                 raise Exception("Initial date missing")      
+        
+        endpoint = 'http://192.168.2.223:5006/getDeathsOriginAllStates' 
+        aux = pd.DataFrame( requests.get(endpoint).json()['data'])
+       
+        if type(tstate) == list:
+            aux = aux[tstate]
+        else: 
+            aux = aux[tstate]
+
+        
+        Dr_hosp = aux.loc['fromHospital']
+        Dr_Nonhosp = aux.loc['notFromHospital']
+        hosp_dates = [datetime.strptime(aux.loc['dates'][i][:10], '%Y-%m-%d') for i in range(len(Dr_Nonhosp))]
+        Br_hosp = np.cumsum(Dr_hosp)
+        Br_Nonhosp = np.cumsum(Dr_Nonhosp)
+        
+        
+        index = np.where(np.array(hosp_dates) >= initdate)[0][0]
+        
+        Dr_hosp = Br_hosp[index:]
+        Dr_Nonhosp = Br_Nonhosp[index:]
+        
+        Br_hosp = Br_hosp[index:]
+        Br_Nonhosp = Br_Nonhosp[index:]
+
+        hosp_dates = hosp_dates[index:]
+        hosp_tr = [(hosp_dates[i]-initdate).days for i in range(len(hosp_dates))]
 
 
+        endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv'
         aux = pd.read_csv(endpoint)
         aux = aux.loc[aux['Region'] == 'Metropolitana']
-        Dr_hosp = aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['2020-09-09']
-        Dr_Nonhosp = aux.loc[aux['Hospitalizacion'] == 'FALSO']['2020-09-09']
+        Dr_hosp = aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['2020-09-07']
+        Dr_Nonhosp = aux.loc[aux['Hospitalizacion'] == 'FALSO']['2020-09-07']
         hosp_dates =  [datetime.strptime(aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['Fecha'].tolist()[i], '%Y-%m-%d') for i in range(len(Dr_hosp))]
         
         Br_hosp = Dr_hosp.cumsum()
