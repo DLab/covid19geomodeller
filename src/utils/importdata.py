@@ -448,10 +448,10 @@ class ImportData():
 
         sochimi = sochimi.loc[sochimi['Codigo region'] == int(tstate)]
 
-        UCI = sochimi.loc[sochimi['Serie'] == 'Camas ocupadas intermedio'].iloc[:,4:].sum()
-        UCI_tot = sochimi.loc[sochimi['Serie'] == 'Camas totales intermedio'].iloc[:,4:].sum()
-        UTI = sochimi.loc[sochimi['Serie'] == 'Camas ocupadas intensivo'].iloc[:,4:].sum()
-        UTI_tot = sochimi.loc[sochimi['Serie'] == 'Camas totales intensivo'].iloc[:,4:].sum()
+        UTI = sochimi.loc[sochimi['Serie'] == 'Camas ocupadas intermedio'].iloc[:,4:].sum()
+        UTI_tot = sochimi.loc[sochimi['Serie'] == 'Camas totales intermedio'].iloc[:,4:].sum()
+        UCI = sochimi.loc[sochimi['Serie'] == 'Camas ocupadas intensivo'].iloc[:,4:].sum()
+        UCI_tot = sochimi.loc[sochimi['Serie'] == 'Camas totales intensivo'].iloc[:,4:].sum()
         
         VMI = sochimi.loc[sochimi['Serie'] == 'Vmi ocupados'].iloc[:,4:].sum()
         VMI_tot = sochimi.loc[sochimi['Serie'] == 'Vmi totales'].iloc[:,4:].sum()
@@ -605,8 +605,8 @@ class ImportData():
         
         index = np.where(np.array(hosp_dates) >= initdate)[0][0]
         
-        Dr_hosp = Br_hosp[index:]
-        Dr_Nonhosp = Br_Nonhosp[index:]
+        Dr_hosp = Dr_hosp[index:]
+        Dr_Nonhosp = Dr_Nonhosp[index:]
         
         Br_hosp = Br_hosp[index:]
         Br_Nonhosp = Br_Nonhosp[index:]
