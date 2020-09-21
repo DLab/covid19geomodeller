@@ -47,12 +47,13 @@ class ImportData():
         """
         print('Importing Population') 
 
-        aux = pd.read_csv(endpoint)
         if self:
             tstate = self.tstate
         else:
             if not tstate:
                 raise Exception("State code missing")
+
+        aux = pd.read_csv(endpoint)            
         if type(tstate) == list:
             population = 0
             for i in tstate:
@@ -505,7 +506,6 @@ class ImportData():
 
 
 
-
     # -------------------------------- #
     #    Datos Fallecidos acumulados   #
     # -------------------------------- #
@@ -591,7 +591,7 @@ class ImportData():
         aux = pd.DataFrame( requests.get(endpoint).json()['data'])
        
         if type(tstate) == list:
-            aux = aux[tstate]
+            aux = aux[tstate[0]]
         else: 
             aux = aux[tstate]
 
