@@ -189,10 +189,16 @@ def alphafunct(rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
 
 
 
-def SeroPrevDynamics(t0,t1,dailyincrease = 1):
+def SeroPrevDynamics(t0,t1,t2,dailyincrease = 1,form='Square'):
+    """
+    Sero Prevalence Dynamics Function generator
+    """
+    def f(t):
+        return(np.poly1d(np.polyfit([t0,t1],[0,dailyincrease],1))(t))
+
     def chi(t):
-        return(dailyincrease*(expit(10*(t-t0)) - expit(10*(t-t1))))
-    
+        return f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + dailyincrease*(expit(10*(t-t1)) - expit(10*(t-t2)))
+      
     return chi
 
 

@@ -1184,10 +1184,3 @@ class SEIRHVD:
         return(sol)
 
 
-
-def SeroPrevDynamics(t0,t1,dailyincrease = 1):
-    def chi(t):
-        return(dailyincrease*(expit(10*(t-t0)) - expit(10*(t-t1))))
-    
-    return chi
-
