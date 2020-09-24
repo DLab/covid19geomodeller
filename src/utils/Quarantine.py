@@ -189,15 +189,27 @@ def alphafunct(rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
 
 
 
-def SeroPrevDynamics(t0,t1,t2,dailyincrease = 1,form='Square'):
+def SeroPrevDynamics(t0,t1,t2,dailyincrease = 1,form='sig',df = 10):
     """
     Sero Prevalence Dynamics Function generator
     """
-    def f(t):
-        return(np.poly1d(np.polyfit([t0,t1],[0,dailyincrease],1))(t))
+    if form == 'line':
+        a = np.polyfit([t0,t1],[0,dailyincrease],1)
+        def f(t):
+            return(np.poly1d(a)(t))
 
-    def chi(t):
-        return f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + dailyincrease*(expit(10*(t-t1)) - expit(10*(t-t2)))
+        def chi(t):
+            return f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + dailyincrease*(expit(10*(t-t1)) - expit(10*(t-t2)))
+    elif form == 'quadratic':
+        a = np.polyfit([t0,t1,2*t0-t1],[0,dailyincrease,dailyincrease],2)
+        def f(t):
+            return(np.poly1d(a)(t))
+
+        def chi(t):
+            return f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + dailyincrease*(expit(10*(t-t1)) - expit(10*(t-t2)))            
+    elif form == 'sig'or form == 'sigmoid':
+        def chi(t):
+            return dailyincrease*(expit((t-t0-4)*8/(t1-t0)) - expit(df*(t-t2)))
       
     return chi
 
