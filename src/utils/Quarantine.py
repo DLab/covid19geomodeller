@@ -214,3 +214,8 @@ def SeroPrevDynamics(t0,t1,t2,dailyincrease = 1,form='sig',df = 10):
     return chi
 
 
+
+def functionSum(a,b):
+    def aux(t):
+        return a(t)+b(t)
+    return aux

@@ -329,7 +329,7 @@ class SEIRHVD:
  
         # 2) Daily dE_as/dt
         self.dE_d = lambda t,S,E,E_d,Ias,Imi,Ise,Icr: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k*(Ias+Imi+Ise+Icr)) - E_d
-       
+        
         # 3) Accumulated dE_as/dt
         self.dE_ac = lambda t,S,E,Ias,Imi,Ise,Icr: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k*(Ias+Imi+Ise+Icr))
 
