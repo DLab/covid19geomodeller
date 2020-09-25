@@ -36,7 +36,63 @@ class ImportData():
     # -------------------------------- #
     #            Poblacion             #
     # -------------------------------- #
-    def importPopulation(self=None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv',tstate = ''):     
+
+    def importPopulation(self=None,endpoint = '',tstate = ''):     
+        """
+            Import Population
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - endpoint [string](opcional)
+            output:
+                - population [int] 
+            
+        """
+        print('Importing Population') 
+
+        if self:
+            tstate = self.tstate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+
+        endpointComunas = 'http://192.168.2.223:5006/getComunas'
+        endpointRegiones = 'http://192.168.2.223:5006/getStates'
+        endpointSS = 'http://192.168.2.223:5006/getHealthServices'
+        
+        county = pd.read_json(endpointComunas)
+        #regiones = pd.read_json(endpointRegiones)
+        #ServicioSalud =  pd.read_json(endpointSS)
+
+        if type(tstate) == list:
+            population = 0
+            for i in tstate:
+                if len(i)==2:                    
+                    population += int(county.loc[county['state'] == int(tstate)]['total_pop'].sum())
+                    population_male += int(county.loc[county['state'] == int(tstate)]['male_pop'].sum())
+                    population_female += int(county.loc[county['state'] == int(tstate)]['female_pop'].sum())
+                if len(i)>2:
+                    population += int(county.loc[county['county'] == int(tstate)]['total_pop'].sum())
+                    population_male += int(county.loc[county['county'] == int(tstate)]['male_pop'].sum())
+                    population_female += int(county.loc[county['county'] == int(tstate)]['female_pop'].sum())         
+        else:
+            if len(tstate)==2:
+                population = int(county.loc[county['state'] == int(tstate)]['total_pop'].sum())
+                population_male = int(county.loc[county['state'] == int(tstate)]['male_pop'].sum())
+                population_female = int(county.loc[county['state'] == int(tstate)]['female_pop'].sum())
+            if len(tstate)>2:
+                population = int(county.loc[county['county'] == int(tstate)]['total_pop'].sum())
+                population_male += int(county.loc[county['county'] == int(tstate)]['male_pop'].sum())
+                population_female += int(county.loc[county['county'] == int(tstate)]['female_pop'].sum())                        
+               
+        if self:
+            self.population = population
+            self.population_male = population_male
+            self.population_female = population_female
+            return
+        else:        
+            return population
+
+    def importPopulationMinCiencia(self=None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv',tstate = ''):     
         """
             Import Population
             input: 
@@ -73,6 +129,7 @@ class ImportData():
         else:        
             return population
 
+
     def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = "http://192.168.2.223:5006/getActiveNewCasesByComuna?comuna="):
         """
             Import Active infected
@@ -102,7 +159,7 @@ class ImportData():
         #   Infectados Activos   #
         # ---------------------- #
 
-        cutlistendpoint = 'http://192.168.2.220:8080/covid19/selectComunas' 
+        cutlistendpoint = 'http://192.168.2.220:8080/covid19/selectComunas'
         cutlist  = pd.read_json(cutlistendpoint)[['cut','idState']]        
 
         actives = []
@@ -656,9 +713,9 @@ class ImportData():
     #self.importfallecidosacumulados = self.importAcumulatedDeaths
 
 
-    # -------------------------------- #
-    #            DEIS Deaths           #
-    # -------------------------------- #
+    # ----------------------------------------- #
+    #          DEIS Deaths (Not ready)          #
+    # ----------------------------------------- #
     def importDeathsDEIS(self=None,tstate = '',initdate = None):     
         """
             Import Acumulated Deaths
@@ -876,7 +933,7 @@ class ImportData():
     # ----------------------------- #
     #    Import Adjacency Matrix    #
     # ----------------------------- #
-    def importAdjacencyRegional(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getRegionalAdjacencyMatrix', N = 0):
+    def importAdjacencyRegional(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getRegionalAdjacencyMatrix', N = 1):
         """
         Import adjacency data 
         N is the adjacency order, with 0 meaning the immediate neighbors, 1 the neighbor's neighbors, and so on.
