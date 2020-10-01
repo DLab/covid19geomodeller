@@ -112,7 +112,7 @@ class SEIRHVD:
             Vcmodel = np.poly1d(np.polyfit(IC.sochimi_tr, IC.Vr_tot, 4))
             tsat = IC.sochimi_tr[-1]
             Vmax = np.mean(IC.Vr_tot[-10:])
-            self.Vtot=lambda t: Vcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Vmax
+            self.Vtot=lambda t: Vcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Vmax #+ 1000
 
             # Set Initial values
             self.H0 = IC.Hr[0]
@@ -1182,5 +1182,9 @@ class SEIRHVD:
         self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
 
         return(sol)
+
+
+
+
 
 

@@ -40,11 +40,21 @@ class ImportData():
     def importPopulation(self=None,endpoint = '',tstate = ''):     
         """
             Import Population
+            This Function imports the selected area population. 
+
             input: 
                 - tstate: [string or string list] CUT por comuna o región
                 - endpoint [string](opcional)
             output:
                 - population [int] 
+
+            object variables:
+                self.population
+                self.population_male
+                self.population_female
+
+            Example usage as function:
+            population = importPopulation(tstate = '13101',initdate=datetime(2020,5,15))                
             
         """
         print('Importing Population') 
@@ -65,15 +75,17 @@ class ImportData():
 
         if type(tstate) == list:
             population = 0
+            population_male = 0
+            population_female = 0
             for i in tstate:
                 if len(i)==2:                    
-                    population += int(county.loc[county['state'] == int(tstate)]['total_pop'].sum())
-                    population_male += int(county.loc[county['state'] == int(tstate)]['male_pop'].sum())
-                    population_female += int(county.loc[county['state'] == int(tstate)]['female_pop'].sum())
+                    population += int(county.loc[county['state'] == int(i)]['total_pop'].sum())
+                    population_male += int(county.loc[county['state'] == int(i)]['male_pop'].sum())
+                    population_female += int(county.loc[county['state'] == int(i)]['female_pop'].sum())
                 if len(i)>2:
-                    population += int(county.loc[county['county'] == int(tstate)]['total_pop'].sum())
-                    population_male += int(county.loc[county['county'] == int(tstate)]['male_pop'].sum())
-                    population_female += int(county.loc[county['county'] == int(tstate)]['female_pop'].sum())         
+                    population += int(county.loc[county['county'] == int(i)]['total_pop'].sum())
+                    population_male += int(county.loc[county['county'] == int(i)]['male_pop'].sum())
+                    population_female += int(county.loc[county['county'] == int(i)]['female_pop'].sum())         
         else:
             if len(tstate)==2:
                 population = int(county.loc[county['state'] == int(tstate)]['total_pop'].sum())
@@ -95,12 +107,21 @@ class ImportData():
     def importPopulationMinCiencia(self=None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv',tstate = ''):     
         """
             Import Population
+            This Function imports the selected area population from the Minciencia Github Repository 
+
             input: 
                 - tstate: [string or string list] CUT por comuna o región
                 - endpoint [string](opcional)
             output:
                 - population [int] 
-        """
+
+            Variables when used as Object:
+                self.population
+
+            Usage as function:
+            population = importPopulationMinCiencia(tstate = '13101',initdate=datetime(2020,5,15))
+
+        """            
         print('Importing Population') 
 
         if self:
@@ -129,10 +150,15 @@ class ImportData():
         else:        
             return population
 
+    # -------------------------------- #
+    #          Active Infected         #
+    # -------------------------------- #
 
-    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = "http://192.168.2.223:5006/getActiveNewCasesByComuna?comuna="):
+    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = 'http://192.168.2.223:5006/getActiveCasesAllComunas'):
         """
             Import Active infected
+            This function imports the active infected calculated as the infected that are within their 14 days since exposure.
+            
             input: 
                 - tstate: [string or string list] CUT por comuna o región
                 - endpoint (opcional):
@@ -142,7 +168,12 @@ class ImportData():
                 - tr: days from simulation beginning
                 - Ir_dates: dates [datetime object]
 
-            usage:
+            Variables when used as Object:
+                self.Ir
+                self.tr
+                self.Ir_dates
+
+            Usage as function example:
                 Ir,tr,Ir_dates = importActiveInfected(tstate = '13101',initdate=datetime(2020,5,15))
                 
         """ 
@@ -158,47 +189,27 @@ class ImportData():
         # ---------------------- # 
         #   Infectados Activos   #
         # ---------------------- #
+        data = pd.DataFrame(requests.get(endpoint).json()['data'])
 
-        cutlistendpoint = 'http://192.168.2.220:8080/covid19/selectComunas'
-        cutlist  = pd.read_json(cutlistendpoint)[['cut','idState']]        
-
-        actives = []
-        mydict = None
         if type(tstate) == list:
-            for i in tstate:
-                if len(i)<=2:
-                    aux = cutlist[cutlist['idState']==int(i)]
-                    for j in aux['cut']:    
-                        auxendpoint = endpoint+str(j).zfill(5)
-                        r = requests.get(auxendpoint) 
-                        mydict = r.json()
-                        actives.append(mydict['actives'])
-                        #data=pd.DataFrame(mydict)
-                    #Ir = (np.array(actives)).sum(axis=0)
-                elif len(i)>2:
-                    auxendpoint = endpoint+i
-                    r = requests.get(auxendpoint) 
-                    mydict = r.json()
-                    actives.append(mydict['actives'])
-                    #Ir = np.array(mydict['actives'])
-                Ir = (np.array(actives)).sum(axis=0)
+            counties = [i for i in tstate if len(i)>2 ]
+            states = [i for i in tstate if len(i)==2 ]            
+            aux = []
+            for i in states:
+                aux.append(data.filter(regex='^'+i,axis=1))
+            
+            aux.append(data[counties])
+            Ir = np.array(pd.concat(aux, axis=1).sum(axis=1))
+        
         else:
-            if len(tstate)<=2:
-                aux = cutlist[cutlist['idState']==int(tstate)]
-                for j in aux['cut']:
-                    auxendpoint = endpoint+str(j).zfill(5)
-                    r = requests.get(auxendpoint) 
-                    mydict = r.json()
-                    actives.append(mydict['actives'])
-                    
-                Ir = (np.array(actives)).sum(axis=0)
-            elif len(tstate)>2:
-                auxendpoint = endpoint+tstate
-                r = requests.get(auxendpoint) 
-                mydict = r.json()
-                Ir = np.array(mydict['actives'])
+            if len(tstate) == 2:
+                Ir = np.array(data.filter(regex='^'+tstate,axis=1).sum(axis=1))
+            elif len(tstate) > 2:
+                Ir = np.array(data[tstate])
 
-        Ir_dates = [datetime.strptime(mydict['dates'][i][:10],'%Y-%m-%d') for i in range(len(mydict['dates']))]
+
+        dates = list(requests.get(endpoint).json()['dates'])
+        Ir_dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]
         index = np.where(np.array(Ir_dates) >= initdate)[0][0]     
         Ir=Ir[index:]
         Ir_dates=Ir_dates[index:]
@@ -212,12 +223,138 @@ class ImportData():
         else:        
             return Ir,tr,Ir_dates
 
-    #self.importinfectadosactivos = self.importActiveInfected
+    #def importActiveInfectedMinciencia(self=None,tstate = '',initdate=None,endpoint = ""):
+    # ---------------------------------------- #
+    #    Datos Infectados activos Minciencia   #
+    # ---------------------------------------- #
+    def importActiveInfectedMinciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv' ):     
+        """
+            Import Active infected Minciencia
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - I_minciencia_r: Real acumulated deaths
+                - I_minciencia_r_tr: days from simulation first day
+                - I_minciencia_r_dates: data dates
+        """        
+        print('Importing Active Infected by Minciencia')
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")  
+
+        aux = pd.read_csv(endpoint)
+
+        if type(tstate) == list:            
+            I_minciencia_r = aux.loc[aux['Codigo region'].isin(tstate)].iloc[:,5:-1]            
+            I_minciencia_r = I_minciencia_r.append(aux.loc[aux['Codigo comuna'].isin(tstate)].iloc[:,5:-1])
+            I_minciencia_r = I_minciencia_r.sum()
+        else:
+            I_minciencia_r = aux.loc[aux['Codigo region']==int(tstate)].iloc[:,5:-1]
+            I_minciencia_r = I_minciencia_r.append(aux.loc[aux['Codigo comuna']==int(tstate)].iloc[:,5:-1])
+            I_minciencia_r = I_minciencia_r.sum()
+
+
+        #self.I_minciencia_r = aux.loc[aux['Codigo region']==int(self.tstate[:2])].iloc[:,5:].sum()
+        
+
+        I_minciencia_r_dates = [datetime.strptime(I_minciencia_r.index[i],'%Y-%m-%d') for i in range(len(I_minciencia_r))]
+        index = np.where(np.array(I_minciencia_r_dates) >= initdate)[0][0] 
+        I_minciencia_r = I_minciencia_r[index:]
+        I_minciencia_r_dates = I_minciencia_r_dates[index:]
+        I_minciencia_r_tr = [(I_minciencia_r_dates[i]-initdate).days for i in range(len(I_minciencia_r))]
+        
+        
+        if self:
+            self.I_minciencia_r = I_minciencia_r
+            self.I_minciencia_r_dates = I_minciencia_r_dates
+            self.I_minciencia_r_tr = I_minciencia_r_tr
+            return
+        else:        
+            return I_minciencia_r, I_minciencia_r_tr, I_minciencia_r_dates 
+
 
     # -------------------------------- #
-    #    Datos Infectados acumulados   #
+    #      Accumulated Infected        #
     # -------------------------------- #
-    def importAcumulatedInfected(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv'):     
+    def importAccumulatedInfected(self=None,tstate = '',initdate = None, endpoint = ''):     
+        """
+            Import acumulated infected
+            This Function imports the selected area accumulated infected from CyV Endpoint
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (opcional): 
+            output: 
+                - I_ac_r: Real Acumulated infected
+                - I_ac_r_tr: days from simulation first day
+                - I_ac_r_dates: data dates
+
+            Variables when used as Object:
+                self.I_ac_r
+                self.I_ac_r_tr
+                self.I_ac_r_dates
+
+            Usage as function:
+                I_ac_r, I_ac_r_tr,I_ac_r_dates= importAccumulatedInfected(tstate = '13101',initdate=datetime(2020,5,15))
+
+                
+        """
+        print('Importing Accumulated Infected') 
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
+        
+        
+        endPointTotal = 'http://192.168.2.223:5006/getTotalCasesAllComunas'
+        data = pd.DataFrame(requests.get(endPointTotal).json()['data'])
+
+
+        if type(tstate) == list:
+            counties = [i for i in tstate if len(i)>2 ]
+            states = [i for i in tstate if len(i)==2 ]            
+            aux = []
+            for i in states:
+                aux.append(data.filter(regex='^'+i,axis=1))
+            
+            aux.append(data[counties])
+            I_ac_r = np.array(pd.concat(aux, axis=1).sum(axis=1))
+        
+        else:
+            if len(tstate) == 2:
+                I_ac_r = np.array(data.filter(regex='^'+tstate,axis=1).sum(axis=1))
+            elif len(tstate) > 2:
+                I_ac_r = np.array(data[tstate])
+
+        # Get and filter by dates
+        dates = pd.DataFrame(requests.get(endPointTotal).json()['dates'])[0]
+        I_ac_r_dates = [datetime.strptime(i[:10],'%Y-%m-%d') for i in dates]        
+        index = np.where(np.array(I_ac_r_dates) >= initdate)[0][0] 
+        I_ac_r = I_ac_r[index:]
+        I_ac_r_dates = I_ac_r_dates[index:]
+        I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]        
+               
+        if self:
+            self.I_ac_r = I_ac_r
+            self.I_ac_r_dates = I_ac_r_dates
+            self.I_ac_r_tr = I_ac_r_tr
+            return
+        else:        
+            return I_ac_r,I_ac_r_tr,I_ac_r_dates
+
+
+    def importAccumulatedInfectedMinCiencia(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv'):     
         """
             Import acumulated infected
             input: 
@@ -263,9 +400,6 @@ class ImportData():
             return
         else:        
             return I_ac_r,I_ac_r_tr,I_ac_r_dates
-
-    #self.importinfectadosacumulados = self.importAcumulatedInfected
-
 
     # -------------------------------- #
     #      Daily infected Smoothed     #
@@ -800,68 +934,38 @@ class ImportData():
         else:        
             return D_r_confirmed,D_r_suspected,B_r_confirmed,B_r_suspected,D_r_dates,D_r_tr
 
-    # ---------------------------------------- #
-    #    Datos Infectados activos Minciencia   #
-    # ---------------------------------------- #
-    def importActiveInfectedMinciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv' ):     
-        """
-            Import Active infected Minciencia
-            input: 
-                - tstate: [string or string list] CUT por comuna o región
-                - initdate: datetime object with the initial date
-                - endpoint (optional): 
-            output: 
-                - I_minciencia_r: Real acumulated deaths
-                - I_minciencia_r_tr: days from simulation first day
-                - I_minciencia_r_dates: data dates
-        """        
-        print('Importing Active Infected by Minciencia')
-        if self:
-            tstate = self.tstate
-            initdate = self.initdate
-        else:
-            if not tstate:
-                raise Exception("State code missing")
-            if not initdate:
-                raise Exception("Initial date missing")  
-
-        aux = pd.read_csv(endpoint)
-
-        if type(tstate) == list:            
-            I_minciencia_r = aux.loc[aux['Codigo region'].isin(tstate)].iloc[:,5:-1]            
-            I_minciencia_r = I_minciencia_r.append(aux.loc[aux['Codigo comuna'].isin(tstate)].iloc[:,5:-1])
-            I_minciencia_r = I_minciencia_r.sum()
-        else:
-            I_minciencia_r = aux.loc[aux['Codigo region']==int(tstate)].iloc[:,5:-1]
-            I_minciencia_r = I_minciencia_r.append(aux.loc[aux['Codigo comuna']==int(tstate)].iloc[:,5:-1])
-            I_minciencia_r = I_minciencia_r.sum()
-
-
-        #self.I_minciencia_r = aux.loc[aux['Codigo region']==int(self.tstate[:2])].iloc[:,5:].sum()
-        
-
-        I_minciencia_r_dates = [datetime.strptime(I_minciencia_r.index[i],'%Y-%m-%d') for i in range(len(I_minciencia_r))]
-        index = np.where(np.array(I_minciencia_r_dates) >= initdate)[0][0] 
-        I_minciencia_r = I_minciencia_r[index:]
-        I_minciencia_r_dates = I_minciencia_r_dates[index:]
-        I_minciencia_r_tr = [(I_minciencia_r_dates[i]-initdate).days for i in range(len(I_minciencia_r))]
-        
-        
-        if self:
-            self.I_minciencia_r = I_minciencia_r
-            self.I_minciencia_r_dates = I_minciencia_r_dates
-            self.I_minciencia_r_tr = I_minciencia_r_tr
-            return
-        else:        
-            return I_minciencia_r, I_minciencia_r_tr, I_minciencia_r_dates 
 
     #self.importinfectadosactivosminciencia = self.importActiveInfectedMinciencia
 
     # ---------------------------------------- #
     #       Datos Subreporte de Infectados     #
     # ---------------------------------------- #
-    def importInfectedSubreport(self = None,tstate = '', initdate = None):
-        print('Importing Subreported Infeted')
+    def importInfectedSubreport(self = None,tstate = '', initdate = None,endpoint = ''):
+        """
+            Import calculated active infected subreport 
+            This Function imports the  calculated active infected subreport by the given region. 
+            When working with counties, we'll assume that the subreport is homogeneous for the whole region. 
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint [deprecated]: 
+            output: 
+                - I_ac_r: Real Acumulated infected
+                - I_ac_r_tr: days from simulation first day
+                - I_ac_r_dates: data dates
+
+            Variables when used as Object:
+                self.I_ac_r
+                self.I_ac_r_tr
+                self.I_ac_r_dates
+
+            Usage as function:
+                I_ac_r, I_ac_r_tr,I_ac_r_dates= importAccumulatedInfected(tstate = '13101',initdate=datetime(2020,5,15))
+
+                
+        """
+        
+        print('Importing Subreported Infeted')        
         if self:
             tstate = self.tstate
             initdate = self.initdate
@@ -870,6 +974,49 @@ class ImportData():
                 raise Exception("State code missing")
             if not initdate:
                 raise Exception("Initial date missing")          
+
+        # Import Active Infected Data
+        Ir_endpoint = 'http://192.168.2.223:5006/getActiveCasesAllComunas'
+        Ir = pd.DataFrame(requests.get(Ir_endpoint).json()['data'])
+        
+
+        # Import Subreport proportion data
+        # This is only calculated for states and then for counties 
+        endpoint = 'http://192.168.2.223:5006/getActiveCasesUnderreportByState'
+        SR_data = pd.DataFrame(requests.get(endpoint).json()['data'])
+
+        if type(tstate) == list:            
+            states = [i for i in tstate if len(i)==2 ]
+            
+            # Adding counties' states
+            counties = [i for i in tstate if len(i)>2 ]
+            
+            for i in counties:
+                if i[:2] not in states:
+                    states.append(i[:2])
+            
+            aux = []
+            for i in tstate:
+                if len(i)>2:
+                    aux_estimate = [Ir[i][j]*SR_data[i[:2]].loc['estimate'][j] for j in range(len(SR_data[i[:2]].loc['estimate']))]
+                    aux_lower
+                    aux_upper
+
+                aux.append()
+            for i in states:
+                aux.append(data.filter(regex='^'+i,axis=1))
+            
+            aux.append(data[counties])
+            I_ac_r = pd.concat(aux, axis=1).sum(axis=1)
+        
+        else:
+            if len(tstate) == 2:
+                I_ac_r = data.filter(regex='^'+tstate,axis=1)
+            elif len(tstate) > 2:
+                I_ac_r = data[tstate]
+
+        #estimate = data[
+
         path = "../Data/subreporte.csv"
         subreporte = pd.read_csv(path)
         subreporte = subreporte.drop(columns = ['Unnamed: 0'])
@@ -879,7 +1026,60 @@ class ImportData():
         subreporte = subreporte.iloc[index:]
         subreporte_date = subreporte_date[index:]
         subreporte_tr = [(subreporte_date[i]-initdate).days for i in range(len(subreporte))]
+
+        # Get and filter by dates
+        dates = list(requests.get(endpoint).json()['dates'])
+        SR_dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]        
+        index = np.where(np.array(Ir_dates) >= initdate)[0][0]
+        SR_dates=SR_dates[index:]
+        SR_tr = [(SR_dates[i]-initdate).days for i in range(len(SR_dates))]        
+
+        SR=SR[index:]
         
+        
+
+
+        # Import Active infected and calculate Real Active Infected: 
+        cutlistendpoint = 'http://192.168.2.220:8080/covid19/selectComunas'
+        cutlist  = pd.read_json(cutlistendpoint)[['cut','idState']]        
+
+        actives = []
+        mydict = None
+        if type(tstate) == list:
+            for i in tstate:
+                if len(i)<=2:
+                    aux = cutlist[cutlist['idState']==int(i)]
+                    for j in aux['cut']:    
+                        auxendpoint = endpoint+str(j).zfill(5)
+                        r = requests.get(auxendpoint) 
+                        mydict = r.json()
+                        actives.append(mydict['actives'])
+                        #data=pd.DataFrame(mydict)
+                    #Ir = (np.array(actives)).sum(axis=0)
+                elif len(i)>2:
+                    auxendpoint = endpoint+i
+                    r = requests.get(auxendpoint) 
+                    mydict = r.json()
+                    actives.append(mydict['actives'])
+                    #Ir = np.array(mydict['actives'])
+                Ir = (np.array(actives)).sum(axis=0)
+        else:
+            if len(tstate)<=2:
+                aux = cutlist[cutlist['idState']==int(tstate)]
+                for j in aux['cut']:
+                    auxendpoint = endpoint+str(j).zfill(5)
+                    r = requests.get(auxendpoint) 
+                    mydict = r.json()
+                    actives.append(mydict['actives'])
+                    
+                Ir = (np.array(actives)).sum(axis=0)
+            elif len(tstate)>2:
+                auxendpoint = endpoint+tstate
+                r = requests.get(auxendpoint) 
+                mydict = r.json()
+                Ir = np.array(mydict['actives'])
+
+
         if self:
             self.subreporte = subreporte
             self.subreporte_estimate = np.array(subreporte['estimate'])
@@ -1020,9 +1220,22 @@ class ImportData():
 
     def importdata(self):
         print('Importing General Data')
-        self.importPopulation()
-        self.importActiveInfected()
-        self.importAcumulatedInfected()
+        try:
+            self.importPopulation()
+        except:
+            print('Dlab Endpoint Error')
+            self.importPopulationMinCiencia()
+        try:
+            self.importActiveInfected()
+        except:
+            print('Dlab Endpoint Error')
+            self.importActiveInfectedMinciencia()
+        try:
+            self.importAccumulatedInfected()
+        except:
+            print('Dlab Endpoint Error')            
+            self.importAccumulatedInfectedMinCiencia()
+
         self.importDailyInfected()
         #self.importSOCHIMI()
         self.importSOCHIMI2()
@@ -1052,3 +1265,7 @@ class ImportData():
 ##self.importSubreporte()        
         
         
+
+
+
+
