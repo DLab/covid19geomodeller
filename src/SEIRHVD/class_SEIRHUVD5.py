@@ -443,6 +443,32 @@ class SEIRHVD:
         self.dV_D_ac   = lambda t,V: self.pV_D/self.tV_D*V 
 
 
+
+        # ---------------------------------- #
+        #        Hospital beds Necesity      #
+        # ---------------------------------- #
+
+        # 37) dV_need/dt: Ventilator Necesity
+        self.dV_need=lambda t,Icr,H_need,V_need: self.pIcr_V/self.tIcr_V*Icr + self.pHse_V/self.tHse_V*H_need \
+            -  self.pV_Hout/self.tV_Hout*V_need - self.pV_D/self.tV_D*V_need
+
+
+        # 38) dHse/dt: Serious Infected Hospitalized
+        self.dHse_need=lambda t,Ise,Hse_need,V: self.pIse_Hse/self.tIse_Hse*Ise - self.pHse_V/self.tHse_V*Hse_need \
+             - self.pHse_R/self.tHse_R*Hse_need
+            
+
+        # 39) dHout/dt: Hospitalized Recovering after VMI
+        self.dHout_need=lambda t,Hout_need,V_need: self.pV_Hout/self.tV_Hout*V_need-self.pHout_R/self.tHout_R*Hout_need
+            
+        # 38) dH_need/dt: Hospital beds need
+        #self.dH_need=lambda t,Ise,H_need,Hout,V_need: self.pIse_Hse/self.tIse_Hse*Ise - self.pHse_V/self.tHse_V*H_need \
+        #      - self.pHse_R/self.tHse_R*H_need + self.pV_Hout/self.tV_Hout*V_need-self.pHout_R/self.tHout_R*Hout                 
+
+
+
+
+
     # UCI and UTI beds saturation function
     def h_sat(self,Hse,Hout,t):
         return(expit(-self.gw*(Hse+Hout-self.Htot(t))))
@@ -714,7 +740,9 @@ class SEIRHVD:
             Hse_D_ac0 = self.Hse_D_ac
             V_D_ac0 = self.V_D_ac
 
-
+            V_need0=self.V
+            Hse_need0=self.Hse
+            Hout_need0= self.Hout
 
             self.t=np.arange(t0,T+h,h)
             
@@ -774,6 +802,9 @@ class SEIRHVD:
             Hse_D_ac0 = self.Hse_D_ac[idx]
             V_D_ac0 = self.V_D_ac[idx]
 
+            V_need0=self.V[idx]
+            Hse_need0 = self.Hse[idx]
+            Hout_need0 = self.Hout[idx]
 
             #set time grid
             self.t=np.arange(self.t[idx],T+h,h)
@@ -833,10 +864,14 @@ class SEIRHVD:
             ydot[35]=self.dHse_D_ac(t,y[16],y[18])
             ydot[36]=self.dV_D_ac(t,y[18])
 
+            ydot[37]=self.dV_need(t,y[7],y[38],y[37])
+            ydot[38]=self.dHse_need(t,y[6],y[38],y[37])
+            ydot[39]=self.dHout_need(t,y[39],y[37])
+
 
 
         initcond = np.array([S0,E0,E_d0,E_ac0,Ias0,Imi0,Ise0,Icr0,Ias_d0,Imi_d0,Ise_d0,Icr_d0,Ias_ac0,Imi_ac0,Ise_ac0,Icr_ac0,Hse0,Hout0,V0,Hse_d0,Hout_d0,V_d0,Hse_ac0,
-            Hout_ac0,V_ac0,R0,R_d0,D0,B0,Ise_D_d0,Icr_D_d0,Hse_D_d0,V_D_d0,Ise_D_ac0,Icr_D_ac0,Hse_D_ac0,V_D_ac0])
+            Hout_ac0,V_ac0,R0,R_d0,D0,B0,Ise_D_d0,Icr_D_d0,Hse_D_d0,V_D_d0,Ise_D_ac0,Icr_D_ac0,Hse_D_ac0,V_D_ac0,V_need0,Hse_need0,Hout_need0])
             
         print('Solving ODE')
         sol = odeint(model_SEIR_graph, self.t, initcond,method='admo')
@@ -892,7 +927,9 @@ class SEIRHVD:
         self.Hse_D_ac=sol.values.y[:,35]
         self.V_D_ac=sol.values.y[:,36]
 
-
+        self.V_need=sol.values.y[:,37]
+        self.Hse_need=sol.values.y[:,38]
+        self.Hout_need=sol.values.y[:,39]
 
         self.I = self.Ias + self.Imi + self.Ise + self.Icr
         self.I_d = self.Ias_d + self.Imi_d + self.Ise_d + self.Icr_d
@@ -907,6 +944,8 @@ class SEIRHVD:
 
         self.V_cap = [self.Vtot(i) for i in self.t]
         self.H_cap = [self.Htot(i) for i in self.t]
+
+        self.H_need = self.Hse_need + self.Hout_need
 
         #Cálculo de la fecha del Peak  
         self.peakindex = np.where(self.I==max(self.I))[0][0]
@@ -987,6 +1026,10 @@ class SEIRHVD:
             Hse_D_ac0 = self.Hse_D_ac
             V_D_ac0 = self.V_D_ac
 
+            V_need0 = self.V
+            Hse_need0 = self.Hse 
+            Hout_need0 = self.Hout
+
             self.t=np.arange(t0,T+h,h)
             
         elif((min(self.t)<=t0) & (t0<=max(self.t))):
@@ -1044,6 +1087,10 @@ class SEIRHVD:
             Icr_D_ac0 = self.Icr_D_ac[idx]
             Hse_D_ac0 = self.Hse_D_ac[idx]
             V_D_ac0 = self.V_D_ac[idx] 
+
+            V_need0=self.V[idx]
+            Hse_need0=self.Hse[idx]
+            Hout_need0= self.Hout[idx]
 
             #set time grid
             self.t=np.arange(self.t[idx],T+h,h)
@@ -1104,12 +1151,15 @@ class SEIRHVD:
             ydot[34]=self.dIcr_D_ac(t,y[7],y[16],y[17],y[18])
             ydot[35]=self.dHse_D_ac(t,y[16],y[18])
             ydot[36]=self.dV_D_ac(t,y[18])
-                           
+
+            ydot[37]=self.dV_need(t,y[7],y[16],y[18])            
+            ydot[38]=self.dHse_need(t,y[6],y[38],y[37])
+            ydot[39]=self.dHout_need(t,y[39],y[37])            
                                           
             return(ydot)
 
         initcond = np.array([S0,E0,E_d0,E_ac0,Ias0,Imi0,Ise0,Icr0,Ias_d0,Imi_d0,Ise_d0,Icr_d0,Ias_ac0,Imi_ac0,Ise_ac0,Icr_ac0,Hse0,Hout0,V0,Hse_d0,Hout_d0,V_d0,Hse_ac0,
-            Hout_ac0,V_ac0,R0,R_d0,D0,B0,Ise_D_d0,Icr_D_d0,Hse_D_d0,V_D_d0,Ise_D_ac0,Icr_D_ac0,Hse_D_ac0,V_D_ac0])
+            Hout_ac0,V_ac0,R0,R_d0,D0,B0,Ise_D_d0,Icr_D_d0,Hse_D_d0,V_D_d0,Ise_D_ac0,Icr_D_ac0,Hse_D_ac0,V_D_ac0,V_need0,Hse_need0,Hout_need0])
 
         
         sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA')
@@ -1154,6 +1204,10 @@ class SEIRHVD:
         self.Hse_D_ac=sol.y[35,:]
         self.V_D_ac=sol.y[36,:]
 
+        self.V_need=sol.y[37,:]
+        self.Hse_need=sol.y[37,:]
+        self.Hout_need=sol.y[37,:]
+
 
         self.I = self.Ias + self.Imi + self.Ise + self.Icr
         self.I_d = self.Ias_d + self.Imi_d + self.Ise_d + self.Icr_d
@@ -1168,6 +1222,8 @@ class SEIRHVD:
 
         self.V_cap = [self.Vtot(i) for i in self.t]
         self.H_cap = [self.Htot(i) for i in self.t]
+
+        self.H_need = self.Hse_need + self.Hout_need
 
         #Cálculo de la fecha del Peak  
         self.peakindex = np.where(self.I==max(self.I))[0][0]
