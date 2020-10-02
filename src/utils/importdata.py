@@ -462,9 +462,10 @@ class ImportData():
 
         
         if self:
-            self.I_d_r = I_d_r
+            self.I_d_r = np.array(I_d_r_smooth)
             self.I_d_r_tr = I_d_r_tr
             self.I_d_r_dates = I_d_r_dates
+            self.I_d_r_raw = I_d_r
             return
         else:        
             return I_d_r_smooth, I_d_r_tr, I_d_r_dates
@@ -609,7 +610,7 @@ class ImportData():
     # ------------------ #
     #    Datos Sochimi   #
     # ------------------ #
-    def importSOCHIMI2(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto48/SOCHIMI.csv'):
+    def importSOCHIMIMinCiencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto48/SOCHIMI.csv'):
         """
         Import SOCHIMI data per state.
         Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
@@ -778,18 +779,23 @@ class ImportData():
             if not initdate:
                 raise Exception("Initial date missing")      
         
-        endpoint = 'http://192.168.2.223:5006/getDeathsOriginAllStates' 
+        endpoint = 'http://192.168.2.223:5006/getDeathsOriginAllStates'
         aux = pd.DataFrame( requests.get(endpoint).json()['data'])
        
+        
         if type(tstate) == list:
-            aux = aux[tstate[0]]
+            aux = aux[tstate[0][:2]]
+            if len(tstate[0])>2:
+                print('No information for counties, importing state information')
         else: 
-            aux = aux[tstate]
+            aux = aux[tstate[:2]]
+            if len(tstate)>2:
+                print('No information for counties, importing state information')
 
         
         Dr_hosp = aux.loc['fromHospital']
         Dr_Nonhosp = aux.loc['notFromHospital']
-        hosp_dates = [datetime.strptime(aux.loc['dates'][i][:10], '%Y-%m-%d') for i in range(len(Dr_Nonhosp))]
+        hosp_dates = [datetime.strptime(aux.loc['dates'][i][:10], '%Y-%m-%d') for i in range(len(Dr_hosp))]
         Br_hosp = np.cumsum(Dr_hosp)
         Br_Nonhosp = np.cumsum(Dr_Nonhosp)
         
@@ -806,28 +812,28 @@ class ImportData():
         hosp_tr = [(hosp_dates[i]-initdate).days for i in range(len(hosp_dates))]
 
 
-        endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv'
-        aux = pd.read_csv(endpoint)
-        aux = aux.loc[aux['Region'] == 'Metropolitana']
-        Dr_hosp = aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['2020-09-07']
-        Dr_Nonhosp = aux.loc[aux['Hospitalizacion'] == 'FALSO']['2020-09-07']
-        hosp_dates =  [datetime.strptime(aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['Fecha'].tolist()[i], '%Y-%m-%d') for i in range(len(Dr_hosp))]
+        #endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv'
+        #aux = pd.read_csv(endpoint)
+        #aux = aux.loc[aux['Region'] == 'Metropolitana']
+        #Dr_hosp = aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['2020-09-07']
+        #Dr_Nonhosp = aux.loc[aux['Hospitalizacion'] == 'FALSO']['2020-09-07']
+        #hosp_dates =  [datetime.strptime(aux.loc[aux['Hospitalizacion'] == 'VERDADERO']['Fecha'].tolist()[i], '%Y-%m-%d') for i in range(len(Dr_hosp))]
         
-        Br_hosp = Dr_hosp.cumsum()
-        Br_Nonhosp = Dr_Nonhosp.cumsum()
+        #Br_hosp = Dr_hosp.cumsum()
+        #Br_Nonhosp = Dr_Nonhosp.cumsum()
 
-        index = np.where(np.array(hosp_dates) >= initdate)[0][0]
-        
-        Dr_hosp = Br_hosp[index:]
-        Dr_Nonhosp = Br_Nonhosp[index:]
-        
-        Br_hosp = Br_hosp[index:]
-        Br_Nonhosp = Br_Nonhosp[index:]
+        #index = np.where(np.array(hosp_dates) >= initdate)[0][0]
+        #
+        #Dr_hosp = Br_hosp[index:]
+        #Dr_Nonhosp = Br_Nonhosp[index:]
+        #
+        #Br_hosp = Br_hosp[index:]
+        #Br_Nonhosp = Br_Nonhosp[index:]
 
-        hosp_dates = hosp_dates[index:]
-        hosp_tr = [(hosp_dates[i]-initdate).days for i in range(len(hosp_dates))]
-        
-        #V_F = [Br_Nonhosp.iloc[i]/Br_hosp.iloc[i] for i in range(len(Br_Nonhosp))]
+        #hosp_dates = hosp_dates[index:]
+        #hosp_tr = [(hosp_dates[i]-initdate).days for i in range(len(hosp_dates))]
+        #
+        ##V_F = [Br_Nonhosp.iloc[i]/Br_hosp.iloc[i] for i in range(len(Br_Nonhosp))]
         
       
         if self:
@@ -940,6 +946,7 @@ class ImportData():
     # ---------------------------------------- #
     #       Datos Subreporte de Infectados     #
     # ---------------------------------------- #
+    """
     def importInfectedSubreport(self = None,tstate = '', initdate = None,endpoint = ''):
         """
             Import calculated active infected subreport 
@@ -986,11 +993,14 @@ class ImportData():
         SR_data = pd.DataFrame(requests.get(endpoint).json()['data'])
 
         if type(tstate) == list:            
+
+            # State list
             states = [i for i in tstate if len(i)==2 ]
             
             # Adding counties' states
             counties = [i for i in tstate if len(i)>2 ]
             
+            # Get Subreport data for selected states
             for i in counties:
                 if i[:2] not in states:
                     states.append(i[:2])
@@ -999,8 +1009,8 @@ class ImportData():
             for i in tstate:
                 if len(i)>2:
                     aux_estimate = [Ir[i][j]*SR_data[i[:2]].loc['estimate'][j] for j in range(len(SR_data[i[:2]].loc['estimate']))]
-                    aux_lower
-                    aux_upper
+                    aux_lower = 0
+                    aux_upper = 0
 
                 aux.append()
             for i in states:
@@ -1090,7 +1100,7 @@ class ImportData():
             return subreporte, np.array(subreporte['estimate']), subreporte_date, subreporte_tr
 
     #self.importSubreporte = self.importInfectedSubreport
-
+    """
     # -------------------------- #
     #    Fallecidos excesivos    #
     # -------------------------- #
@@ -1238,7 +1248,7 @@ class ImportData():
 
         self.importDailyInfected()
         #self.importSOCHIMI()
-        self.importSOCHIMI2()
+        self.importSOCHIMIMinCiencia()
         self.importAcumulatedDeaths()
         self.importActiveInfectedMinciencia()
 
