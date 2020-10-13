@@ -948,7 +948,7 @@ class ImportData():
     # ---------------------------------------- #
     """
     def importInfectedSubreport(self = None,tstate = '', initdate = None,endpoint = ''):
-        """
+        
             Import calculated active infected subreport 
             This Function imports the  calculated active infected subreport by the given region. 
             When working with counties, we'll assume that the subreport is homogeneous for the whole region. 
@@ -970,7 +970,7 @@ class ImportData():
                 I_ac_r, I_ac_r_tr,I_ac_r_dates= importAccumulatedInfected(tstate = '13101',initdate=datetime(2020,5,15))
 
                 
-        """
+
         
         print('Importing Subreported Infeted')        
         if self:
