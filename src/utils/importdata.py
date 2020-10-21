@@ -580,6 +580,8 @@ class ImportData():
         Hr = sochimi['camas_ocupadas']
         Vr =  sochimi['vmi_ocupados']
         Vr_tot =  sochimi['vmi_totales']
+        Vr_conf =  sochimi['Vmi covid19 confirmados']
+        Vr_susp =  sochimi['Vmi covid19 sospechosos']
         Hr_tot =  sochimi['camas_totales']
         sochimi_dates = [datetime.strptime(sochimi['dates'][i][:10],'%Y-%m-%d') for i in range(len(sochimi))]
 
@@ -597,6 +599,8 @@ class ImportData():
             self.sochimi = sochimi
             self.Hr = Hr
             self.Vr = Vr
+            self.Vr_conf = Vr_conf
+            self.Vr_susp = Vr_susp
             self.Vr_tot = Vr_tot
             self.Hr_tot = Hr_tot
             self.sochimi_dates = sochimi_dates
@@ -1221,6 +1225,58 @@ class ImportData():
         if self:
             self.adjacency = adjacency
             self.adjacency_lvl = adjacency_lvl
+        else:        
+            return adjacency, adjacency_lvl
+
+    # ---------------------- #
+    #    Import Lockdowns    #
+    # ---------------------- #
+    def importLockdowns(self,tstate= '', endpoint = '', N = 1):
+        """
+        Import Lockdowns data 
+        So far from local data
+        
+        """
+        print('Importing Lockdown data')
+        if self:
+            tstate = self.tstate            
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+        
+        endpoint = '../Data/Confinamiento_COVID19.xlsx'
+        Data = pd.read_excel('Confinamiento_COVID19.xlsx',header=1,index_col=0) 
+        
+        Data[tstate].iloc[2:]
+        # fig, ax = plt.subplots()
+        # ax.plot(valdivia.astype(int))   
+        # ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d') 
+        # plt.show() 
+
+        Data = pd.read_json(endpoint)
+        if type(tstate) == list:
+            adjacency = tstate
+            adjacency_lvl = tstate
+        else:
+            adjacency = [tstate]
+            adjacency_lvl = [tstate]
+        adjacency_lvl.append(Data.loc[int(tstate)][0])
+        adjacency.extend((Data.loc[int(tstate)][0]))
+        for j in range(1,N):
+            aux = [] 
+            for i in adjacency_lvl[j]:
+                aux.extend(Data.loc[int(i)][0])
+                # Remove duplicates                
+                aux = [k for k in aux if k not in adjacency]
+                aux = list(set(aux))
+            if len(aux)>0:                
+                adjacency_lvl.append(aux)
+                adjacency.extend(aux)
+            else:
+                break
+        if self:
+            self.adjacencyR = adjacency
+            self.adjacencyR_lvl = adjacency_lvl
         else:        
             return adjacency, adjacency_lvl
 

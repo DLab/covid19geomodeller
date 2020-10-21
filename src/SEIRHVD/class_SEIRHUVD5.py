@@ -959,6 +959,12 @@ class SEIRHVD:
         self.I_d_det = self.I_d*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
         self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
 
+
+        # Prevalence: 
+        self.prevalence_total = self.I_ac/self.population
+        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
+        self.prevalence_detected = [(self.Ias_det*self.Ias[i]+self.Imi_det*self.Imi[i]+self.Ise_det*self.Ise[i]+self.Icr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]        
+
         return(sol)
 
     def integr_sci(self,t0,T,h,E0init=False):
@@ -1236,6 +1242,11 @@ class SEIRHVD:
         self.I_det = self.I*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
         self.I_d_det = self.I_d*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
         self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
+
+        # Prevalence: 
+        self.prevalence_total = self.I_ac/self.population
+        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
+        self.prevalence_detected = [(self.Ias_det*self.Ias[i]+self.Imi_det*self.Imi[i]+self.Ise_det*self.Ise[i]+self.Icr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
 
         return(sol)
 

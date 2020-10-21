@@ -24,50 +24,7 @@ class SEIR_plots():
             plt.legend(loc=0)
         plt.show()
 
-    # ---------------------------------------- #
-    #                 Datos                    #
-    # ---------------------------------------- #
-    def plotdatosactivos(self,enddate =  datetime(2020,7,30),days=0, reales= False,ylim = 0,norm=1,scalefactor = False,legend=True):
-        if not self.realdata:
-            return('No real data')        
-        # Reales
-        if reales:
-            plt.scatter(self.tr,self.Ir,label='Infectados Activos reales')
-
-        # Inicio cuarentena general
-        for i in range(self.numescenarios):
-            plt.axvline(x=self.inputarray[i][4],linestyle = 'dashed',color = 'grey')
-          
-        self.plot(title = 'Activos Reales',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
-
-    def plotdatosacumulados(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
-        if not self.realdata:
-            return('No real data')        
-        # Reales
-        if reales:
-            plt.scatter(self.I_ac_r_tr,self.I_ac_r,label='Infectados Acumulados reales')
-
-        # Inicio cuarentena general
-        for i in range(self.numescenarios):
-            plt.axvline(x=self.inputarray[i][4],linestyle = 'dashed',color = 'grey')
-          
-        self.plot(title = 'Infectados Acumulados Reales - EPI',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
-
-    def plotdatosdiarios(self,enddate =  datetime(2020,7,30),days=0, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True):
-        if not self.realdata:
-            return('No real data')        
-        # Reales
-        if reales:
-            plt.scatter(self.I_d_r_tr,self.I_d_r,label='Infectados diarios reales')
-
-        # Inicio cuarentena general
-        for i in range(self.numescenarios):
-            plt.axvline(x=self.inputarray[i][4],linestyle = 'dashed',color = 'grey')
-          
-        self.plot(title = 'Infectados Diarios Reales - EPI',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'),legend=legend)
-
-
-
+ 
     # -------------------------------------------------------- #
     #                       Infectados                         #
     # -------------------------------------------------------- #
@@ -95,14 +52,14 @@ class SEIR_plots():
         # ----------- #
         
         # Error
-        if self.realdata:                        
-            if minciencia:
-                for i in range(self.numescenarios):
-                    plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives_minciencia[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
-        
-            else:
-                for i in range(self.numescenarios):
-                    plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+        #if self.realdata:                        
+        #    if minciencia:
+        #        for i in range(self.numescenarios):
+        #            plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives_minciencia[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+        #
+        #    else:
+        #        for i in range(self.numescenarios):
+        #            plt.plot([], [], ' ', label='err: '+str(round(100*self.err_Iactives[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
 
         # Parametros:
         if showparams:
@@ -111,21 +68,21 @@ class SEIR_plots():
             plt.plot([], [], ' ', label='k: '+str(self.k))
             #plt.plot([], [], ' ', label='ScaleFactor: '+str(self.ScaleFactor))
             #plt.plot([], [], ' ', label='seroprev: '+str(self.SeroPrevFactor))
-            if scalefactor:
-                for i in range(self.numescenarios):
-                    plt.plot([], [], ' ', label='SeroPrev Norm: '+str(round(self.infectedpop_norm[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
-            else:
-                for i in range(self.numescenarios):
-                    plt.plot([], [], ' ', label='SeroPrev: '+str(round(self.infectedpop[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+        #if scalefactor:
+        #    for i in range(self.numescenarios):
+        #        plt.plot([], [], ' ', label='SeroPrev Norm: '+str(round(self.infectedpop_norm[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
+        #else:
+        #    for i in range(self.numescenarios):
+        #        plt.plot([], [], ' ', label='SeroPrev: '+str(round(self.infectedpop[i],2))+'%'+' Mov = '+str(self.inputarray[i][2]))    
 
 
         # Reales
-        if self.realdata:
-            if reales:
-                if minciencia:
-                    plt.scatter(self.I_minciencia_r_tr,self.I_minciencia_r,label='Infectados Activos Minciencia')
-                else:
-                    plt.scatter(self.tr,self.Ir,label='Infectados Activos ')                    
+        #if self.realdata:
+        #    if reales:
+        #        if minciencia:
+        #            plt.scatter(self.I_minciencia_r_tr,self.I_minciencia_r,label='Infectados Activos Minciencia')
+        #        else:
+        #            plt.scatter(self.tr,self.Ir,label='Infectados Activos reales')                    
 
 
         # Inicio cuarentena general
@@ -154,7 +111,7 @@ class SEIR_plots():
     # -------------------------------- #
     #       Infectados Acumulados      #
     # -------------------------------- #
-    def plotAccumulatedInfected(self,enddate =  datetime(2020,7,30),days=-1, reales= False,ylim = 0,norm=1,scalefactor = False,showparams = False):
+    def plotAccumulatedInfected(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,showparams = False):
         # -------- #
         #   Time   #
         # -------- #
@@ -177,9 +134,8 @@ class SEIR_plots():
             plt.plot([], [], ' ', label='k: '+str(self.k))        
         
         # Error
-        #if showerror:
-        #    for i in range(self.numescenarios):
-        #        plt.plot([], [], ' ', label='err: '+str(round(100*self.err[i],2))+'%')    
+        #for i in range(self.numescenarios):
+        #    plt.plot([], [], ' ', label='err: '+str(round(100*self.err[i],2))+'%')    
 
         # Inicio cuarentena general
         for i in range(self.numescenarios):
@@ -188,9 +144,9 @@ class SEIR_plots():
         plt.axvline(x=self.inputarray[0][5],linestyle = 'dotted',color = 'grey')        
 
         # Reales
-        if self.realdata:
-            if reales:
-                plt.scatter(self.I_ac_r_tr,self.I_ac_r,label='Infectados Acumulados reales')
+        #if self.realdata:
+        #    if reales:
+        #        plt.scatter(self.I_ac_r_tr,self.I_ac_r,label='Infectados Activos reales')
 
         # Infectados
         qt = ['TQ' if self.inputarray[i][-1]==0 else 'DQ'+str(int(self.inputarray[i][3])) for i in range(len(self.inputarray))]
@@ -207,7 +163,7 @@ class SEIR_plots():
     # ------------------------------ #
     #       Infectados Diarios       #
     # ------------------------------ #    
-    def plotDailyInfected(self,enddate =  datetime(2020,7,30),days=-1, reales= False,ylim = 0,norm=1,scalefactor = False, showparams=False):
+    def plotDailyInfected(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False, showparams=False):
         # -------- #
         #   Time   #
         # -------- #
@@ -220,9 +176,9 @@ class SEIR_plots():
         idx = [np.searchsorted(self.t[i],range(days)) for i in range(self.numescenarios)]
 
         # Reales
-        if self.realdata:
-            if reales:
-                plt.scatter(self.I_d_r_tr,self.I_d_r,label='Infectados diarios reales')
+        #if self.realdata:
+        #    if reales:
+        #        plt.scatter(self.I_d_r_tr,self.I_d_r,label='Infectados diarios reales')
 
         if showparams:
             plt.plot([], [], ' ', label='beta: '+str(self.beta))
@@ -244,57 +200,6 @@ class SEIR_plots():
             plt.xlim(0,days)
         self.plot(title = 'Infectados Diarios',xlabel='Dias desde '+datetime.strftime(self.initdate,'%Y-%m-%d'))          
   
-
-
-    # -------------------- #
-    #     Susceptible      #
-    # -------------------- #
-    def plotSusceptible(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True,showparams=False):
-        # -------- #
-        #   Time   #
-        # -------- #
-        if days == 0:
-            days = (enddate-self.initdate).days      
-        elif days < 0:
-            days = self.tsim     
-        endD = [np.searchsorted(self.t[i],days) for i in range(self.numescenarios)]
-        
-        if norm <1:
-            norm = self.ScaleFactor
-
-        if showparams:
-            plt.plot([], [], ' ', label='beta: '+str(self.beta))
-            plt.plot([], [], ' ', label='mu: '+str(self.mu))
-            plt.plot([], [], ' ', label='k: '+str(self.k))            
-        #Isf = 1    
-        #if scalefactor:
-        #    Isf = ScaleFactor
-
-        # ----------- #
-        #     Plot    #
-        # ----------- #
-        # Parametros 
-        #plt.plot([], [], ' ', label='beta: '+str(self.beta))
-        #plt.plot([], [], ' ', label='mu: '+str(self.mu))
-        #plt.plot([], [], ' ', label='factor de escala: '+str(self.ScaleFactor))
-
-        # Fecha de Peak
-        #for i in range(self.numescenarios):
-        #    plt.plot([], [], ' ', label='Mov='+str(self.inputarray[i][2])+'Peak='+self.peak_date[i].strftime('%Y-%m-%d'))
-        #
-
-        linestyle = ['dashed','solid','dashed','dotted','dotted']
-        qt = ['TQ' if self.inputarray[i][-1]==0 else 'DQ'+str(int(self.inputarray[i][3])) for i in range(len(self.inputarray))]
-        for i in range(self.numescenarios):
-            plt.plot(self.t[i][:endD[i]],self.S[i][:endD[i]],label='Mob = '+str(self.inputarray[i][2])+' '+qt[i])#,color = 'blue',linestyle=linestyle[i])
-            #plt.plot(self.t[i][:endD[i]],self.E_sy[i][:endD[i]],label='Expuestos sintomáticos Mov = '+str(self.inputarray[i][2]),color = 'red',linestyle=linestyle[i])
-            
-        plt.xlim(0,days)   
-        if ylim >0:
-            plt.ylim(0,ylim)
-
-        self.plot(title = 'Susceptible',xlabel='Days',legend=legend)
-        
 
     # ------------------ #
     #     Expuestos      #
@@ -346,55 +251,6 @@ class SEIR_plots():
         self.plot(title = 'Exposed',xlabel='Days',legend=legend)
         
 
-    # ------------------ #
-    #     Recovered      #
-    # ------------------ #
-    def plotRecovered(self,enddate =  datetime(2020,7,30),days=-1, reales= True,ylim = 0,norm=1,scalefactor = False,legend=True,showparams=False):
-        # -------- #
-        #   Time   #
-        # -------- #
-        if days == 0:
-            days = (enddate-self.initdate).days      
-        elif days < 0:
-            days = self.tsim     
-        endD = [np.searchsorted(self.t[i],days) for i in range(self.numescenarios)]
-        
-        if norm <1:
-            norm = self.ScaleFactor
-
-        if showparams:
-            plt.plot([], [], ' ', label='beta: '+str(self.beta))
-            plt.plot([], [], ' ', label='mu: '+str(self.mu))
-            plt.plot([], [], ' ', label='k: '+str(self.k))            
-        #Isf = 1    
-        #if scalefactor:
-        #    Isf = ScaleFactor
-
-        # ----------- #
-        #     Plot    #
-        # ----------- #
-        # Parametros 
-        #plt.plot([], [], ' ', label='beta: '+str(self.beta))
-        #plt.plot([], [], ' ', label='mu: '+str(self.mu))
-        #plt.plot([], [], ' ', label='factor de escala: '+str(self.ScaleFactor))
-
-        # Fecha de Peak
-        #for i in range(self.numescenarios):
-        #    plt.plot([], [], ' ', label='Mov='+str(self.inputarray[i][2])+'Peak='+self.peak_date[i].strftime('%Y-%m-%d'))
-        #
-
-        linestyle = ['dashed','solid','dashed','dotted','dotted']
-        qt = ['TQ' if self.inputarray[i][-1]==0 else 'DQ'+str(int(self.inputarray[i][3])) for i in range(len(self.inputarray))]
-        for i in range(self.numescenarios):
-            plt.plot(self.t[i][:endD[i]],self.R[i][:endD[i]],label='Mob = '+str(self.inputarray[i][2])+' '+qt[i])#,color = 'blue',linestyle=linestyle[i])
-            #plt.plot(self.t[i][:endD[i]],self.E_sy[i][:endD[i]],label='Expuestos sintomáticos Mov = '+str(self.inputarray[i][2]),color = 'red',linestyle=linestyle[i])
-            
-        plt.xlim(0,days)   
-        if ylim >0:
-            plt.ylim(0,ylim)
-
-        self.plot(title = 'Recovered',xlabel='Days',legend=legend)
-        
 
     # -------------------- #
     #     Curvas SEIR      #
@@ -435,8 +291,8 @@ class SEIR_plots():
         qt = ['TQ' if self.inputarray[i][-1]==0 else 'DQ'+str(int(self.inputarray[i][3])) for i in range(len(self.inputarray))]        
         for i in range(self.numescenarios):        
             plt.plot(self.t[i],self.S[i],label='S Mob = '+str(self.inputarray[i][2])+' '+qt[i],linestyle=linestyle[0],color = colors[i])
-            plt.plot(self.t[i],self.E[i],label='E Mob = '+str(self.inputarray[i][2])+' '+qt[i],linestyle=linestyle[2],color = colors[i])
             plt.plot(self.t[i],self.I[i],label='I Mob = '+str(self.inputarray[i][2])+' '+qt[i],linestyle=linestyle[1],color = colors[i])        
+            plt.plot(self.t[i],self.E[i],label='E Mob = '+str(self.inputarray[i][2])+' '+qt[i],linestyle=linestyle[2],color = colors[i])
             plt.plot(self.t[i],self.R[i],label='R Mob = '+str(self.inputarray[i][2])+' '+qt[i],linestyle=linestyle[3],color = colors[i])
             #plt.plot(self.t[i],D[i],label='Muertos diarios Mov = '+str(inputarray[i][2]),linestyle=linestyle[i])
             #plt.plot(self.t[i],self.B[i],label='Enterrados Mov = '+str(self.inputarray[i][2]),linestyle=linestyle[i])

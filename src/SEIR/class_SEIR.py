@@ -12,6 +12,10 @@ from scipy import signal
 import pandas as pd
 from numpy import linalg as LA 
 import multiprocessing  
+#import SEIR_plots
+
+from datetime import datetime
+from datetime import timedelta
 
 """
 To do:
@@ -61,6 +65,9 @@ class simSEIRHVD:
 
         # Saturated Kinetics
         self.k = k
+
+        self.numescenarios = 1
+        self.initdate = None
 
          
     
@@ -134,7 +141,9 @@ class SEIR:
         # Valores globales
         self.N =  self.SeroPrevFactor*self.population
         self.S = self.N- self.E-self.I - self.R   
-            
+
+        self.numescenarios = 1
+        self.initdate = None 
         
         
         # --------------------------- #
@@ -276,7 +285,14 @@ class SEIR:
         self.I=sol.values.y[:,2]
         self.R=sol.values.y[:,3]
         self.I_ac=sol.values.y[:,4]
-        self.I_d=sol.values.y[:,5]                        
+        self.I_d=sol.values.y[:,5]      
+
+        #Cálculo de la fecha del Peak  
+        self.peakindex = np.where(self.I==max(self.I))[0][0]
+        self.peak = max(self.I)
+        self.peak_t = self.t[self.peakindex]
+        if self.initdate:
+            self.peak_date = self.initdate+timedelta(days=round(self.peak_t))                          
                
         return(sol)
 
@@ -349,6 +365,13 @@ class SEIR:
         self.R=sol.y[3,:]
         self.I_ac=sol.y[4,:]
         self.I_d=sol.y[5,:]
+
+        #Cálculo de la fecha del Peak  
+        self.peakindex = np.where(self.I==max(self.I))[0][0]
+        self.peak = max(self.I)
+        self.peak_t = self.t[self.peakindex]
+        if self.initdate:
+            self.peak_date = self.initdate+timedelta(days=round(self.peak_t))              
 
         return(sol)
 

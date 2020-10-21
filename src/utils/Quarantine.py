@@ -219,3 +219,13 @@ def functionSum(a,b):
     def aux(t):
         return a(t)+b(t)
     return aux
+
+
+def Exams(examrate,period,duty=50):
+    """
+    Examination camping 
+    """
+    def psi(t):
+        return (examrate*signal.square(2*np.pi*t/period,duty) + examrate)/2
+  
+    return psi
