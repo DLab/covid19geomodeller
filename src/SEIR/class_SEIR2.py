@@ -36,7 +36,7 @@ Instructions:
 """
 
 class SEIR:  
-    def __init__(self,tsim,alpha,beta,mu,sigma = 0.2, gamma = 0.1, k=0,I0=100,I_ac0=0,I_d0=0,R0=0,population=1000000,expinfection = 1, SeroPrevFactor=1,chi = 0,psi = 0,k_I=0,k_R=0,RealIC=None, initdate = None,SimIC=None,I_det_prop=1):        
+    def __init__(self,tsim,alpha,beta,mu,sigma = 0.2, gamma = 0.1, k=0,I0=100,I_ac0=0,I_d0=0,R0=0,population=1000000,expinfection = 1, SeroPrevFactor=1,chi = 0,psi = 0,k_I=0,k_R=0,RealIC=None, initdate = None,SimIC=None,I_det_prop=1,testaccuracy=1):        
         self.tsim = tsim
         self.alpha = alpha
         self.beta = beta
@@ -69,6 +69,8 @@ class SEIR:
 
         self.numescenarios = 1
         self.initdate = None 
+
+        self.testaccuracy = testaccuracy
         
         if type(chi) == int:
             self.chi = np.poly1d(0)
@@ -96,7 +98,7 @@ class SEIR:
 
         # Infected
         # dI_as/dt
-        self.dI=lambda t,E,I: self.sigma*E - self.gamma*I - self.psi(t)*I/self.population
+        self.dI=lambda t,E,I: self.sigma*E - self.gamma*I - self.testaccuracy*self.psi(t)*I/self.population
 
         # Recovered
         # dR/dt
@@ -112,7 +114,7 @@ class SEIR:
         self.de =  lambda t: self.psi(t)
 
         # Detected and removed Infected
-        self.de_I = lambda t,I: self.psi(t)*I/self.population
+        self.de_I = lambda t,I: self.testaccuracy*self.psi(t)*I/self.population
 
 
     # ------------------- #
