@@ -18,20 +18,7 @@ from datetime import datetime
 from datetime import timedelta
 
 """
-To do:
-  - Create reports function inside simSAEIRHVD class
-
-
-SEIRHVD Implementation
-Instructions: 
-    Init a simSEIRHVD objecting giving the simulation condictions:
-        - tsim: Simulation time
-        - max_mov:
-        - rem_mov:
-        - qp:
-        - iqt:
-        - fqt:
-        - movfunct: 
+SEIRQ Model Implementation
 
 """
 

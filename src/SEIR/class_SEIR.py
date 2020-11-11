@@ -112,6 +112,7 @@ class simSEIRHVD:
 
 class SEIR:  
     def __init__(self,tsim,alpha,beta,mu,sigma = 0.2, gamma = 0.1, k=0,I=100,I_ac=0,I_d=0,R=0,population=1000000,expinfection = 1, SeroPrevFactor=1):
+                (self,tsim,alpha,beta,mu,sigma = 0.2, gamma = 0.1, k=0,I0=100,I_ac0=0,I_d0=0,R0=0,population=1000000,expinfection = 1, SeroPrevFactor=1,chi = 0,k_I=0,k_R=0,RealIC=None, initdate = None,SimIC=None):
         
         self.tsim = tsim
         self.alpha = alpha
