@@ -13,6 +13,19 @@ from os import path
 """   
    SEIRHDV Import data
 """
+def requestdata(user=None,password=None):
+    # Esta funcion devolvera una funcion de request        
+    def request(endpoint):
+        if user:
+            aux = requests.get('https://api.cv19gm.org/'+endpoint, auth=HTTPBasicAuth(user, password))
+            if aux.status_code == 401:
+                raise Exception('Wrong Credentials')
+            else:
+                print('Logged in successfully')
+        else:
+            aux = requests.get('http://192.168.2.223:5006/'+endpoint)
+        return aux
+    return request
 
 class ImportData():
     """
@@ -72,24 +85,14 @@ class ImportData():
             self.credentials = True
             aux = requests.get('https://api.cv19gm.org/getComunas', auth=HTTPBasicAuth(user, password))
             if aux.status_code == 401:
-                raise Exception('Wrong Password')
+                raise Exception('Wrong Credentials')
             elif aux.status_code == 200:
-                print('Logged in correctly')
+                print('Logged in succesfully')
             else:
                 print('Logging status_Code: '+str(aux.status_code))
 
-        self.request = self.requestdata(user,password)
-            
+        self.request = requestdata(user,password)
 
-    def requestdata(self,user=None,password=None):
-        # Esta funcion devolvera una funcion de request        
-        def request(endpoint):
-            if user:
-                aux = requests.get('https://api.cv19gm.org/'+endpoint, auth=HTTPBasicAuth(user, password))
-            else:
-                aux = requests.get('http://192.168.2.223:5006/'+endpoint)
-            return aux
-        return request
 
     # ------------------------------- #
     #        Importar Data Real       #
@@ -99,9 +102,9 @@ class ImportData():
     #            Population            #
     # -------------------------------- #
 
-    def importPopulation(self=None,endpoint = '',tstate = ''):     
+    def importPopulation(self=None,endpoint = '',tstate = '',user=None,password=None):     
         """
-            Import Population
+            Import PopulationendpointComunas
             This Function imports the selected area population. 
 
             input: 
@@ -123,25 +126,24 @@ class ImportData():
 
         if self:
             tstate = self.tstate
+            request = self.request
+        
         else:
             if not tstate:
                 raise Exception("State code missing")
+            request = requestdata(user,password)
 
-        endpointComunas = 'http://192.168.2.223:5006/getComunas'
-        #endpointRegiones = 'http://192.168.2.223:5006/getStates'
-        #endpointSS = 'http://192.168.2.223:5006/getHealthServices'
-        #regiones = pd.read_json(endpointRegiones)
-        #ServicioSalud =  pd.read_json(endpointSS)
-        
 
+        endpoint = 'getComunas'
     
-        if not self.credentials:
-            county = pd.read_json(endpointComunas)
+        #if not self.credentials:
+        #    county = pd.read_json(endpointComunas)
 
-        else:
-            aux = requests.get('https://api.cv19gm.org/getComunas', auth=HTTPBasicAuth(self.user, self.password))
-            county = pd.DataFrame(aux.json())
+        #else:
+        #    aux = requests.get('https://api.cv19gm.org/getComunas', auth=HTTPBasicAuth(self.user, self.password))
+        #    county = pd.DataFrame(aux.json())
 
+        county = pd.DataFrame(request(endpoint).json())
         
         if type(tstate) == list:
             population = 0
@@ -149,22 +151,22 @@ class ImportData():
             population_female = 0
             for i in tstate:
                 if len(i)==2:                    
-                    population += int(county.loc[county['state'] == int(i)]['total_pop'].sum())
-                    population_male += int(county.loc[county['state'] == int(i)]['male_pop'].sum())
-                    population_female += int(county.loc[county['state'] == int(i)]['female_pop'].sum())
+                    population += int(county.loc[county['state'] == i]['total_pop'].sum())
+                    population_male += int(county.loc[county['state'] == i]['male_pop'].sum())
+                    population_female += int(county.loc[county['state'] == i]['female_pop'].sum())
                 if len(i)>2:
-                    population += int(county.loc[county['county'] == int(i)]['total_pop'].sum())
-                    population_male += int(county.loc[county['county'] == int(i)]['male_pop'].sum())
-                    population_female += int(county.loc[county['county'] == int(i)]['female_pop'].sum())         
+                    population += int(county.loc[county['county'] == i]['total_pop'].sum())
+                    population_male += int(county.loc[county['county'] == i]['male_pop'].sum())
+                    population_female += int(county.loc[county['county'] == i]['female_pop'].sum())         
         else:
             if len(tstate)==2:
-                population = int(county.loc[county['state'] == int(tstate)]['total_pop'].sum())
-                population_male = int(county.loc[county['state'] == int(tstate)]['male_pop'].sum())
-                population_female = int(county.loc[county['state'] == int(tstate)]['female_pop'].sum())
+                population = int(county.loc[county['state'] == tstate]['total_pop'].sum())
+                population_male = int(county.loc[county['state'] == tstate]['male_pop'].sum())
+                population_female = int(county.loc[county['state'] == tstate]['female_pop'].sum())
             if len(tstate)>2:
-                population = int(county.loc[county['county'] == int(tstate)]['total_pop'].sum())
-                population_male += int(county.loc[county['county'] == int(tstate)]['male_pop'].sum())
-                population_female += int(county.loc[county['county'] == int(tstate)]['female_pop'].sum())                        
+                population = int(county.loc[county['county'] == tstate]['total_pop'].sum())
+                population_male += int(county.loc[county['county'] == tstate]['male_pop'].sum())
+                population_female += int(county.loc[county['county'] == tstate]['female_pop'].sum())                        
                
         if self:
             self.population = population
@@ -226,7 +228,7 @@ class ImportData():
     #          Active Infected         #
     # -------------------------------- #
 
-    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = 'http://192.168.2.223:5006/getActiveCasesAllComunas'):
+    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = 'getActiveCasesAllComunas',user=None,password=None):
         """
             Import Active infected
             This function imports the active infected calculated as the infected that are within their 14 days since exposure.
@@ -253,23 +255,25 @@ class ImportData():
         if self:
             tstate = self.tstate
             initdate = self.initdate
+            request = self.request
         else:
             if not tstate:
                 raise Exception("State code missing")
             if not initdate:
                 raise Exception("Initial date missing")
+            request = requestdata(user,password)
         # ---------------------- # 
         #   Infectados Activos   #
         # ---------------------- #
 
-        if not self.credentials:
-            data = pd.DataFrame(requests.get(endpoint).json()['data'])
+        #if not self.credentials:
+        #    data = pd.DataFrame(requests.get(endpoint).json()['data'])
 
-        else:
-            aux = requests.get('https://api.cv19gm.org/getActiveCasesAllComunas', auth=HTTPBasicAuth(self.user, self.password))
-            data = pd.DataFrame(aux.json()['data'])
+        #else:
+        #    aux = requests.get('https://api.cv19gm.org/getActiveCasesAllComunas', auth=HTTPBasicAuth(self.user, self.password))
+        #    data = pd.DataFrame(aux.json()['data'])
 
-        
+        data = pd.DataFrame(request(endpoint).json()['data'])
 
         if type(tstate) == list:
             counties = [i for i in tstate if len(i)>2 ]
@@ -288,7 +292,7 @@ class ImportData():
                 Ir = np.array(data[tstate])
 
 
-        dates = list(requests.get(endpoint).json()['dates'])
+        dates = list(request(endpoint).json()['dates'])
         Ir_dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]
         index = np.where(np.array(Ir_dates) >= initdate)[0][0]     
         Ir=Ir[index:]
@@ -363,7 +367,7 @@ class ImportData():
     # -------------------------------- #
     #      Accumulated Infected        #
     # -------------------------------- #
-    def importAccumulatedInfected(self=None,tstate = '',initdate = None, endpoint = 'http://192.168.2.223:5006/getTotalCasesAllComunas'):     
+    def importAccumulatedInfected(self=None,tstate = '',initdate = None, endpoint = 'getTotalCasesAllComunas',user=None,password=None):     
         """
             Import acumulated infected
             This Function imports the selected area accumulated infected from CyV Endpoint
@@ -390,23 +394,28 @@ class ImportData():
         if self:
             tstate = self.tstate
             initdate = self.initdate
+            request = self.request
         else:
             if not tstate:
                 raise Exception("State code missing")
             if not initdate:
                 raise Exception("Initial date missing")
-        
+            request = requestdata(user,password)
+
+
         
         #endPointTotal = 'http://192.168.2.223:5006/getTotalCasesAllComunas'
         #data = pd.DataFrame(requests.get(endpoint).json()['data'])
 
-        if not self.credentials:
-            data = pd.DataFrame(requests.get(endpoint).json()['data'])
+        #if not self.credentials:
+        #    data = pd.DataFrame(requests.get(endpoint).json()['data'])
 
-        else:
-            aux = requests.get('https://api.cv19gm.org/getTotalCasesAllComunas', auth=HTTPBasicAuth(self.user, self.password))
-            data = pd.DataFrame(aux.json()['data'])
+        #else:
+        #    aux = requests.get('https://api.cv19gm.org/getTotalCasesAllComunas', auth=HTTPBasicAuth(self.user, self.password))
+        #    data = pd.DataFrame(aux.json()['data'])
 
+        data = pd.DataFrame(request(endpoint).json()['data'])
+        dates = pd.DataFrame(request(endpoint).json()['dates'])[0]
 
         if type(tstate) == list:
             counties = [i for i in tstate if len(i)>2 ]
@@ -425,7 +434,7 @@ class ImportData():
                 I_ac_r = np.array(data[tstate])
 
         # Get and filter by dates
-        dates = pd.DataFrame(requests.get(endpoint).json()['dates'])[0]
+        
         I_ac_r_dates = [datetime.strptime(i[:10],'%Y-%m-%d') for i in dates]        
         index = np.where(np.array(I_ac_r_dates) >= initdate)[0][0] 
         I_ac_r = I_ac_r[index:]
@@ -492,7 +501,7 @@ class ImportData():
     #      Daily infected Smoothed     #
     # -------------------------------- #
     # Created by Felipe Castillo
-    def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'http://192.168.2.223:5006/getTotalCasesAllComunas' ):     
+    def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'getTotalCasesAllComunas',user=None,password=None):     
         """
             Import daily infected
             input: 
@@ -511,21 +520,17 @@ class ImportData():
         if self:
             tstate = self.tstate
             initdate = self.initdate
+            request = self.request
         else:
             if not tstate:
                 raise Exception("State code missing")
             if not initdate:
                 raise Exception("Initial date missing")
+            request = requestdata(user,password)
 
-        if not self.credentials:
-            data = pd.DataFrame(requests.get(endpoint).json()['data'])
-            dates = pd.DataFrame(requests.get(endpoint).json()['dates'])[0]
 
-        else:
-            aux = requests.get('https://api.cv19gm.org/getTotalCasesAllComunas', auth=HTTPBasicAuth(self.user, self.password))
-            data = pd.DataFrame(aux.json()['data'])
-            dates = pd.DataFrame(aux.json()['dates'])[0]
-
+        data = pd.DataFrame(request(endpoint).json()['data'])
+        dates = pd.DataFrame(request(endpoint).json()['dates'])[0]
 
         if type(tstate) == list:
             counties = [i for i in tstate if len(i)>2 ]
@@ -720,7 +725,7 @@ class ImportData():
     # ------------------ #
     #    Datos Sochimi   #
     # ------------------ #
-    def importSOCHIMI(self=None,tstate = '', initdate = None, endpoint = "http://192.168.2.223:5006/getBedsAndVentilationByState?state="):
+    def importSOCHIMI(self=None,tstate = '', initdate = None, endpoint = "getBedsAndVentilationByState?state=",user=None,password=None):
         """
         Import SOCHIMI data per state.
         Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
@@ -739,24 +744,28 @@ class ImportData():
         if self:
             tstate = self.tstate
             initdate = self.initdate
+            request = self.request
         else:
             if not tstate:
                 raise Exception("State code missing")
             if not initdate:
-                raise Exception("Initial date missing")        
+                raise Exception("Initial date missing")
+            request = requestdata(user,password)
+
         if type(tstate) == list:
             tstate = tstate[0]
 
 
-        if not self.credentials:
-            endpoint = endpoint+tstate[:2]
-            r = requests.get(endpoint) 
-            sochimi=pd.DataFrame(r.json())
+        #if not self.credentials:
+        #    endpoint = endpoint+tstate[:2]
+        #    r = requests.get(endpoint) 
+        #    sochimi=pd.DataFrame(r.json())
             
-        else:
-            r = requests.get('https://api.cv19gm.org/getBedsAndVentilationByState?state='+tstate[:2], auth=HTTPBasicAuth(self.user, self.password))
-            sochimi=pd.DataFrame(r.json())
+        #else:
+        #    r = requests.get('https://api.cv19gm.org/getBedsAndVentilationByState?state='+tstate[:2], auth=HTTPBasicAuth(self.user, self.password))
+        #    sochimi=pd.DataFrame(r.json())
 
+        sochimi=pd.DataFrame(request(endpoint+tstate[:2]).json())
         
         Hr = sochimi['camas_ocupadas']
         Vr =  sochimi['vmi_ocupados']
@@ -886,7 +895,7 @@ class ImportData():
     # -------------------------------- #
     #    Datos Fallecidos acumulados   #
     # -------------------------------- #
-    def importAcumulatedDeaths(self=None,tstate = '',initdate = None, endpoint = 'http://192.168.2.223:5006/getMinsalDeathsByState?state=' ):     
+    def importAccumulatedDeaths(self=None,tstate = '',initdate = None, endpoint = 'getMinsalDeathsByState?state=',user=None,password=None ):     
         """
             Import Acumulated Deaths - Regional
             input: 
@@ -901,18 +910,22 @@ class ImportData():
                 Br,Br_tr,Br_dates = importAcumulatedDeaths(self=None,tstate = '13',initdate = datetime(2020,5,15))
         """
         print('Importing Accumulated Deaths')
-
+        print('Only regional data available')
         if self:
             tstate = self.tstate
             initdate = self.initdate
+            request = self.request
         else:
             if not tstate:
                 raise Exception("State code missing")
             if not initdate:
-                raise Exception("Initial date missing")      
+                raise Exception("Initial date missing")
+            request = requestdata(user,password)     
                 
         tstate = tstate[:2]
-        data =  pd.DataFrame(requests.get(endpoint+tstate).json())        
+
+        data =  pd.DataFrame(request(endpoint+tstate).json())        
+        
         Br = data.set_index('dates')
         Br_dates = [datetime.strptime(data['dates'].iloc[i][:10],'%Y-%m-%d') for i in range(len(data['dates']))]
 
@@ -932,20 +945,21 @@ class ImportData():
     # -------------------------------- #
     #    Datos Fallecidos acumulados   #
     # -------------------------------- #
-    def importAcumulatedDeathsMinCiencia(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto14/FallecidosCumulativo.csv' ):     
-        """
-            Import Acumulated Deaths
-            input: 
-                - tstate: [string or string list] CUT por comuna o región
-                - initdate: datetime object with the initial date
-                - endpoint (optional): 
-            output: 
-                - Br: Real acumulated deaths
-                - Br_tr: days from simulation first day
-                - Br_dates: data dates
-            Usage:
-                Br,Br_tr,Br_dates = importAcumulatedDeaths(self=None,tstate = '13',initdate = datetime(2020,5,15))
-        """
+    """
+    def importAccumulatedDeathsMinCiencia(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto14/FallecidosCumulativo.csv' ):     
+        #
+        #    Import Accumulated Deaths
+        #    input: 
+        #        - tstate: [string or string list] CUT por comuna o región
+        #        - initdate: datetime object with the initial date
+        #        - endpoint (optional): 
+        #    output: 
+        #        - Br: Real accumulated deaths
+        #        - Br_tr: days from simulation first day
+        #        - Br_dates: data dates
+        #    Usage:
+        #        Br,Br_tr,Br_dates = importAccumulatedDeaths(self=None,tstate = '13',initdate = datetime(2020,5,15))
+        # 
         print('Importing Accumulated Deaths')
 
         if self:
@@ -976,39 +990,40 @@ class ImportData():
         else:        
             return Br,Br_tr,Br_dates
 
-    #self.importfallecidosacumulados = self.importAcumulatedDeaths
+    """
 
-
-    # ----------------------------------------- #
-    #          DEIS Deaths (Not ready)          #
-    # ----------------------------------------- #
-    def importDeathsDEIS(self=None,tstate = '',initdate = None):     
+    # ----------------------------- #
+    #          Deaths (DEIS)        #
+    # ----------------------------- #
+    def importDeathsDEIS(self=None,tstate = '',initdate = None,endpointreg = 'getDeathsByState?state=',endpointcom = 'getDeathsByComuna?comuna=',user=None,password=None):     
         """
-            Import Acumulated Deaths
+            Import Accumulated Deaths
             input: 
                 - tstate: [string or string list] CUT por comuna o región
                 - initdate: datetime object with the initial date
                 - endpoint (optional): 
             output: 
-                - Br: Real acumulated deaths
+                - Br: Real accumulated deaths
                 - Br_tr: days from simulation first day
                 - Br_dates: data dates
             Usage:
-                Br,Br_tr,Br_dates = importAcumulatedDeaths(self=None,tstate = '13',initdate = datetime(2020,5,15))
+                Br,Br_tr,Br_dates = importAccumulatedDeaths(self=None,tstate = '13',initdate = datetime(2020,5,15))
         """
         print('Importing Deaths by DEIS')
 
-        endpointreg = 'http://192.168.2.223:5006/getDeathsByState?state='
-        endpointcom = 'http://192.168.2.223:5006/getDeathsByComuna?comuna='
+        endpointreg = 'getDeathsByState?state='
+        endpointcom = 'getDeathsByComuna?comuna='
  
         if self:
             tstate = self.tstate
             initdate = self.initdate
+            request = self.request
         else:
             if not tstate:
                 raise Exception("State code missing")
             if not initdate:
-                raise Exception("Initial date missing")      
+                raise Exception("Initial date missing")     
+            request = requestdata(user,password) 
 
 
         D_r_confirmed = []
@@ -1016,17 +1031,21 @@ class ImportData():
 
         if type(tstate) == list:
             if len(tstate[0])>2:
-                aux = pd.read_json(endpointcom+tstate[0])
+                aux = pd.DataFrame(request(endpointcom+tstate[0]).json())
+                #aux = pd.read_json(endpointcom+tstate[0])
                 D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
             else:
-                aux = pd.read_json(endpointreg+tstate[0])
+                #aux = pd.read_json(endpointreg+tstate[0])
+                aux = pd.DataFrame(request(endpointreg+tstate[0]).json())
                 D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
 
             for i in tstate:
                 if len(i)>2:
-                    aux = pd.read_json(endpointcom+i)
+                    #aux = pd.read_json(endpointcom+i)
+                    aux = pd.DataFrame(request(endpointcom+i).json())
                 else:
-                    aux = pd.read_json(endpointreg+i)
+                    #aux = pd.read_json(endpointreg+i)
+                    aux = pd.DataFrame(request(endpointreg+i).json())
                 if len(D_r_confirmed)>1:
                     D_r_confirmed += np.array(aux['confirmed'])
                     D_r_suspected += np.array(aux['suspected'])
@@ -1035,9 +1054,105 @@ class ImportData():
                     D_r_suspected = np.array(aux['suspected'])
         else:        
             if len(tstate)>2:
-                aux = pd.read_json(endpointcom+tstate)
+                #aux = pd.read_json(endpointcom+tstate)
+                aux = pd.DataFrame(request(endpointcom+tstate).json())
             else:
-                aux = pd.read_json(endpointreg+tstate)
+                #aux = pd.read_json(endpointreg+tstate)
+                aux = pd.DataFrame(request(endpointreg+tstate).json())
+
+            D_r_confirmed = np.array(aux['confirmed'])
+            D_r_suspected = np.array(aux['suspected'])            
+            D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+        
+
+
+        index = np.where(np.array(D_r_dates) >= initdate)[0][0] 
+        D_r_confirmed = D_r_confirmed[index:]
+        D_r_suspected = D_r_suspected[index:]
+        D_r_dates = D_r_dates[index:]
+        D_r_tr = [(D_r_dates[i]-initdate).days for i in range(len(D_r_dates))]
+
+        B_r_confirmed = D_r_confirmed.cumsum()
+        B_r_suspected = D_r_suspected.cumsum()
+
+        
+        if self:
+            self.Dr = D_r_confirmed
+            self.Dr_suspected = D_r_suspected
+            self.Br = B_r_confirmed
+            self.Br_suspected = B_r_suspected
+            self.Br_dates = D_r_dates
+            self.Br_tr = D_r_tr            
+            return
+        else:        
+            return D_r_confirmed,D_r_suspected,B_r_confirmed,B_r_suspected,D_r_dates,D_r_tr
+
+
+    # -------------------------------------- #
+    #          Deaths (DEIS) MinCiencia      #
+    # -------------------------------------- #
+    def importDeathsDEISMinCiencia(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv'):     
+        """
+            Import Accumulated Deaths
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - Br: Real accumulated deaths
+                - Br_tr: days from simulation first day
+                - Br_dates: data dates
+            Usage:
+                Br,Br_tr,Br_dates = importAccumulatedDeaths(self=None,tstate = '13',initdate = datetime(2020,5,15))
+        """
+        print('Importing Deaths by DEIS')
+
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")     
+             
+        data_confirmed = pd.read_csv('https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv')
+        data_suspected = pd.read_csv('https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_sospechososPorComuna.csv')
+
+        D_r_confirmed = []
+        D_r_suspected = []
+
+        if type(tstate) == list:
+            if len(tstate[0])>2:
+                aux = pd.DataFrame(request(endpointcom+tstate[0]).json())
+                #aux = pd.read_json(endpointcom+tstate[0])
+                D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+            else:
+                #aux = pd.read_json(endpointreg+tstate[0])
+                aux = pd.DataFrame(request(endpointreg+tstate[0]).json())
+                D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+
+            for i in tstate:
+                if len(i)>2:
+                    #aux = pd.read_json(endpointcom+i)
+                    aux = pd.DataFrame(request(endpointcom+i).json())
+                else:
+                    #aux = pd.read_json(endpointreg+i)
+                    aux = pd.DataFrame(request(endpointreg+i).json())
+                if len(D_r_confirmed)>1:
+                    D_r_confirmed += np.array(aux['confirmed'])
+                    D_r_suspected += np.array(aux['suspected'])
+                else:
+                    D_r_confirmed = np.array(aux['confirmed'])
+                    D_r_suspected = np.array(aux['suspected'])
+        else:        
+            if len(tstate)>2:
+                #aux = pd.read_json(endpointcom+tstate)
+                aux = pd.DataFrame(request(endpointcom+tstate).json())
+            else:
+                #aux = pd.read_json(endpointreg+tstate)
+                aux = pd.DataFrame(request(endpointreg+tstate).json())
 
             D_r_confirmed = np.array(aux['confirmed'])
             D_r_suspected = np.array(aux['suspected'])            
@@ -1068,13 +1183,12 @@ class ImportData():
 
 
 
-
     # ------------------------------------ #
     #    Datos Fallecidos Hospitalizados   #
     # ------------------------------------ #
     def importDeathsHospitalized(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv' ):     
         """
-            Import Acumulated Deaths
+            Import Accumulated Deaths
             input: 
                 - tstate: [string or string list] CUT por comuna o región
                 - initdate: datetime object with the initial date
@@ -1087,7 +1201,7 @@ class ImportData():
                 - Br_hosp_tr: Days since initdate
                 - Dr_hosp_dates: Dates
             Usage:
-                Dr_hosp, Dr_Nonhosp,Br_hosp, Br_Nonhosp, hosp_tr, hosp_dates =importAcumulatedDeathsHospitalized(tstate = '13',initdate = datetime(2020,5,15))
+                Dr_hosp, Dr_Nonhosp,Br_hosp, Br_Nonhosp, hosp_tr, hosp_dates =importAccumulatedDeathsHospitalized(tstate = '13',initdate = datetime(2020,5,15))
         """
         
         print('Importing Hospitalized/NonHospitalized Deaths')
@@ -1172,11 +1286,6 @@ class ImportData():
 
 
 
-    #self.importfallecidosacumulados = self.importAcumulatedDeaths
-
-
-
-    #self.importinfectadosactivosminciencia = self.importActiveInfectedMinciencia
 
     # ---------------------------------------- #
     #       Datos Subreporte de Infectados     #
@@ -1192,7 +1301,7 @@ class ImportData():
                 - initdate: datetime object with the initial date
                 - endpoint [deprecated]: 
             output: 
-                - I_ac_r: Real Acumulated infected
+                - I_ac_r: Real Accumulated infected
                 - I_ac_r_tr: days from simulation first day
                 - I_ac_r_dates: data dates
 
@@ -1511,6 +1620,123 @@ class ImportData():
         else:        
             return adjacency, adjacency_lvl
 
+
+    # ------------------------------------------- #
+    #    Import Effective Reproduction Number     #
+    # ------------------------------------------- #
+    def importR(self=None,tstate = '',initdate = None,endpointcounty = 'http://192.168.2.223:5006/getEffectiveReproductionAllComunas', endpointstates = 'http://192.168.2.223:5006/getEffectiveReproductionAllStates',user=None,password=None):     
+        """
+            Import Effective Reproduction Number
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - Br: Real accumulated deaths
+                - Br_tr: days from simulation first day
+                - Br_dates: data dates
+            Usage:
+                Br,Br_tr,Br_dates = importAccumulatedDeaths(self=None,tstate = '13',initdate = datetime(2020,5,15))
+        """
+        print('Importing Effective Reproduction Number')
+ 
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            request = self.request
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")     
+            request = requestdata(user,password) 
+
+        auxcounty = requests.get(endpointcounty).json()
+        auxstate = requests.get(endpointstates).json()
+        datacounty = pd.DataFrame(auxcounty['data'])
+        datastate = pd.DataFrame(auxstate['data'])
+                
+        R_eff_dates = [datetime.strptime(auxcounty['dates'][i][:10],'%Y-%m-%d') for i in range(len(auxcounty['dates']))]
+
+
+        if type(tstate) == list:
+            counties = [i for i in tstate if len(i)>2 ]
+            states = [i for i in tstate if len(i)==2 ]            
+            aux = []
+            for i in states:
+                aux.append(data.filter(regex='^'+i,axis=1))
+            
+            aux.append(data[counties])
+            R_eff = np.array(pd.concat(aux, axis=1).sum(axis=1))
+        
+        else:
+            if len(tstate) == 2:
+                R_eff = data.filter(regex='^'+tstate,axis=1).sum(axis=1)
+            elif len(tstate) > 2:
+                R_eff = (data[tstate])
+
+        R_
+        if type(tstate) == list:
+            if len(tstate[0])>2:
+                aux = pd.DataFrame(request(endpointcom+tstate[0]).json())
+                #aux = pd.read_json(endpointcom+tstate[0])
+                D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+            else:
+                #aux = pd.read_json(endpointreg+tstate[0])
+                aux = pd.DataFrame(request(endpointreg+tstate[0]).json())
+                D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+
+            for i in tstate:
+                if len(i)>2:
+                    #aux = pd.read_json(endpointcom+i)
+                    aux = pd.DataFrame(request(endpointcom+i).json())
+                else:
+                    #aux = pd.read_json(endpointreg+i)
+                    aux = pd.DataFrame(request(endpointreg+i).json())
+                if len(D_r_confirmed)>1:
+                    D_r_confirmed += np.array(aux['confirmed'])
+                    D_r_suspected += np.array(aux['suspected'])
+                else:
+                    D_r_confirmed = np.array(aux['confirmed'])
+                    D_r_suspected = np.array(aux['suspected'])
+        else:        
+            if len(tstate)>2:
+                #aux = pd.read_json(endpointcom+tstate)
+                aux = pd.DataFrame(request(endpointcom+tstate).json())
+            else:
+                #aux = pd.read_json(endpointreg+tstate)
+                aux = pd.DataFrame(request(endpointreg+tstate).json())
+
+            D_r_confirmed = np.array(aux['confirmed'])
+            D_r_suspected = np.array(aux['suspected'])            
+            D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+        
+
+
+        index = np.where(np.array(D_r_dates) >= initdate)[0][0] 
+        D_r_confirmed = D_r_confirmed[index:]
+        D_r_suspected = D_r_suspected[index:]
+        D_r_dates = D_r_dates[index:]
+        D_r_tr = [(D_r_dates[i]-initdate).days for i in range(len(D_r_dates))]
+
+        B_r_confirmed = D_r_confirmed.cumsum()
+        B_r_suspected = D_r_suspected.cumsum()
+
+        
+        if self:
+            self.Dr = D_r_confirmed
+            self.Dr_suspected = D_r_suspected
+            self.Br = B_r_confirmed
+            self.Br_suspected = B_r_suspected
+            self.Br_dates = D_r_dates
+            self.Br_tr = D_r_tr            
+            return
+        else:        
+            return D_r_confirmed,D_r_suspected,B_r_confirmed,B_r_suspected,D_r_dates,D_r_tr
+
+
+    
+
     # --------------------------- #
     #    Importar toda la data    #
     # --------------------------- #
@@ -1536,7 +1762,8 @@ class ImportData():
         self.importDailyInfected()
         #self.importSOCHIMI()
         self.importSOCHIMIMinCiencia()
-        self.importAcumulatedDeaths()
+        #self.importAccumulatedDeaths()
+        self.importDeathsDEIS()
         self.importActiveInfectedMinciencia()
 
         self.importDeathsHospitalized()
