@@ -85,8 +85,14 @@ class SEIR:
         # --------------------------- #
         #    Diferential Ecuations    #
         # --------------------------- #        
-        # dVariable/dt = sum(prob_i/in_time_i*in_State_i,i in in states) - sum(prob_i/out_time_i*out_State_i,i in in states) 
+        # dVariable/dt = sum(prob_i/in_time_i*in_State_i,i in in states) - sum(prob_i/out_time_i*out_State_i,i in in states)
         
+        self.NoT_T =  0
+        if self.T_T<0.5:
+            self.NoT_T = 1
+
+        #self.lambdatot = self.lambda_Q*testaccuracy
+
         # Susceptibles
         # dS/dt:
         self.dS=lambda t,S,E,I,R,I_T: self.chi(t) -self.alpha(t)*self.beta*S*(self.expinfection*(E)+I+I_T)/(self.N+self.k_I*(I+I_T)+self.k_R*R)+self.eta*R
@@ -116,12 +122,18 @@ class SEIR:
         # Detected and removed Infected
         self.de_I = lambda t,I: self.testaccuracy*self.psi(t)*I/self.population
 
-
+            
         # Infected that have been tested but not quarantined yet 
-        self.dI_T=lambda t,I,I_T: self.testaccuracy*self.lambda_Q*self.psi(t)*I/self.population*(1+self.lambda_Tr) - I_T/self.T_T
+        if self.NoT_T:
+            self.dI_T=lambda t,I,I_T: 0
+        else:
+            self.dI_T=lambda t,I,I_T: self.testaccuracy*self.lambda_Q*self.psi(t)*I/self.population*(1+self.lambda_Tr) - I_T/self.T_T
 
         # Quarantined
-        self.dQ= lambda t,I_T,Q: I_T/self.T_T - Q/self.T_Q
+        if self.NoT_T:        
+            self.dQ= lambda t,I_T,Q,I: - Q/self.T_Q + self.testaccuracy*self.lambda_Q*self.psi(t)*I/self.population*(1+self.lambda_Tr)
+        else:
+            self.dQ= lambda t,I_T,Q,I: - Q/self.T_Q + I_T/self.T_T 
 
 
     def integr(self,t0=0,T=500,h=0.01,E0init=False):
@@ -197,7 +209,7 @@ class SEIR:
             ydot[7]=self.de_I(t,y[2])
 
             ydot[8]=self.dI_T(t,y[2],y[8])
-            ydot[9]=self.dQ(t,y[8],y[9])
+            ydot[9]=self.dQ(t,y[8],y[9],y[2])
 
 
             
@@ -309,7 +321,7 @@ class SEIR:
             ydot[7]=self.de_I(t,y[2])
 
             ydot[8]=self.dI_T(t,y[2],y[8])
-            ydot[9]=self.dQ(t,y[8],y[9])            
+            ydot[9]=self.dQ(t,y[8],y[9],y[2])            
 
             return(ydot)
         initcond = np.array([S0,E0,I0,R0,I_ac0,I_d0,e0,e_I0,I_T0,Q0])  
