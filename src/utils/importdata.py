@@ -561,13 +561,15 @@ class ImportData():
         I_d_r_tr = list(range(len(I_d_r)))
         I_d_r_dates = [initdate + timedelta(days=i) for i in range(len(I_d_r_tr))]
 
-        outliers_init = (datetime(2020,6,15)-initdate).days
-        outliers_end = (datetime(2020,6,19)-initdate).days
+        if initdate < datetime(2020,6,15):
+            outliers_init = (datetime(2020,6,15)-initdate).days
+            outliers_end = (datetime(2020,6,19)-initdate).days
 
         I_d_r_smooth=pd.DataFrame(I_d_r)
 
-        I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
-        I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
+        if initdate < datetime(2020,6,15):
+            I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
+            I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
         
         if self:
@@ -608,7 +610,7 @@ class ImportData():
                 raise Exception("State code missing")
             if not initdate:
                 raise Exception("Initial date missing")
-        
+                        
         data = pd.read_csv(endpoint)
         
         if type(tstate) == list:            
@@ -631,13 +633,15 @@ class ImportData():
         I_d_r_tr = list(range(len(I_d_r)))
         I_d_r_dates = [initdate + timedelta(days=i) for i in range(len(I_d_r_tr))]
 
-        outliers_init = (datetime(2020,6,15)-initdate).days
-        outliers_end = (datetime(2020,6,19)-initdate).days
+        if initdate < datetime(2020,6,15):
+            outliers_init = (datetime(2020,6,15)-initdate).days
+            outliers_end = (datetime(2020,6,19)-initdate).days
 
         I_d_r_smooth=pd.DataFrame(I_d_r)
 
-        I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
-        I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
+        if initdate < datetime(2020,6,15):
+            I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
+            I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
         
         if self:
@@ -889,6 +893,98 @@ class ImportData():
             return
         else:        
             return UCI, UCI_tot, UTI, UTI_tot, VMI, VMI_tot, VMI_sospechoso, VMI_confirmado, sochimi_dates, sochimi_tr, sochimi, Hr, Hr_tot
+
+
+    # ----------------------------- #
+    #    Datos Ocupacion de Camas   #
+    # ----------------------------- #
+    def importICUBedOccupation(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None):
+        """
+        Import ICU Bed Occupation data per region.
+        Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
+        input:
+            - tstate: región
+            - initdate: Fecha de inicio
+            - endpoint: Data endpoint
+        output:
+            - sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot, 
+             (data frame, fechas, dias desde inicio sim, Hospitalizados, capacidad hospitalizados, ventilados, capacidad ventilados) 
+        
+        Normal Usage:
+            sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot = importSOCHIMI(tstate = '13', initdate = datetime(2020,5,15))
+        """
+        print('Importing ICU Beds Data') 
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            request = self.request
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
+            request = requestdata(user,password)
+
+
+        #if not self.credentials:
+        #    endpoint = endpoint+tstate[:2]
+        #    r = requests.get(endpoint) 
+        #    sochimi=pd.DataFrame(r.json())
+            
+        #else:
+        #    r = requests.get('https://api.cv19gm.org/getBedsAndVentilationByState?state='+tstate[:2], auth=HTTPBasicAuth(self.user, self.password))
+        #    sochimi=pd.DataFrame(r.json())
+
+
+        aux = request(endpoint).json()
+        data = pd.DataFrame(aux['data'])
+        dates = pd.DataFrame(aux['dates'])[0]
+
+        #sochimi=pd.DataFrame(request(endpoint+tstate[:2]).json())
+        if type(tstate) == list:
+            #counties = [i for i in tstate if len(i)>2 ]
+            states = [i for i in tstate if len(i)==2 ]            
+            capacity = []
+            occupied_covid = []
+            occupied_non_covid = []
+            for i in states:
+                capacity.append(data[i]['capacity'])
+                occupied_covid.append(data[i]['occupied_covid'])
+                occupied_non_covid.append(data[i]['occupied_non_covid'])
+            
+             
+            capacity =  np.array(capacity).sum(axis=0) 
+            occupied_covid =  np.array(occupied_covid).sum(axis=0) 
+            occupied_non_covid =  np.array(occupied_non_covid).sum(axis=0) 
+
+
+        else:
+            capacity = data[tstate[:2]]['capacity']
+            occupied_covid = data[tstate[:2]]['occupied_covid']
+            occupied_non_covid = data[tstate[:2]]['occupied_non_covid']
+
+
+        dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]        
+        index = np.where(np.array(dates) >= initdate)[0][0] 
+
+        UCI_capacity =list(capacity[index:])
+        UCI_use_covid =list(occupied_covid[index:])
+        UCI_use_noncovid =list(occupied_non_covid[index:])
+
+        UCI_dates = dates[index:]
+        UCI_tr = [(dates[i]-initdate).days for i in range(len(dates))]       
+               
+
+        if self:
+            self.UCI_capacity = UCI_capacity
+            self.UCI_use_covid = UCI_use_covid
+            self.UCI_use_noncovid = UCI_use_noncovid                        
+            self.UCI_dates = UCI_dates
+            self.UCI_tr = UCI_tr
+            return
+        else:        
+            return UCI_capacity,UCI_use_covid,UCI_use_noncovid,UCI_dates,UCI_tr
+
 
 
 
@@ -1218,20 +1314,29 @@ class ImportData():
         endpoint = 'http://192.168.2.223:5006/getDeathsOriginAllStates'
         aux = pd.DataFrame( requests.get(endpoint).json()['data'])
        
-        
         if type(tstate) == list:
-            aux = aux[tstate[0][:2]]
-            if len(tstate[0])>2:
-                print('No information for counties, importing state information')
-        else: 
-            aux = aux[tstate[:2]]
-            if len(tstate)>2:
-                print('No information for counties, importing state information')
+            counties = [i for i in tstate if len(i)>2 ]
+            states = [i for i in tstate if len(i)==2 ]            
+            aux_fromhospital = []
+            aux_notfromhospital = []
+            for i in states:
+                aux_fromhospital.append(aux[i]['fromHospital'])
+                aux_notfromhospital.append(aux[i]['notFromHospital'])
+            
+            #aux.append(data[counties])
+            Dr_hosp = np.array(aux_fromhospital).sum(axis=0)
+            Dr_Nonhosp = np.array(aux_notfromhospital).sum(axis=0)
 
-        
-        Dr_hosp = aux.loc['fromHospital']
-        Dr_Nonhosp = aux.loc['notFromHospital']
-        hosp_dates = [datetime.strptime(aux.loc['dates'][i][:10], '%Y-%m-%d') for i in range(len(Dr_hosp))]
+        else:
+            if len(tstate)>2:
+                print('No information for counties, getting regional info instead')
+            
+            Dr_hosp = aux[tstate[:2]]['fromHospital']            
+            Dr_Nonhosp = aux[tstate[:2]]['notFromHospital']
+            
+
+                
+        hosp_dates = [datetime.strptime(aux.loc['dates'][0][i][:10], '%Y-%m-%d') for i in range(len(Dr_hosp))]
         Br_hosp = np.cumsum(Dr_hosp)
         Br_Nonhosp = np.cumsum(Dr_Nonhosp)
         
@@ -1653,6 +1758,9 @@ class ImportData():
 
         auxcounty = requests.get(endpointcounty).json()
         auxstate = requests.get(endpointstates).json()
+
+        if tstate == '0' or tstate == '00':
+            auxnacional = requests.get('http://192.168.2.223:5006/getNationalEffectiveReproduction').json()
         datacounty = pd.DataFrame(auxcounty['data'])
         datastate = pd.DataFrame(auxstate['data'])
                 
@@ -1675,7 +1783,7 @@ class ImportData():
             elif len(tstate) > 2:
                 R_eff = (data[tstate])
 
-        R_
+        #R_
         if type(tstate) == list:
             if len(tstate[0])>2:
                 aux = pd.DataFrame(request(endpointcom+tstate[0]).json())
@@ -1761,12 +1869,13 @@ class ImportData():
 
         self.importDailyInfected()
         #self.importSOCHIMI()
-        self.importSOCHIMIMinCiencia()
+        #self.importSOCHIMIMinCiencia()
+        self.importICUBedOccupation()
         #self.importAccumulatedDeaths()
         self.importDeathsDEIS()
         self.importActiveInfectedMinciencia()
 
-        self.importDeathsHospitalized()
+        #self.importDeathsHospitalized()
         #self.importInfectedSubreport()
         #self.importpcrpop()        
         #self.importfallecidosexcesivos()        
