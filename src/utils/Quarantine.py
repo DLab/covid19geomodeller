@@ -28,6 +28,13 @@ np.array([tsim,max_mob,rem_mob,qp,iqt,fqt,movfunct])
 
 
 """
+def functionAdd(funct):
+    def f(t):
+        aux = 0
+        for i in funct:    
+            aux += i(t)
+        return aux
+    return f
 
 class Quarantine():
     """
@@ -188,7 +195,7 @@ def alphafunct(rem_mob,max_mob=0.85,qp=0,iqt=0,fqt=1000,movfunct = 'once'):
     return(alpha)
 
 
-
+# Increasing function
 def SeroPrevDynamics(t0,t1,t2,dailyincrease = 1,form='sig',df = 10):
     """
     Sero Prevalence Dynamics Function generator
@@ -214,18 +221,128 @@ def SeroPrevDynamics(t0,t1,t2,dailyincrease = 1,form='sig',df = 10):
     return chi
 
 
-
+"""
 def functionSum(a,b):
     def aux(t):
         return a(t)+b(t)
     return aux
+"""
 
 
+# square function
 def Exams(examrate,period,duty=50):
     """
-    Examination camping 
+    Examination campain 
     """
     def psi(t):
         return (examrate*signal.square(2*np.pi*t/period,duty) + examrate)/2
   
     return psi
+
+
+# Custom values through time
+def Events(values,days):
+    """
+    Event creator function. Create a time dependent function that returns the values setted in the 
+    values vector for the periods specified in the days vector. 
+    Input:
+    * values: list with the values for the different intervals
+    * days: list of lists of len == 2 with the values for the function on that v.
+    By default the value returned is 0 unless is stated otherwise
+    """
+
+    # for one interval
+    if type(not days[0]) == list and len(days == 2):
+        days = [[days[0],days[1]]]
+    
+    for i in range(len(values)):
+        if type(values[i]) == int or type(values[i]) == float:
+            aux = values[i]
+            values[i] = lambda t: aux
+    # define default function
+    def f(t):
+        return 0
+
+    functions = [f]
+    for i in range(len(values)):
+        def auxf(t,i=i):
+            return values[i](t)*(expit(10*(t-days[i][0])) - expit(10*(t-days[i][1]))) 
+        functions.append(auxf)
+
+    f = functionAdd(functions)
+    
+    return f
+
+
+    """
+    days = [[3,10],[15,25],[8,17]]
+    values = [1,5,3]
+    t = np.array(np.arange(0,30,0.1))
+    plt.plot(t,sumfunct(t))
+    plt.show()
+    """
+
+
+
+def square(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,phase='min',duty=0.5):
+    # phase en fraccion del periodo
+    def f(t): 
+        return signal.square(t,duty)
+    
+    if phase == 'min':
+        phi = np.pi*(2*init/period - 1.1)
+    elif phase == 'max':
+        phi = 2*np.pi*init/period
+    else:
+        phi = 2*np.pi*(init/period - phase)
+    def aux(t):    
+        return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
+        (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
+
+    return aux
+
+
+def sine(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,phase='min'):
+    # phase en fraccion del periodo
+    def f(t): 
+        return np.cos(t)
+    
+    if phase == 'min':
+        phi = np.pi*(2*init/period - 1)
+    elif phase == 'max':
+        phi = 2*np.pi*init/period
+    else:
+        phi = 2*np.pi*(init/period - phase)
+    def aux(t):    
+        return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
+        (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
+
+    return aux
+
+def sawtooth(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,phase='min',width=1):
+    # phase en fraccion del periodo
+    def f(t): 
+        return signal.sawtooth(t,width)
+    
+    if phase == 'min':
+        phi = np.pi*(2*init/period - 1.1)
+    elif phase == 'max':
+        phi = 2*np.pi*init/period
+    else:
+        phi = 2*np.pi*(init/period - phase)
+    def aux(t):    
+        return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
+        (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
+
+    return aux
+
+
+"""
+Testing:
+
+#def increasingfunct
+t = np.array(np.arange(0,50,0.1)) 
+plt.plot(t,aux(t))
+plt.show() 
+
+"""
