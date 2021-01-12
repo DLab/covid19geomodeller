@@ -242,7 +242,7 @@ class SEIR:
         # Detected cases
         self.I_det = self.I_det_prop*self.I
         self.I_ac_det = self.I_det_prop*self.I_ac
-        self.I__d_det = self.I_det_prop*self.I_d
+        self.I_d_det = self.I_det_prop*self.I_d
 
 
         # Prevalence: 
@@ -326,7 +326,7 @@ class SEIR:
             return(ydot)
         initcond = np.array([S0,E0,I0,R0,I_ac0,I_d0,e0,e_I0,I_T0,Q0])  
 
-        sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA')
+        sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
         
         self.t=sol.t 
 
@@ -354,7 +354,7 @@ class SEIR:
         # Detected cases
         self.I_det = self.I_det_prop*self.I
         self.I_ac_det = self.I_det_prop*self.I_ac
-        self.I__d_det = self.I_det_prop*self.I_d
+        self.I_d_det = self.I_det_prop*self.I_d
 
         # Prevalence: 
         self.prevalence_total = self.I_ac/self.population
