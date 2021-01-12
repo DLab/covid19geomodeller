@@ -49,7 +49,9 @@ class SEIRHVD:
             Htot: Hospital capacity, either an int or a function(t)
             Vtot: VMI capacity, either an int or a function(t)
     """
-    def __init__(self,tsim,beta,mu,alpha,k=0,chi = 0,k_I=0,k_R=0,Htot=30,Vtot=20,H0=0,V0=0,B0=0,D0=0,R0=0,I0=100,I_d0=10,I_ac0=100,SeroPrevFactor=1,expinfection=0,population=1000000,RealIC=None, initdate = None,Imi_det = 1,Ias_det = 1,Ise_det = 1,Icr_det = 1,SimIC=None):
+    def __init__(self,tsim,beta,mu,alpha,k=0,chi = 0,k_I=0,k_R=0,Htot=30,Vtot=20,
+    H0=0,V0=0,B0=0,D0=0,R0=0,I0=100,I_d0=10,I_ac0=100,SeroPrevFactor=1,expinfection=0,
+    population=1000000,RealIC=None, initdate = None,Imi_det = 1,Ias_det = 1,Ise_det = 1,Icr_det = 1,SimIC=None):
 
         self.tsim = tsim 
         self.beta = beta 
@@ -243,12 +245,12 @@ class SEIRHVD:
             self.population = population
 
             # Build Hospital Capacities
-            if type(Htot)==int:
+            if type(Htot)==int or type(Htot)==float:
                 self.Htot = np.poly1d(Htot) 
             else:
                 self.Htot = Htot
 
-            if type(Vtot)==int:
+            if type(Vtot)==int or type(Vtot)==float:
                 self.Vtot = np.poly1d(Vtot) 
             else:
                 self.Vtot = Vtot            
@@ -1168,7 +1170,7 @@ class SEIRHVD:
             Hout_ac0,V_ac0,R0,R_d0,D0,B0,Ise_D_d0,Icr_D_d0,Hse_D_d0,V_D_d0,Ise_D_ac0,Icr_D_ac0,Hse_D_ac0,V_D_ac0,V_need0,Hse_need0,Hout_need0])
 
         
-        sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA')
+        sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
         
         self.t=sol.t 
         
@@ -1236,6 +1238,7 @@ class SEIRHVD:
         self.peak = max(self.I)
         self.peak_t = self.t[self.peakindex]
         if self.initdate:
+            self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
             self.peak_date = self.initdate+timedelta(days=round(self.peak_t))
 
         # Detected Cases
@@ -1247,7 +1250,7 @@ class SEIRHVD:
         self.prevalence_total = self.I_ac/self.population
         self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
         self.prevalence_detected = [(self.Ias_det*self.Ias[i]+self.Imi_det*self.Imi[i]+self.Ise_det*self.Ise[i]+self.Icr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
-
+        
         return(sol)
 
 
