@@ -4,6 +4,8 @@ import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
 from scipy.special import expit
+import json
+
 
 """
 # ------------------------------------------------- #   
@@ -11,7 +13,41 @@ from scipy.special import expit
 #        Time dependent function constructors       #
 #                                                   #
 # ------------------------------------------------- #
+
+
+To Do:
+    * Crear una opción para el build donde si recibe un arreglo con diccionarios creadores de funciones, los sume con functionAddition. 
+    * A fitdata agregar la opción de trabajar con objetos de nuestras clases de datos. 
 """
+def build(input):
+    # crear un iterador que recorra el input y cree la función a partir de un comando exec:
+    # Acepta diccionarios o strings con forma de diccionario
+
+    if type(input)==str:
+        input_dict = json.loads(input)
+    elif type(input)==dict:
+        input_dic = input.copy()
+    else:
+        print('Constant value function: '+str(input))
+        def out(t):
+            return input
+        setattr(locals()['out'],'constructor',str(input))            
+        return out
+    try:
+        print("Executing "+input_dict['function'])
+    except:
+        raise SyntaxError("No function defined")
+    aux = 'out=' + input_dict['function']+"("
+    del input_dict['function']
+    for key, value in input_dict.items():
+        aux +=key+"="+str(value)+',' 
+    aux +=')'
+    print(aux)
+    ldict={}
+    exec(aux,globals(),ldict)
+    out = ldict['out']
+    setattr(locals()['out'],'constructor',str(input))
+    return locals()['out']
 
 def functionAddition(functarray):
     """
@@ -24,6 +60,14 @@ def functionAddition(functarray):
             aux += i(t)
         return aux
     return f
+
+def fitdata(time,values,degree=4,tsat=-1,endvalue = -10):
+    # Aproximate Hospitals capacity:
+    datamodel = np.poly1d(np.polyfit(time, values, degree))
+    tsat = time[tsat]
+    endvalue = np.mean(values[endvalue:])
+    f_out=lambda t: datamodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*endvalue
+    return f_out
 
 
 # Custom values through time
@@ -69,17 +113,17 @@ def Events(values,days,functions = []):
 
 
 
-def square(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,phase='min',duty=0.5):
+def square(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min',duty=0.5):
     # phase en fraccion del periodo
     def f(t): 
         return signal.square(t,duty)
     
-    if phase == 'min':
+    if initphase == 'min':
         phi = np.pi*(2*init/period - 1.1)
-    elif phase == 'max':
+    elif initphase == 'max':
         phi = 2*np.pi*init/period
     else:
-        phi = 2*np.pi*(init/period - phase)
+        phi = 2*np.pi*(init/period - initphase)
     def aux(t):    
         return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
         (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
@@ -87,34 +131,34 @@ def square(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,phase='min',d
     return aux
 
 
-def sine(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,phase='min'):
+def sine(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min'):
     # phase en fraccion del periodo
     def f(t): 
         return np.cos(t)
     
-    if phase == 'min':
+    if initphase == 'min':
         phi = np.pi*(2*init/period - 1)
-    elif phase == 'max':
+    elif initphase == 'max':
         phi = 2*np.pi*init/period
     else:
-        phi = 2*np.pi*(init/period - phase)
+        phi = 2*np.pi*(init/period - initphase)
     def aux(t):    
         return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
         (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
 
     return aux
 
-def sawtooth(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,phase='min',width=1):
+def sawtooth(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min',width=1):
     # phase en fraccion del periodo
     def f(t): 
         return signal.sawtooth(t,width)
     
-    if phase == 'min':
+    if initphase == 'min':
         phi = np.pi*(2*init/period - 1.1)
-    elif phase == 'max':
+    elif initphase == 'max':
         phi = 2*np.pi*init/period
     else:
-        phi = 2*np.pi*(init/period - phase)
+        phi = 2*np.pi*(init/period - initphase)
     def aux(t):    
         return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
         (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val

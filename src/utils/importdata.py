@@ -9,9 +9,31 @@ from datetime import datetime
 from datetime import timedelta
 import numpy as np
 from os import path
+from timeutils import timeJStoPy 
 
 """   
    SEIRHDV Import data
+
+
+           #regiones = [['Arica y Parinacota'],
+        #['Tarapacá'],
+        #['Antofagasta'],
+        #['Atacama'],
+        #['Coquimbo'],
+        #['Valparaíso'],
+        #['Metropolitana'],
+        #['O’Higgins'],
+        #['Maule'],
+        #['Ñuble'],
+        #['Biobío'],
+        #['Araucanía'],
+        #['Los Ríos'],
+        #['Los Lagos'],
+        #['Aysén'],
+        #['Magallanes']]
+
+        #cut = ['15','01','02','03','04','05','13','06','07','16','08','09','14','10','11','12'] 
+
 """
 def requestdata(user=None,password=None):
     # Esta funcion devolvera una funcion de request        
@@ -582,6 +604,62 @@ class ImportData():
             return np.array(I_d_r_smooth[0]), I_d_r_tr, I_d_r_dates
                 
 
+    # -------------------------------- #
+    #      Daily infected Informe Diario Minciencia    #
+    # -------------------------------- #
+
+    def importDailyInfectedNacional(self=None,tstate = '',initdate = None,endpoint = 'getNationalNewCases',user=None,password=None):     
+        """
+            Import daily infected
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - I_d_r: Real Daily infected
+                - I_d_r_tr: days from simulation first day
+                - I_d_r_dates: data dates
+            usage 
+                I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = '13101',initdate = datetime(2020,5,15))      
+        """
+        print('Importing Daily Infected')
+
+
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            request = self.request
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
+            request = requestdata(user,password)
+
+
+        data = pd.DataFrame(request(endpoint).json()['cases'])[0]
+        dates = pd.DataFrame(request(endpoint).json()['dates'])[0]       
+
+
+        # Get and filter by dates               
+        I_d_r_dates = [timeJStoPy(i) for i in dates]        
+
+        index = np.where(np.array(I_d_r_dates) >= initdate)[0][0] 
+        I_d_r = np.array(data[index:])
+        I_d_r_dates = I_d_r_dates[index:]
+        I_d_r_tr = [(I_d_r_dates[i]-initdate).days for i in range(len(I_d_r))]        
+                
+        if self:
+            self.I_d_r = I_d_r#np.array(I_d_r_smooth[0])
+            self.I_d_r_tr = I_d_r_tr
+            self.I_d_r_dates = I_d_r_dates
+            self.I_d_r_raw = I_d_r
+            return
+        else:        
+            return I_d_r, I_d_r_tr, I_d_r_dates
+                
+
+
     # ------------------------------------------ #
     #      Daily infected Smoothed MinCiencia    #
     # ------------------------------------------ #
@@ -612,7 +690,8 @@ class ImportData():
                 raise Exception("Initial date missing")
                         
         data = pd.read_csv(endpoint)
-        
+
+
         if type(tstate) == list:            
             I_ac_r = data.loc[data['Codigo region'].isin(tstate)].iloc[:,5:-1]            
             I_ac_r = I_ac_r.append(data.loc[data['Codigo comuna'].isin(tstate)].iloc[:,5:-1])
@@ -704,13 +783,17 @@ class ImportData():
         I_d_r_tr = list(range(len(I_d_r)))
         I_d_r_dates = [initdate + timedelta(days=i) for i in range(len(I_d_r_tr))]
 
-        outliers_init = (datetime(2020,6,15)-initdate).days
-        outliers_end = (datetime(2020,6,19)-initdate).days
+
 
         I_d_r_smooth=pd.DataFrame(I_d_r)
 
-        I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
-        I_d_r_smooth[:outliers_end] += np.round(I_d_r_smooth[:outliers_end]*31412/np.sum(I_d_r_smooth[:outliers_end]))
+        outliers_init = (datetime(2020,6,15)-initdate).days
+        outliers_end = (datetime(2020,6,19)-initdate).days
+
+        if outliers_end>0:
+            I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
+            I_d_r_smooth[:outliers_end] += np.round(I_d_r_smooth[:outliers_end]*31412/np.sum(I_d_r_smooth[:outliers_end]))
+
         I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
         
