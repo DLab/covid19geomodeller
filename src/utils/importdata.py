@@ -1055,7 +1055,7 @@ class ImportData():
         UCI_use_noncovid =list(occupied_non_covid[index:])
 
         UCI_dates = dates[index:]
-        UCI_tr = [(dates[i]-initdate).days for i in range(len(dates))]       
+        UCI_tr = [(UCI_dates[i]-initdate).days for i in range(len(UCI_dates))]       
                
 
         if self:
@@ -1244,6 +1244,8 @@ class ImportData():
             D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
         
 
+        B_r_confirmed = D_r_confirmed.cumsum()
+        B_r_suspected = D_r_suspected.cumsum()
 
         index = np.where(np.array(D_r_dates) >= initdate)[0][0] 
         D_r_confirmed = D_r_confirmed[index:]
@@ -1251,8 +1253,9 @@ class ImportData():
         D_r_dates = D_r_dates[index:]
         D_r_tr = [(D_r_dates[i]-initdate).days for i in range(len(D_r_dates))]
 
-        B_r_confirmed = D_r_confirmed.cumsum()
-        B_r_suspected = D_r_suspected.cumsum()
+        B_r_confirmed = B_r_confirmed[index:]
+        B_r_suspected = B_r_suspected[index:]
+
 
         
         if self:

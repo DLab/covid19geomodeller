@@ -5,7 +5,6 @@ SEIRHVD Model
 """
 
 import numpy as np
-
 from scipy.integrate import solve_ivp
 from scipy.special import expit
 from joblib import Parallel, delayed
@@ -15,6 +14,15 @@ from numpy import linalg as LA
 import multiprocessing  
 from datetime import datetime
 from datetime import timedelta
+import toml
+
+import sys
+
+from pathlib import Path
+sys.path.insert(1, '/utils/')
+sys.path.insert(1, '../utils/')
+from importdata import ImportData
+import timeutils
 
 """
 To do:
@@ -48,16 +56,35 @@ class SEIRHVD:
             k: Saturation Kynetics Dynamics factor
             Htot: Hospital capacity, either an int or a function(t)
             Vtot: VMI capacity, either an int or a function(t)
-    """
-    def __init__(self,tsim,beta,mu,alpha,k=0,chi = 0,k_I=0,k_R=0,Htot=30,Vtot=20,
-    H0=0,V0=0,B0=0,D0=0,R0=0,I0=100,I_d0=10,I_ac0=100,SeroPrevFactor=1,expinfection=0,
-    population=1000000,RealIC=None, initdate = None,Imi_det = 1,Ias_det = 1,Ise_det = 1,Icr_det = 1,SimIC=None):
 
-        self.tsim = tsim 
-        self.beta = beta 
-        self.mu = mu 
+
+            CFG = configuration file in TOML
+    """
+    def __init__(self,cfg = None, RealData=None, tsim=None,beta=None,mu=None,alpha=None,k=None,chi =None,k_I=None,k_R=None,Htot=None,Vtot=None,
+    H0=None,V0=None,B0=None,D0=None,R0=None,I0=None,I_d0=None,I_ac0=None,SeroPrevFactor=None,expinfection=None,
+    population=None, initdate = None,Imi_det = None,Ias_det =None,Ise_det =None,Icr_det =None,SimIC=None, IC = None):
         
-        self.alpha = alpha        
+        if not cfg:
+            return None
+
+        cfgdata = toml.load(cfg)
+        self.__dict__.update(cfgdata['parameters'])
+
+        # Initial conditions            
+        if cfgdata['realdata']['realdata']:
+            self.__dict__.update(cfgdata['realdata'])
+            self.initdate = timeutils.timetxttoDatetime(self.initdate)
+            ImportData()
+        else:
+            self.realdata = False
+            self.initdate = False
+
+        
+        """
+        self.tsim = tsim
+        self.beta = beta
+        self.mu = mu
+        self.alpha = alpha
 
         self.SeroPrevFactor = SeroPrevFactor
         self.expinfection = expinfection
@@ -68,6 +95,8 @@ class SEIRHVD:
         self.Icr_det = Icr_det # Fraction of asymptomatic infected detected        
 
         self.SimIC = SimIC
+
+        self.IC = IC # Initial Conditions. 
 
 
         self.k = k
@@ -83,7 +112,7 @@ class SEIRHVD:
         else:
             self.chi = chi 
 
-        """
+        
         I0 = Imi_det*Imi + Ias_det*Ias + Icr + Ise 
         Itot = Imi +  Icr + Ise  + Iac 
         Ias = Itot * pas
@@ -98,16 +127,16 @@ class SEIRHVD:
         """
         self.gw=20
 
-        self.initdate = initdate 
+
+
         # Initial Conditions:        
         #self.setinitvalues()  
-        if RealIC:
-            IC = RealIC
+        if RealData:
+            IC = RealData
             # Use initial conditions object/dictionary with realworld imported initial conditions
             
             # Aproximate Hospitals capacity:
-            #Hcmodel = np.poly1d(np.polyfit(IC.sochimi_tr, IC.Hr_tot, 4))
-            Hcmodel = np.poly1d(30000)
+            Hcmodel = np.poly1d(np.polyfit(IC.sochimi_tr, IC.Hr_tot, 4))
             tsat = IC.sochimi_tr[-1]
             Hmax = np.mean(IC.Hr_tot[-10:])
             self.Htot=lambda t: Hcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Hmax  
@@ -118,10 +147,7 @@ class SEIRHVD:
             self.Vtot=lambda t: Vcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Vmax #+ 1000
 
             # Set Initial values
-            if type(IC.Hr) == list:
-                self.H0 = IC.Hr[0]
-            else:
-                self.H0 = IC.Hr
+            self.H0 = IC.Hr[0]
             self.V = IC.Vr[0]
             self.B = IC.Br[0]
             self.D = IC.Br[1]-IC.Br[0]
@@ -152,7 +178,7 @@ class SEIRHVD:
             self.Hout_ac = 0
             self.V_ac = 0
             
-            self.setparams()
+            self.setparamsalpj
             self.Einit = False
             self.setrelationalvalues()
             self.setequations()
@@ -323,14 +349,14 @@ class SEIRHVD:
         # --------------------------- # 
        
         # 0) dS/dt:
-        self.dS=lambda t,S,E,Ias,Imi,Ise,Icr,R,D: self.chi(t) - self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k_I*(Ias+Imi+Ise+Icr))-self.betaD*D+self.eta*R
+        self.dS=lambda t,S,E,Ias,Imi,Ise,Icr,R,D: self.chi(t) - self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k_I*(Ias+Imi+Ise+Icr) + self.k_R*R)-self.betaD*D+self.eta*R
         
         # --------------------------- #
         #           Exposed           #
         # --------------------------- #        
         
         # 1) dE_as/dt
-        self.dE = lambda t,S,E,Ias,Imi,Ise,Icr: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k_I*(Ias+Imi+Ise+Icr)) \
+        self.dE = lambda t,S,E,Ias,Imi,Ise,Icr: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k*(Ias+Imi+Ise+Icr)) \
             -self.pE_Ias/self.tE_Ias*E -self.pE_Imi/self.tE_Imi*E-self.pE_Ise/self.tE_Ise*E-self.pE_Icr/self.tE_Icr*E
  
         # 2) Daily dE_as/dt
