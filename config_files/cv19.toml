@@ -1,0 +1,32 @@
+# Pandemic Suite Configuration File
+
+title = "Pandemic Suite Configuration File"
+
+[Model]
+name = "SEIR"
+states = ['S','E','I','R'] # Fechas de primera clase
+
+[Transition Parameters]
+
+
+[database]
+server = "192.168.1.1"
+ports = [ 8001, 8001, 8002 ]
+connection_max = 5000
+enabled = true
+
+[servers]
+
+  # La sangría (tabulaciones y/o espacios) está permitida pero no es obligatoria
+  [servers.alpha]
+  ip = "10.0.0.1"
+  dc = "eqdc10"
+
+  [servers.beta]
+  ip = "10.0.0.2"
+  dc = "eqdc10"
+
+[clients]
+data = [ ["gamma", "delta"], [1, 2] ]
+
+
