@@ -11,32 +11,41 @@ from datetime import date
 from datetime import timedelta
 import numpy as np
 from os import path
+import matplotlib.pyplot as plt
+
+import sys
+from pathlib import Path
+sys.path.insert(1, '/utils/')
+sys.path.insert(1, '../utils/')
 from timeutils import timeJStoPy 
 
 """   
-   SEIRHDV Import data
+   Import and analyse data 
 
 
-           #regiones = [['Arica y Parinacota'],
-        #['Tarapacá'],
-        #['Antofagasta'],
-        #['Atacama'],
-        #['Coquimbo'],
-        #['Valparaíso'],
-        #['Metropolitana'],
-        #['O’Higgins'],
-        #['Maule'],
-        #['Ñuble'],
-        #['Biobío'],
-        #['Araucanía'],
-        #['Los Ríos'],
-        #['Los Lagos'],
-        #['Aysén'],
-        #['Magallanes']]
+    To Do:
+        * Save data to file 
+        * Load data from file
+        * Creación de df de información (self.info) sobre los datos (self.data)
+        * Estandarizar nombres de variables de hospitalización
+        * Expandir creación de dataframe a todas las funciones de importación
+        * Función que devuelva serie de tiempo sin nulls. Puede ser necesario para funciones de análisis de datos
+        * Manually add data ()
 
-        #cut = ['15','01','02','03','04','05','13','06','07','16','08','09','14','10','11','12'] 
+    self.resume:
+        country,state,county,healthservice, population, initdate, update_date, dataindex
+    self.datainfo:
+        endpoint,initdate,enddate,update_date,sim_var, complete name, additional info.
+
+
+    CUT Regiones:
+        Names = ['Arica y Parinacota','Tarapacá','Antofagasta','Atacama','Coquimbo','Valparaíso','Metropolitana','O’Higgins','Maule','Ñuble','Biobío','Araucanía','Los Ríos','Los Lagos','Aysén','Magallanes']
+        cut =   ['15',                '01',      '02',         '03',     '04',      '05',        '13',           '06',       '07',   '16',   '08',    '09',       '14',      '10',       '11',   '12'] 
 
 """
+
+
+
 def dataretriever(user=None,password=None):
     # Esta funcion devolvera una funcion de request        
     def request(endpoint):
@@ -50,6 +59,16 @@ def dataretriever(user=None,password=None):
             aux = requests.get('http://192.168.2.223:5006/'+endpoint)
         return aux
     return request
+
+
+def dfappend(df,values,days,dataname):
+    length = len(df)
+    aux = [np.nan for i in range(length)]
+    iterator = iter(values)
+    for i in days:
+        aux[i] = next(iterator)
+    auxdf = pd.DataFrame({dataname:aux})
+    return pd.concat([df,auxdf],axis=1)
 
 class ImportData():
     """
@@ -86,9 +105,6 @@ class ImportData():
         state = '13'
         initdate = datetime(2020,5,15)
 
-        user = 'afosr' 
-        password = '5pI50sOjPTDlpH'
-
         data = ImportData(state,initdate, user, password)
 
 
@@ -96,12 +112,13 @@ class ImportData():
          - Agregar credenciales desde importDeathDEIS hacia abajo
 
     """    
-    def __init__(self,tstate,initdate = None,enddate = datetime.now(),user = None,password = None, data = None):
-        if data:
-            if type(data) == str:
-                self.data = pd.read_csv(data)
-            elif type(data) == pd.core.frame.DataFrame:
-                self.data = data
+    def __init__(self,tstate=None, initdate = None,enddate = datetime.now(),user = None,password = None, localdata = None):
+        if localdata:
+            if type(localdata) == str:
+                self.data = pd.read_csv(localdata)
+                #self.load(localdata)
+            elif type(localdata) == pd.core.frame.DataFrame:
+                self.data = localdata
             else:
                 raise DataError
             
@@ -109,8 +126,9 @@ class ImportData():
             tdelta = enddate - initdate 
             dates = [initdate + timedelta(days=i) for i in range(tdelta.days + 1) ] 
             days = [i for i in range(tdelta.days + 1)] 
-            self.data = pd.DataFrame({'day':days,'date':dates})
+            self.data = pd.DataFrame({'days':days,'dates':dates})
 
+        
         self.tstate = tstate
         self.initdate = initdate
         
@@ -131,10 +149,90 @@ class ImportData():
 
         self.request = dataretriever(user,password)
 
+    # --------------------------- #
+    #    Importar toda la data    #
+    # --------------------------- #
 
-    # ------------------------------- #
-    #        Importar Data Real       #
-    # ------------------------------- #
+    def importdata(self):
+        print('Importing General Data')
+        try:
+            self.importPopulation()
+        except:
+            print('Dlab Endpoint Error')
+            self.importPopulationMinCiencia()
+        try:
+            self.importActiveInfected()
+        except:
+            print('Dlab Endpoint Error')
+            self.importActiveInfectedMinciencia()
+        try:
+            self.importAccumulatedInfected()
+        except:
+            print('Dlab Endpoint Error')            
+            self.importAccumulatedInfectedMinCiencia()
+
+        self.importDailyInfected()
+        #self.importSOCHIMI()
+        #self.importSOCHIMIMinCiencia()
+        self.importICUBedOccupation()
+        #self.importAccumulatedDeaths()
+        self.importDeathsDEIS()
+        #self.importActiveInfectedMinciencia()
+
+        #self.importDeathsHospitalized()
+        #self.importInfectedSubreport()
+        #self.importpcrpop()        
+        #self.importfallecidosexcesivos()        
+        print('Done')
+
+    # -------------------------- #
+    #            Plot            #
+    # -------------------------- #
+    def plot(self,x,y,label = 'default',color = None,thickness = None,type = 'line',ylabel='',xlabel = ''):
+        # Drop na values
+        auxdata = self.data[[x,y]].dropna()
+        if type == 'line':
+            plt.plot(auxdata[x],auxdata[y],label=y+' data') 
+        elif type == 'scatter':
+            plt.scatter(auxdata[x],auxdata[y],label=y+' data') 
+        if xlabel:
+            plt.xlabel(xlabel)
+        else:
+            plt.xlabel(x)
+
+        plt.ylabel(ylabel)
+        plt.legend(loc=0)        
+        return
+
+    # ---------------------------- #
+    #         Save Data            #
+    # ---------------------------- #
+    def save(self,filename):        
+        print('Saving Data')
+        self.data.to_csv(filename)
+        return
+
+    # ---------------------------- #
+    #         Load Data            #
+    # ---------------------------- #
+    def load(self,filename):
+        # Drop na values
+        print('Loading Data')
+        self.data = pd.read_csv(filename)
+        # Process the data - create de corresponding variables and dataframes:
+        return
+
+
+    # ------------------------------ #
+    #       Add Data Manually        #
+    # ------------------------------ #
+    def adddata(self,data,dates=None,days=None,initdate=None):
+        print('Adding Data')
+        # We use initdate in the case they give a days vector and it doesn't fit the actual data size        
+        
+        
+        
+        return
 
     # -------------------------------- #
     #            Population            #
@@ -266,7 +364,7 @@ class ImportData():
     #          Active Infected         #
     # -------------------------------- #
 
-    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = 'getActiveCasesAllComunas',user=None,password=None):
+    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = 'getActiveCasesAllComunas',user=None,password=None, name='I'):
         """
             Import Active infected
             This function imports the active infected calculated as the infected that are within their 14 days since exposure.
@@ -336,6 +434,10 @@ class ImportData():
         Ir=Ir[index:]
         Ir_dates=Ir_dates[index:]
         tr = [(Ir_dates[i]-initdate).days for i in range(len(Ir))]
+
+        # Add data to Pandas DataFrame
+        print('updating database')
+        self.data = dfappend(self.data,Ir,tr,name)
         
         if self:
             self.Ir = Ir
@@ -349,7 +451,7 @@ class ImportData():
     # ---------------------------------------- #
     #    Datos Infectados activos Minciencia   #
     # ---------------------------------------- #
-    def importActiveInfectedMinciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv' ):     
+    def importActiveInfectedMinciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv',name = 'I' ):     
         """
             Import Active infected Minciencia
             input: 
@@ -392,7 +494,11 @@ class ImportData():
         I_minciencia_r_dates = I_minciencia_r_dates[index:]
         I_minciencia_r_tr = [(I_minciencia_r_dates[i]-initdate).days for i in range(len(I_minciencia_r))]
         
-        
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,I_minciencia_r,I_minciencia_r_tr,name)
+
+
         if self:
             self.I_minciencia_r = I_minciencia_r
             self.I_minciencia_r_dates = I_minciencia_r_dates
@@ -405,7 +511,7 @@ class ImportData():
     # -------------------------------- #
     #      Accumulated Infected        #
     # -------------------------------- #
-    def importAccumulatedInfected(self=None,tstate = '',initdate = None, endpoint = 'getTotalCasesAllComunas',user=None,password=None):     
+    def importAccumulatedInfected(self=None,tstate = '',initdate = None, endpoint = 'getTotalCasesAllComunas',user=None,password=None, name = 'I_ac'):     
         """
             Import acumulated infected
             This Function imports the selected area accumulated infected from CyV Endpoint
@@ -478,7 +584,12 @@ class ImportData():
         I_ac_r = I_ac_r[index:]
         I_ac_r_dates = I_ac_r_dates[index:]
         I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]        
-               
+
+
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,I_ac_r,I_ac_r_tr,name)
+
         if self:
             self.I_ac_r = I_ac_r
             self.I_ac_r_dates = I_ac_r_dates
@@ -488,7 +599,7 @@ class ImportData():
             return I_ac_r,I_ac_r_tr,I_ac_r_dates
 
 
-    def importAccumulatedInfectedMinCiencia(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv'):     
+    def importAccumulatedInfectedMinCiencia(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_ac'):     
         """
             Import acumulated infected
             input: 
@@ -525,7 +636,11 @@ class ImportData():
         index = np.where(np.array(I_ac_r_dates) >= initdate)[0][0] 
         I_ac_r = I_ac_r[index:]
         I_ac_r_dates = I_ac_r_dates[index:]
-        I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]        
+        I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]     
+
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,I_ac_r,I_ac_r_tr,name)           
                
         if self:
             self.I_ac_r = np.array(I_ac_r)
@@ -539,7 +654,7 @@ class ImportData():
     #      Daily infected Smoothed     #
     # -------------------------------- #
     # Created by Felipe Castillo
-    def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'getTotalCasesAllComunas',user=None,password=None):     
+    def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'getTotalCasesAllComunas',user=None,password=None, name = 'I_d'):     
         """
             Import daily infected
             input: 
@@ -553,6 +668,11 @@ class ImportData():
             usage 
                 I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = '13101',initdate = datetime(2020,5,15))      
         """
+
+        endpoint_counties = 'getNewCasesAllCounties'
+        endpoint_regions = 'getNewCasesAllStates'
+        endpoint_national = 'getNationalNewCases'
+
         print('Importing Daily Infected')
 
         if self:
@@ -567,64 +687,68 @@ class ImportData():
             request = dataretriever(user,password)
 
 
-        data = pd.DataFrame(request(endpoint).json()['data'])
-        dates = pd.DataFrame(request(endpoint).json()['dates'])[0]
+        #data = pd.DataFrame(request(endpoint).json()['data'])
+        #dates = pd.DataFrame(request(endpoint).json()['dates'])[0]
 
+        # Multiple data
         if type(tstate) == list:
             counties = [i for i in tstate if len(i)>2 ]
             states = [i for i in tstate if len(i)==2 ]            
             aux = []
+            data = pd.DataFrame(request(endpoint_counties).json()['data'])
+            dates = pd.DataFrame(request(endpoint_counties).json()['dates'])[0]            
             for i in states:
                 aux.append(data.filter(regex='^'+i,axis=1))
             
             aux.append(data[counties])
-            I_ac_r = np.array(pd.concat(aux, axis=1).sum(axis=1))
+            I_d_r = np.array(pd.concat(aux, axis=1).sum(axis=1))
         
+
+        # Single data
         else:
+            # National
+            if tstate == '0' or tstate == 0:
+                I_d_r = pd.DataFrame(request(endpoint_national).json()['cases'])[0]
+                dates = pd.DataFrame(request(endpoint_national).json()['dates'])[0]
+            # Regions                
             if len(tstate) == 2:
-                I_ac_r = np.array(data.filter(regex='^'+tstate,axis=1).sum(axis=1))
+                I_d_r = pd.DataFrame(request(endpoint_regions).json()['data'])[tstate]
+                dates = pd.DataFrame(request(endpoint_regions).json()['dates'])[0]                
+                
+            # Counties
             elif len(tstate) > 2:
-                I_ac_r = np.array(data[tstate])
+                I_d_r = pd.DataFrame(request(endpoint_counties).json()['data'])[tstate]
+                dates = pd.DataFrame(request(endpoint_counties).json()['dates'])[0]
+                
 
         # Get and filter by dates
         
-        I_ac_r_dates = [datetime.strptime(i[:10],'%Y-%m-%d') for i in dates]        
-        index = np.where(np.array(I_ac_r_dates) >= initdate)[0][0] 
-        I_ac_r = I_ac_r[index:]
-        I_ac_r_dates = I_ac_r_dates[index:]
-        I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]        
-        
-        # Create daily infected from Interpolating and diferentiating the acumulated infected
-        I_d_r = np.diff(np.interp(list(range(I_ac_r_tr[-1])),I_ac_r_tr,I_ac_r))
-        I_d_r_tr = list(range(len(I_d_r)))
-        I_d_r_dates = [initdate + timedelta(days=i) for i in range(len(I_d_r_tr))]
+        I_d_dates = [datetime.strptime(i[:10],'%Y-%m-%d') for i in dates]
+        index = np.where(np.array(I_d_dates) >= initdate)[0][0] 
+        I_d_r = I_d_r[index:]
+        I_d_dates = I_d_dates[index:]
+        I_d_tr = [(I_d_dates[i]-initdate).days for i in range(len(I_d_r))]        
 
-        if initdate < datetime(2020,6,15):
-            outliers_init = (datetime(2020,6,15)-initdate).days
-            outliers_end = (datetime(2020,6,19)-initdate).days
 
-        I_d_r_smooth=pd.DataFrame(I_d_r)
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,I_d_r,I_d_tr,name) 
 
-        if initdate < datetime(2020,6,15):
-            I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
-            I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
-
-        
         if self:
-            self.I_d_r = np.array(I_d_r_smooth[0])
-            self.I_d_r_tr = I_d_r_tr
-            self.I_d_r_dates = I_d_r_dates
-            self.I_d_r_raw = I_d_r
+            self.I_d_r = np.array(I_d_r)
+            self.I_d_r_tr = I_d_tr
+            self.I_d_r_dates = I_d_dates
+
             return
         else:        
-            return np.array(I_d_r_smooth[0]), I_d_r_tr, I_d_r_dates
+            return np.array(I_d_r), I_d_tr, I_d_dates
                 
 
-    # -------------------------------- #
-    #      Daily infected Informe Diario Minciencia    #
-    # -------------------------------- #
+    # -------------------------------------------------- #
+    #       Daily infected Informe Diario Minciencia     #
+    # -------------------------------------------------- #
 
-    def importDailyInfectedNacional(self=None,tstate = '',initdate = None,endpoint = 'getNationalNewCases',user=None,password=None):     
+    def importDailyInfectedNacional(self=None,tstate = '',initdate = None,endpoint = 'getNationalNewCases',user=None,password=None,name = 'I_d'):     
         """
             Import daily infected
             input: 
@@ -663,7 +787,11 @@ class ImportData():
         index = np.where(np.array(I_d_r_dates) >= initdate)[0][0] 
         I_d_r = np.array(data[index:])
         I_d_r_dates = I_d_r_dates[index:]
-        I_d_r_tr = [(I_d_r_dates[i]-initdate).days for i in range(len(I_d_r))]        
+        I_d_r_tr = [(I_d_r_dates[i]-initdate).days for i in range(len(I_d_r))]       
+
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,I_d_r,I_d_r_tr,name)          
                 
         if self:
             self.I_d_r = I_d_r#np.array(I_d_r_smooth[0])
@@ -680,7 +808,7 @@ class ImportData():
     #      Daily infected Smoothed MinCiencia    #
     # ------------------------------------------ #
     # Created by Felipe Castillo
-    def importDailyInfectedMinCiencia(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
+    def importDailyInfectedMinCiencia(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_d' ):     
         """
             Import daily infected
             input: 
@@ -738,6 +866,9 @@ class ImportData():
             I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
             I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,np.array(I_d_r_smooth[0]),I_d_r_tr,name)  
         
         if self:
             self.I_d_r = np.array(I_d_r_smooth[0])
@@ -754,7 +885,7 @@ class ImportData():
     #      Daily infected Smoothed with backpropagation     #
     # ----------------------------------------------------- #
     # Created by Felipe Castillo
-    def importDailyInfectedBackprop(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv' ):     
+    def importDailyInfectedBackprop(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_d' ):     
         """
             Import daily infected smoothed with Backpropagation
             This function smoothes the daily infected thata and distributes homogeneously the 30k excess cases added in ~2020-6-16
@@ -812,9 +943,12 @@ class ImportData():
 
         I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
-        
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,I_d_r_smooth,I_d_r_tr,name)  
+
         if self:
-            self.I_d_r = I_d_r
+            self.I_d_r = I_d_r_smooth
             self.I_d_r_tr = I_d_r_tr
             self.I_d_r_dates = I_d_r_dates
             return
@@ -823,7 +957,9 @@ class ImportData():
                 
     
 
-    #self.importinfectadosdiarios = self.importDailyInfected
+    # --------------------------------------------------------- #
+    #                 Ocupación Hospitalaria                    #
+    # --------------------------------------------------------- #    
 
     # ------------------ #
     #    Datos Sochimi   #
@@ -997,7 +1133,7 @@ class ImportData():
     # ----------------------------- #
     #    Datos Ocupacion de Camas   #
     # ----------------------------- #
-    def importICUBedOccupation(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None):
+    def importICUBedOccupation(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None, name = ['UCI_capacity','UCI_use_covid','UCI_use_noncovid']):
         """
         Import ICU Bed Occupation data per region.
         Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
@@ -1071,8 +1207,14 @@ class ImportData():
         UCI_use_noncovid =list(occupied_non_covid[index:])
 
         UCI_dates = dates[index:]
-        UCI_tr = [(dates[i]-initdate).days for i in range(len(dates))]       
+        UCI_tr = [(UCI_dates[i]-initdate).days for i in range(len(UCI_dates))]       
                
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  
+        self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  
+        self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])  
+        
 
         if self:
             self.UCI_capacity = UCI_capacity
@@ -1084,6 +1226,108 @@ class ImportData():
         else:        
             return UCI_capacity,UCI_use_covid,UCI_use_noncovid,UCI_dates,UCI_tr
 
+
+    # ---------------------------------------------- #
+    #    Datos Ocupacion de Camas y Ventiladores     #
+    # ---------------------------------------------- #
+    def importHospitalization(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None, name = ['UCI_capacity','UCI_use_covid','UCI_use_noncovid']):
+        """
+        Import ICU Bed Occupation data per region.
+        Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
+        input:
+            - tstate: región
+            - initdate: Fecha de inicio
+            - endpoint: Data endpoint
+        output:
+            - sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot, 
+             (data frame, fechas, dias desde inicio sim, Hospitalizados, capacidad hospitalizados, ventilados, capacidad ventilados) 
+        
+        Normal Usage:
+            sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot = importSOCHIMI(tstate = '13', initdate = datetime(2020,5,15))
+        """
+
+        endpoint_nacional = 'getAllBedsAndVentilation'
+        endpoint_regional = 'getBedsAndVentilationByState?state='
+        endpoint_comunal = 'getBedsAndVentilationByComuna?comuna='
+        endpoint_ssalud = ' '
+
+        print('Importing Hospitalization Data')
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            request = self.request
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
+            request = dataretriever(user,password)
+
+
+        #if not self.credentials:
+        #    endpoint = endpoint+tstate[:2]
+        #    r = requests.get(endpoint) 
+        #    sochimi=pd.DataFrame(r.json())
+            
+        #else:
+        #    r = requests.get('https://api.cv19gm.org/getBedsAndVentilationByState?state='+tstate[:2], auth=HTTPBasicAuth(self.user, self.password))
+        #    sochimi=pd.DataFrame(r.json())
+
+
+        aux = request(endpoint).json()
+        data = pd.DataFrame(aux['data'])
+        dates = pd.DataFrame(aux['dates'])[0]
+
+        #sochimi=pd.DataFrame(request(endpoint+tstate[:2]).json())
+        if type(tstate) == list:
+            #counties = [i for i in tstate if len(i)>2 ]
+            states = [i for i in tstate if len(i)==2 ]            
+            capacity = []
+            occupied_covid = []
+            occupied_non_covid = []
+            for i in states:
+                capacity.append(data[i]['capacity'])
+                occupied_covid.append(data[i]['occupied_covid'])
+                occupied_non_covid.append(data[i]['occupied_non_covid'])
+            
+             
+            capacity =  np.array(capacity).sum(axis=0) 
+            occupied_covid =  np.array(occupied_covid).sum(axis=0) 
+            occupied_non_covid =  np.array(occupied_non_covid).sum(axis=0) 
+
+
+        else:
+            capacity = data[tstate[:2]]['capacity']
+            occupied_covid = data[tstate[:2]]['occupied_covid']
+            occupied_non_covid = data[tstate[:2]]['occupied_non_covid']
+
+
+        dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]        
+        index = np.where(np.array(dates) >= initdate)[0][0] 
+
+        UCI_capacity =list(capacity[index:])
+        UCI_use_covid =list(occupied_covid[index:])
+        UCI_use_noncovid =list(occupied_non_covid[index:])
+
+        UCI_dates = dates[index:]
+        UCI_tr = [(UCI_dates[i]-initdate).days for i in range(len(UCI_dates))]       
+               
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  
+        self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  
+        self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])  
+        
+
+        if self:
+            self.UCI_capacity = UCI_capacity
+            self.UCI_use_covid = UCI_use_covid
+            self.UCI_use_noncovid = UCI_use_noncovid                        
+            self.UCI_dates = UCI_dates
+            self.UCI_tr = UCI_tr
+            return
+        else:        
+            return UCI_capacity,UCI_use_covid,UCI_use_noncovid,UCI_dates,UCI_tr
 
 
 
@@ -1190,7 +1434,7 @@ class ImportData():
     # ----------------------------- #
     #          Deaths (DEIS)        #
     # ----------------------------- #
-    def importDeathsDEIS(self=None,tstate = '',initdate = None,endpointreg = 'getDeathsByState?state=',endpointcom = 'getDeathsByComuna?comuna=',user=None,password=None):     
+    def importDeathsDEIS(self=None,tstate = '',initdate = None,endpointreg = 'getDeathsByState?state=',endpointcom = 'getDeathsByComuna?comuna=',user=None,password=None,name = ['D_confirmed','D_suspected','D_ac_confirmed','D_ac_suspected']):
         """
             Import Accumulated Deaths
             input: 
@@ -1270,7 +1514,14 @@ class ImportData():
         B_r_confirmed = D_r_confirmed.cumsum()
         B_r_suspected = D_r_suspected.cumsum()
 
-        
+
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,D_r_confirmed,D_r_tr,name[0])  
+        self.data = dfappend(self.data,D_r_suspected,D_r_tr,name[1])  
+        self.data = dfappend(self.data,B_r_confirmed,D_r_tr,name[2]) 
+        self.data = dfappend(self.data,B_r_suspected,D_r_tr,name[3]) 
+
         if self:
             self.Dr = D_r_confirmed
             self.Dr_suspected = D_r_suspected
@@ -1286,7 +1537,7 @@ class ImportData():
     # -------------------------------------- #
     #          Deaths (DEIS) MinCiencia      #
     # -------------------------------------- #
-    def importDeathsDEISMinCiencia(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv'):     
+    def importDeathsDEISMinCiencia(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv',user=None,password=None,name = ['D_confirmed','D_suspected','D_ac_confirmed','D_ac_suspected']):     
         """
             Import Accumulated Deaths
             input: 
@@ -1305,12 +1556,14 @@ class ImportData():
         if self:
             tstate = self.tstate
             initdate = self.initdate
+            request = self.request
             
         else:
             if not tstate:
                 raise Exception("State code missing")
             if not initdate:
-                raise Exception("Initial date missing")     
+                raise Exception("Initial date missing")
+            request = dataretriever(user,password) 
              
         data_confirmed = pd.read_csv('https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv')
         data_suspected = pd.read_csv('https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_sospechososPorComuna.csv')
@@ -1364,7 +1617,14 @@ class ImportData():
         B_r_confirmed = D_r_confirmed.cumsum()
         B_r_suspected = D_r_suspected.cumsum()
 
-        
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,D_r_confirmed,D_r_tr,name[0])  
+        self.data = dfappend(self.data,D_r_suspected,D_r_tr,name[1])  
+        self.data = dfappend(self.data,B_r_confirmed,D_r_tr,name[2]) 
+        self.data = dfappend(self.data,B_r_suspected,D_r_tr,name[3]) 
+
+
         if self:
             self.Dr = D_r_confirmed
             self.Dr_suspected = D_r_suspected
@@ -1490,165 +1750,6 @@ class ImportData():
 
 
 
-
-    # ---------------------------------------- #
-    #       Datos Subreporte de Infectados     #
-    # ---------------------------------------- #
-    """
-    def importInfectedSubreport(self = None,tstate = '', initdate = None,endpoint = ''):
-        
-            Import calculated active infected subreport 
-            This Function imports the  calculated active infected subreport by the given region. 
-            When working with counties, we'll assume that the subreport is homogeneous for the whole region. 
-            input: 
-                - tstate: [string or string list] CUT por comuna o región
-                - initdate: datetime object with the initial date
-                - endpoint [deprecated]: 
-            output: 
-                - I_ac_r: Real Accumulated infected
-                - I_ac_r_tr: days from simulation first day
-                - I_ac_r_dates: data dates
-
-            Variables when used as Object:
-                self.I_ac_r
-                self.I_ac_r_tr
-                self.I_ac_r_dates
-
-            Usage as function:
-                I_ac_r, I_ac_r_tr,I_ac_r_dates= importAccumulatedInfected(tstate = '13101',initdate=datetime(2020,5,15))
-
-                
-
-        
-        print('Importing Subreported Infeted')        
-        if self:
-            tstate = self.tstate
-            initdate = self.initdate
-        else:
-            if not tstate:
-                raise Exception("State code missing")
-            if not initdate:
-                raise Exception("Initial date missing")          
-
-        # Import Active Infected Data
-        Ir_endpoint = 'http://192.168.2.223:5006/getActiveCasesAllComunas'
-        Ir = pd.DataFrame(requests.get(Ir_endpoint).json()['data'])
-        
-
-        # Import Subreport proportion data
-        # This is only calculated for states and then for counties 
-        endpoint = 'http://192.168.2.223:5006/getActiveCasesUnderreportByState'
-        SR_data = pd.DataFrame(requests.get(endpoint).json()['data'])
-
-        if type(tstate) == list:            
-
-            # State list
-            states = [i for i in tstate if len(i)==2 ]
-            
-            # Adding counties' states
-            counties = [i for i in tstate if len(i)>2 ]
-            
-            # Get Subreport data for selected states
-            for i in counties:
-                if i[:2] not in states:
-                    states.append(i[:2])
-            
-            aux = []
-            for i in tstate:
-                if len(i)>2:
-                    aux_estimate = [Ir[i][j]*SR_data[i[:2]].loc['estimate'][j] for j in range(len(SR_data[i[:2]].loc['estimate']))]
-                    aux_lower = 0
-                    aux_upper = 0
-
-                aux.append()
-            for i in states:
-                aux.append(data.filter(regex='^'+i,axis=1))
-            
-            aux.append(data[counties])
-            I_ac_r = pd.concat(aux, axis=1).sum(axis=1)
-        
-        else:
-            if len(tstate) == 2:
-                I_ac_r = data.filter(regex='^'+tstate,axis=1)
-            elif len(tstate) > 2:
-                I_ac_r = data[tstate]
-
-        #estimate = data[
-
-        path = "../Data/subreporte.csv"
-        subreporte = pd.read_csv(path)
-        subreporte = subreporte.drop(columns = ['Unnamed: 0'])
-        subreporte = subreporte.loc[subreporte['cut']==int(tstate[:2])]
-        subreporte_date = [datetime.strptime(i, '%Y-%m-%d') for i in subreporte['fecha']]
-        index = np.where(np.array(subreporte_date) >= initdate)[0][0]
-        subreporte = subreporte.iloc[index:]
-        subreporte_date = subreporte_date[index:]
-        subreporte_tr = [(subreporte_date[i]-initdate).days for i in range(len(subreporte))]
-
-        # Get and filter by dates
-        dates = list(requests.get(endpoint).json()['dates'])
-        SR_dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]        
-        index = np.where(np.array(Ir_dates) >= initdate)[0][0]
-        SR_dates=SR_dates[index:]
-        SR_tr = [(SR_dates[i]-initdate).days for i in range(len(SR_dates))]        
-
-        SR=SR[index:]
-        
-        
-
-
-        # Import Active infected and calculate Real Active Infected: 
-        cutlistendpoint = 'http://192.168.2.220:8080/covid19/selectComunas'
-        cutlist  = pd.read_json(cutlistendpoint)[['cut','idState']]        
-
-        actives = []
-        mydict = None
-        if type(tstate) == list:
-            for i in tstate:
-                if len(i)<=2:
-                    aux = cutlist[cutlist['idState']==int(i)]
-                    for j in aux['cut']:    
-                        auxendpoint = endpoint+str(j).zfill(5)
-                        r = requests.get(auxendpoint) 
-                        mydict = r.json()
-                        actives.append(mydict['actives'])
-                        #data=pd.DataFrame(mydict)
-                    #Ir = (np.array(actives)).sum(axis=0)
-                elif len(i)>2:
-                    auxendpoint = endpoint+i
-                    r = requests.get(auxendpoint) 
-                    mydict = r.json()
-                    actives.append(mydict['actives'])
-                    #Ir = np.array(mydict['actives'])
-                Ir = (np.array(actives)).sum(axis=0)
-        else:
-            if len(tstate)<=2:
-                aux = cutlist[cutlist['idState']==int(tstate)]
-                for j in aux['cut']:
-                    auxendpoint = endpoint+str(j).zfill(5)
-                    r = requests.get(auxendpoint) 
-                    mydict = r.json()
-                    actives.append(mydict['actives'])
-                    
-                Ir = (np.array(actives)).sum(axis=0)
-            elif len(tstate)>2:
-                auxendpoint = endpoint+tstate
-                r = requests.get(auxendpoint) 
-                mydict = r.json()
-                Ir = np.array(mydict['actives'])
-
-
-        if self:
-            self.subreporte = subreporte
-            self.subreporte_estimate = np.array(subreporte['estimate'])
-            self.subreporte_date = subreporte_date
-            self.subreporte_tr = subreporte_tr
-            return
-        else:        
-            return subreporte, np.array(subreporte['estimate']), subreporte_date, subreporte_tr
-
-    #self.importSubreporte = self.importInfectedSubreport
-    """
     # -------------------------- #
     #    Fallecidos excesivos    #
     # -------------------------- #
@@ -1942,43 +2043,168 @@ class ImportData():
             return D_r_confirmed,D_r_suspected,B_r_confirmed,B_r_suspected,D_r_dates,D_r_tr
 
 
-    
 
-    # --------------------------- #
-    #    Importar toda la data    #
-    # --------------------------- #
 
-    def importdata(self):
-        print('Importing General Data')
-        try:
-            self.importPopulation()
-        except:
-            print('Dlab Endpoint Error')
-            self.importPopulationMinCiencia()
-        try:
-            self.importActiveInfected()
-        except:
-            print('Dlab Endpoint Error')
-            self.importActiveInfectedMinciencia()
-        try:
-            self.importAccumulatedInfected()
-        except:
-            print('Dlab Endpoint Error')            
-            self.importAccumulatedInfectedMinCiencia()
+    # ---------------------------------------- #
+    #       Datos Subreporte de Infectados     #
+    # ---------------------------------------- #
+    """
+    def importInfectedSubreport(self = None,tstate = '', initdate = None,endpoint = ''):
+        
+            Import calculated active infected subreport 
+            This Function imports the  calculated active infected subreport by the given region. 
+            When working with counties, we'll assume that the subreport is homogeneous for the whole region. 
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint [deprecated]: 
+            output: 
+                - I_ac_r: Real Accumulated infected
+                - I_ac_r_tr: days from simulation first day
+                - I_ac_r_dates: data dates
 
-        self.importDailyInfected()
-        #self.importSOCHIMI()
-        #self.importSOCHIMIMinCiencia()
-        self.importICUBedOccupation()
-        #self.importAccumulatedDeaths()
-        self.importDeathsDEIS()
-        self.importActiveInfectedMinciencia()
+            Variables when used as Object:
+                self.I_ac_r
+                self.I_ac_r_tr
+                self.I_ac_r_dates
 
-        #self.importDeathsHospitalized()
-        #self.importInfectedSubreport()
-        #self.importpcrpop()        
-        #self.importfallecidosexcesivos()        
-        print('Done')
+            Usage as function:
+                I_ac_r, I_ac_r_tr,I_ac_r_dates= importAccumulatedInfected(tstate = '13101',initdate=datetime(2020,5,15))
+
+                
+
+        
+        print('Importing Subreported Infeted')        
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")          
+
+        # Import Active Infected Data
+        Ir_endpoint = 'http://192.168.2.223:5006/getActiveCasesAllComunas'
+        Ir = pd.DataFrame(requests.get(Ir_endpoint).json()['data'])
+        
+
+        # Import Subreport proportion data
+        # This is only calculated for states and then for counties 
+        endpoint = 'http://192.168.2.223:5006/getActiveCasesUnderreportByState'
+        SR_data = pd.DataFrame(requests.get(endpoint).json()['data'])
+
+        if type(tstate) == list:            
+
+            # State list
+            states = [i for i in tstate if len(i)==2 ]
+            
+            # Adding counties' states
+            counties = [i for i in tstate if len(i)>2 ]
+            
+            # Get Subreport data for selected states
+            for i in counties:
+                if i[:2] not in states:
+                    states.append(i[:2])
+            
+            aux = []
+            for i in tstate:
+                if len(i)>2:
+                    aux_estimate = [Ir[i][j]*SR_data[i[:2]].loc['estimate'][j] for j in range(len(SR_data[i[:2]].loc['estimate']))]
+                    aux_lower = 0
+                    aux_upper = 0
+
+                aux.append()
+            for i in states:
+                aux.append(data.filter(regex='^'+i,axis=1))
+            
+            aux.append(data[counties])
+            I_ac_r = pd.concat(aux, axis=1).sum(axis=1)
+        
+        else:
+            if len(tstate) == 2:
+                I_ac_r = data.filter(regex='^'+tstate,axis=1)
+            elif len(tstate) > 2:
+                I_ac_r = data[tstate]
+
+        #estimate = data[
+
+        path = "../Data/subreporte.csv"
+        subreporte = pd.read_csv(path)
+        subreporte = subreporte.drop(columns = ['Unnamed: 0'])
+        subreporte = subreporte.loc[subreporte['cut']==int(tstate[:2])]
+        subreporte_date = [datetime.strptime(i, '%Y-%m-%d') for i in subreporte['fecha']]
+        index = np.where(np.array(subreporte_date) >= initdate)[0][0]
+        subreporte = subreporte.iloc[index:]
+        subreporte_date = subreporte_date[index:]
+        subreporte_tr = [(subreporte_date[i]-initdate).days for i in range(len(subreporte))]
+
+        # Get and filter by dates
+        dates = list(requests.get(endpoint).json()['dates'])
+        SR_dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]        
+        index = np.where(np.array(Ir_dates) >= initdate)[0][0]
+        SR_dates=SR_dates[index:]
+        SR_tr = [(SR_dates[i]-initdate).days for i in range(len(SR_dates))]        
+
+        SR=SR[index:]
+        
+        
+
+
+        # Import Active infected and calculate Real Active Infected: 
+        cutlistendpoint = 'http://192.168.2.220:8080/covid19/selectComunas'
+        cutlist  = pd.read_json(cutlistendpoint)[['cut','idState']]        
+
+        actives = []
+        mydict = None
+        if type(tstate) == list:
+            for i in tstate:
+                if len(i)<=2:
+                    aux = cutlist[cutlist['idState']==int(i)]
+                    for j in aux['cut']:    
+                        auxendpoint = endpoint+str(j).zfill(5)
+                        r = requests.get(auxendpoint) 
+                        mydict = r.json()
+                        actives.append(mydict['actives'])
+                        #data=pd.DataFrame(mydict)
+                    #Ir = (np.array(actives)).sum(axis=0)
+                elif len(i)>2:
+                    auxendpoint = endpoint+i
+                    r = requests.get(auxendpoint) 
+                    mydict = r.json()
+                    actives.append(mydict['actives'])
+                    #Ir = np.array(mydict['actives'])
+                Ir = (np.array(actives)).sum(axis=0)
+        else:
+            if len(tstate)<=2:
+                aux = cutlist[cutlist['idState']==int(tstate)]
+                for j in aux['cut']:
+                    auxendpoint = endpoint+str(j).zfill(5)
+                    r = requests.get(auxendpoint) 
+                    mydict = r.json()
+                    actives.append(mydict['actives'])
+                    
+                Ir = (np.array(actives)).sum(axis=0)
+            elif len(tstate)>2:
+                auxendpoint = endpoint+tstate
+                r = requests.get(auxendpoint) 
+                mydict = r.json()
+                Ir = np.array(mydict['actives'])
+
+
+        if self:
+            self.subreporte = subreporte
+            self.subreporte_estimate = np.array(subreporte['estimate'])
+            self.subreporte_date = subreporte_date
+            self.subreporte_tr = subreporte_tr
+            return
+        else:        
+            return subreporte, np.array(subreporte['estimate']), subreporte_date, subreporte_tr
+
+    #self.importSubreporte = self.importInfectedSubreport
+    """    
+
+
 
     def help(self):
         help= """

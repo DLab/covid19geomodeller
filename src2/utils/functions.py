@@ -205,6 +205,14 @@ def increase_sigmoid(t0,t1,t2,maxvalue = 1):
         return maxvalue*(expit((t-t0-4)*8/(t1-t0)) - expit(df*(t-t2)))      
     return f
 
+# saturated function
+def sat(satfunct,gw = 20):
+    # Importante cambiar el orden de las variables donde se llaman estas funciones! 
+    def aux(t,f1,f2=0):
+        return(expit(-gw*(f1+f2-satfunct(t))))
+    return aux
+        
+
 """
 Testing:
 

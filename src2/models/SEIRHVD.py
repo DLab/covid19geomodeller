@@ -21,12 +21,18 @@ import sys
 from pathlib import Path
 sys.path.insert(1, '/utils/')
 sys.path.insert(1, '../utils/')
-from importdata import ImportData
+# cv19gm libraries 
+from cv19data import ImportData
 import timeutils
+import functions
 
 """
 To do:
-  - Create reports function inside simSAEIRHVD class
+  - Ejecutar setparams sólo si es que no se usa archivo de configuración
+  - Estandarizar nombres de variables (creo que está listo)
+  - Función para construir condiciones iniciales y asi optimizar el código
+  - Create reports function inside class
+  - Revisar los intervalos de timepo de los integradores. No es necesario pedirlos como argumentos
 
 
 SEIRHVD Implementation
@@ -47,114 +53,76 @@ class SEIRHVD:
     """
         SEIRHVD Object:
         Construction:
-            SEIRHVD(tsim,beta,mu,alpha,k=0,Htot=30,Vtot=20)
+            SEIRHVD(tsim,beta,mu,alpha,k=0,H_cap=30,V_cap=20)
         with:
             tsim: Simulation time
             beta: Transmition rate
             mu: E/I initial rate
             alpha: Movility function (quarantine object function)
             k: Saturation Kynetics Dynamics factor
-            Htot: Hospital capacity, either an int or a function(t)
-            Vtot: VMI capacity, either an int or a function(t)
+            H_cap: Hospital capacity, either an int or a function(t)
+            V_cap: VMI capacity, either an int or a function(t)
 
 
             CFG = configuration file in TOML
+
+            IC: 
+                B, D, R, I, I_det, I_d,	I_d_det, I_ac ,	I_ac_det, H_cap, V_cap, H, V.
+
     """
-    def __init__(self,cfg = None, RealData=None, tsim=None,beta=None,mu=None,alpha=None,k=None,chi =None,k_I=None,k_R=None,Htot=None,Vtot=None,
-    H0=None,V0=None,B0=None,D0=None,R0=None,I0=None,I_d0=None,I_ac0=None,SeroPrevFactor=None,expinfection=None,
-    population=None, initdate = None,Imi_det = None,Ias_det =None,Ise_det =None,Icr_det =None,SimIC=None, IC = None):
+    def __init__(self,cfg = None, cv19data_obj=None, SimIC=None, tsim=None,beta=None,mu=None,alpha=None,k=None,chi =None,k_I=None,k_R=None,H_cap=None,V_cap=None,
+    H=None,V=None,B=None,D=None,R=None,I=None,I_d=None,I_ac=None,seroprevfactor=None,expinfection=None,
+    population=None, initdate = None,pImi_det = None,pIas_det =None,pIse_det =None,pIcr_det = None,):
         
+        # Parameter that defines sigmoid's raising speed
+        self.gw=20
+
         if not cfg:
+            # turn this into an error
+            # Reconsider this for SimIC 
+            print('Configuration file missing')
             return None
 
         cfgdata = toml.load(cfg)
+
+        # Reading parameters
         self.__dict__.update(cfgdata['parameters'])
 
-        # Initial conditions            
-        if cfgdata['realdata']['realdata']:
-            self.__dict__.update(cfgdata['realdata'])
-            self.initdate = timeutils.timetxttoDatetime(self.initdate)
-            ImportData()
-        else:
-            self.realdata = False
-            self.initdate = False
+        # ------------------------------- #
+        #       Initial conditions        #
+        # ------------------------------- #
 
-        
-        """
-        self.tsim = tsim
-        self.beta = beta
-        self.mu = mu
-        self.alpha = alpha
-
-        self.SeroPrevFactor = SeroPrevFactor
-        self.expinfection = expinfection
-
-        self.Imi_det = Imi_det # Fraction of mild infected detected
-        self.Ias_det = Ias_det # Fraction of asymptomatic infected detected
-        self.Ise_det = Ise_det # Fraction of mild infected detected
-        self.Icr_det = Icr_det # Fraction of asymptomatic infected detected        
-
-        self.SimIC = SimIC
-
-        self.IC = IC # Initial Conditions. 
-
-
-        self.k = k
-        self.k_I = k_I
-        self.k_R = k_R
-
-        # To add backcompatibility
-        if k > 0 and k_I == 0:
-            self.k_I = k        
-
-        if type(chi) == int:
-            self.chi = np.poly1d(0) 
-        else:
-            self.chi = chi 
-
-        
-        I0 = Imi_det*Imi + Ias_det*Ias + Icr + Ise 
-        Itot = Imi +  Icr + Ise  + Iac 
-        Ias = Itot * pas
-        Imi = Itot * pmi
-        Ise = Itot * pse
-        Icr = Itot * pcr
-
-        I0 = Imi_det*Itot*pmi + Itot*(pcr + pse) + Ias_det*Itot*pas
-        I0 = Itot(Imi_det*pmi + Ias_det*pas + pcr + pse)
-        
-        Itot = I0/(Imi_det*pmi + Ias_det*pas + pcr + pse)
-        """
-        self.gw=20
-
-
-
-        # Initial Conditions:        
-        #self.setinitvalues()  
-        if RealData:
-            IC = RealData
+        # Data object
+        if cv19data_obj:
+            self.data = cv19data_obj
+            IC = cv19data_obj
+            
             # Use initial conditions object/dictionary with realworld imported initial conditions
             
+            if cfgdata['initialconditions']['overwrite_ic']:
+                # Overwrite initial conditions
+                self.__dict__.update(cfgdata['initialconditions'])
+
             # Aproximate Hospitals capacity:
             Hcmodel = np.poly1d(np.polyfit(IC.sochimi_tr, IC.Hr_tot, 4))
             tsat = IC.sochimi_tr[-1]
             Hmax = np.mean(IC.Hr_tot[-10:])
-            self.Htot=lambda t: Hcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Hmax  
+            self.H_cap=lambda t: Hcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Hmax  
 
             Vcmodel = np.poly1d(np.polyfit(IC.sochimi_tr, IC.Vr_tot, 4))
             tsat = IC.sochimi_tr[-1]
             Vmax = np.mean(IC.Vr_tot[-10:])
-            self.Vtot=lambda t: Vcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Vmax #+ 1000
+            self.V_cap=lambda t: Vcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Vmax #+ 1000
 
             # Set Initial values
-            self.H0 = IC.Hr[0]
+            self.H = IC.Hr[0]
             self.V = IC.Vr[0]
             self.B = IC.Br[0]
             self.D = IC.Br[1]-IC.Br[0]
             self.R = 0
-            self.I0 = IC.Ir[0]
-            self.I_d0 = IC.I_d_r[0]
-            self.I_ac0 = IC.I_ac_r[0]
+            self.I = IC.Ir[0]
+            self.I_d = IC.I_d_r[0]
+            self.I_ac = IC.I_ac_r[0]
             self.population = IC.population
             self.initdate = IC.initdate
 
@@ -178,19 +146,148 @@ class SEIRHVD:
             self.Hout_ac = 0
             self.V_ac = 0
             
-            self.setparamsalpj
+            #self.setparams()
             self.Einit = False
             self.setrelationalvalues()
             self.setequations()
-            print('InitialCondition Object Data')
+
+            print('InitialCondition Object Data Loaded')            
+
+        
+        # Load Data from localfile
+        elif cfgdata['realdata']['datafile']:
+            print('Loading data from local file (Work in Progress)')
+            # Quizas reutilizar código del if cv19_obj:
+            # datacv19data
+
+        # Load data from servers
+        elif cfgdata['realdata']['importdata']:
+            self.__dict__.update(cfgdata['realdata'])
+            self.initdate = timeutils.timetxttoDatetime(self.initdate)
+            
+            self.data = ImportData(tstate=self.state,initdate = self.initdate)
+            print('Importing data.. this may take about a minute')
+            self.data.importdata()
+
+            if cfgdata['initialconditions']['overwrite_ic']:
+                # Overwrite some initial conditions
+                self.__dict__.update(cfgdata['initialconditions'])
+            
+            # Fix this: 
+            # Aproximate Hospitals capacity:
+            Hcmodel = np.poly1d(np.polyfit(self.data.sochimi_tr, self.data.Hr_tot, 4))
+            tsat = self.data.sochimi_tr[-1]
+            Hmax = np.mean(self.data.Hr_tot[-10:])
+            self.H_cap=lambda t: Hcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Hmax  
+
+            Vcmodel = np.poly1d(np.polyfit(self.data.sochimi_tr, self.data.Vr_tot, 4))
+            tsat = self.data.sochimi_tr[-1]
+            Vmax = np.mean(self.data.Vr_tot[-10:])
+            self.V_cap=lambda t: Vcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Vmax #+ 1000
+
+            # Set Initial values
+            self.H = self.data.Hr[0]
+            self.V = self.data.Vr[0]
+            self.B = self.data.Br[0]
+            self.D = self.data.Br[1]-self.data.Br[0]
+            self.R = 0
+            self.I = self.data.Ir[0]
+            self.I_d = self.data.I_d_r[0]
+            self.I_ac = self.data.I_ac_r[0]
+            self.population = self.data.population
+            self.initdate = self.data.initdate
+
+            self.Ise_D_d = 0
+            self.Icr_D_d = 0
+            self.Hse_D_d = 0
+            self.V_D_d = 0
+
+            self.Ise_D_ac = 0
+            self.Icr_D_ac = 0
+            self.Hse_D_ac = 0
+            self.V_D_ac = 0
+
+            self.R_d = 0
+
+            self.Hse_d = 0
+            self.Hout_d = 0
+            self.V_d = 0
+
+            self.Hse_ac = 0
+            self.Hout_ac = 0
+            self.V_ac = 0
+            
+            #self.setparams()
+            self.Einit = False
+            self.setrelationalvalues()
+            self.setequations()
+
+            print('InitialCondition Object Data Loaded')
+
+        else:
+            # Load initial conditions from config file
+            self.realdata = False
+            self.initdate = False
+            self.__dict__.update(cfgdata['initialconditions'])
+
+
+        # Initial conditions in CFG 
+        
+
+        # Initial Conditions:        
+
+        if cfg:
+            # Build Hospital Capacities
+            if type(self.H_cap)==int or type(self.H_cap)==float:
+                self.H_cap = np.poly1d(self.H_cap) 
+            else:
+                # Create function from H_cap =)
+                self.H_cap = self.H_cap
+
+            if type(self.V_cap)==int or type(self.V_cap)==float:
+                self.V_cap = np.poly1d(self.V_cap) 
+            else:
+                # Create function from V_cap =)
+                self.V_cap = V_cap            
+
+            
+            # Init variables
+            self.Ise_D_d = 0
+            self.Icr_D_d = 0
+            self.Hse_D_d = 0
+            self.V_D_d = 0
+
+            self.Ise_D_ac = 0
+            self.Icr_D_ac = 0
+            self.Hse_D_ac = 0
+            self.V_D_ac = 0
+
+            self.Hse_d = 0
+            self.Hout_d = 0
+            self.V_d = 0
+
+            self.Hse_ac = 0
+            self.Hout_ac = 0
+            self.V_ac = 0            
+
+            self.R_d = 0
+
+            # Init functions:
+            self.alpha = functions.build(self.alpha)
+            self.chi = functions.build(self.chi)
+            self.Einit = False
+            self.setrelationalvalues()
+            self.setequations() 
+
+
 
         elif SimIC:
             self.SimICinitdate = SimIC.initdate
             self.population = SimIC.population
             
             # New Susceptible:
-            self.S = SimIC.S[-1] + SimIC.population*(1-SimIC.SeroPrevFactor)*self.SeroPrevFactor
-            self.N = SimIC.SeroPrevFactor*self.population + self.population*(1-SimIC.SeroPrevFactor)*self.SeroPrevFactor #Past simulation + added now
+            self.S = SimIC.S[-1] + SimIC.population*(1-SimIC.seroprevfactor)*self.seroprevfactor
+            self.N = SimIC.seroprevfactor*self.population + self.population*(1-SimIC.seroprevfactor)*self.seroprevfactor #Past simulation + added now
 
             # Exposed: 
             self.E = SimIC.E[-1]
@@ -252,8 +349,8 @@ class SEIRHVD:
             # Falta trasladarlo en el tiempo
             self.T_delta = (self.initdate - SimIC.initdate).days
 
-            self.Htot = self.Htot_SimIC(SimIC)
-            self.Vtot = self.Vtot_SimIC(SimIC)
+            self.H_cap = self.H_cap_SimIC(SimIC)
+            self.V_cap = self.V_cap_SimIC(SimIC)
 
             self.alpha = self.alpha_SimIC(SimIC)
 
@@ -263,27 +360,28 @@ class SEIRHVD:
 
 
 
+
         else:
-            self.H0 = H0
-            self.V = V0
-            self.B = B0
-            self.D = D0
-            self.R = R0
-            self.I0 = I0
-            self.I_d0 = I_d0
-            self.I_ac0 = I_ac0
+            self.H = H
+            self.V = V
+            self.B = B
+            self.D = D
+            self.R = R
+            self.I = I
+            self.I_d0 = I_d
+            self.I_ac0 = I_ac
             self.population = population
 
             # Build Hospital Capacities
-            if type(Htot)==int or type(Htot)==float:
-                self.Htot = np.poly1d(Htot) 
+            if type(H_cap)==int or type(H_cap)==float:
+                self.H_cap = np.poly1d(H_cap) 
             else:
-                self.Htot = Htot
+                self.H_cap = H_cap
 
-            if type(Vtot)==int or type(Vtot)==float:
-                self.Vtot = np.poly1d(Vtot) 
+            if type(V_cap)==int or type(V_cap)==float:
+                self.V_cap = np.poly1d(V_cap) 
             else:
-                self.Vtot = Vtot            
+                self.V_cap = V_cap            
 
             self.Ise_D_d = 0
             self.Icr_D_d = 0
@@ -305,29 +403,31 @@ class SEIRHVD:
 
             self.R_d = 0
 
-            self.setparams()
+            #self.setparams()
             self.Einit = False
             self.setrelationalvalues()
             self.setequations() 
 
 
+
+    # Functions that delay the functions that come from an older simulation (likely will be deprecated)
     def alpha_SimIC(self,SimIC):
         def funct(t):
             return SimIC.alpha(t+self.T_delta)
         return funct    
 
 
-    def Htot_SimIC(self,SimIC):
+    def H_cap_SimIC(self,SimIC):
         def funct(t):
-            return SimIC.Htot(t+self.T_delta)
+            return SimIC.H_cap(t+self.T_delta)
         return funct
         
 
-    def Vtot_SimIC(self,SimIC):
+    def V_cap_SimIC(self,SimIC):
         def funct(t):
-            return SimIC.Vtot(t+self.T_delta)
+            return SimIC.V_cap(t+self.T_delta)
         return funct
-        #return(SimIC.Vtot(t-self.T_delta))               
+        #return(SimIC.V_cap(t-self.T_delta))               
 
     def setnewparams(self):
         self.setequations()
@@ -356,14 +456,14 @@ class SEIRHVD:
         # --------------------------- #        
         
         # 1) dE_as/dt
-        self.dE = lambda t,S,E,Ias,Imi,Ise,Icr: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k*(Ias+Imi+Ise+Icr)) \
+        self.dE = lambda t,S,E,Ias,Imi,Ise,Icr,R: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k_I*(Ias+Imi+Ise+Icr) + self.k_R*R) \
             -self.pE_Ias/self.tE_Ias*E -self.pE_Imi/self.tE_Imi*E-self.pE_Ise/self.tE_Ise*E-self.pE_Icr/self.tE_Icr*E
  
         # 2) Daily dE_as/dt
-        self.dE_d = lambda t,S,E,E_d,Ias,Imi,Ise,Icr: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k*(Ias+Imi+Ise+Icr)) - E_d
+        self.dE_d = lambda t,S,E,E_d,Ias,Imi,Ise,Icr,R: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k_I*(Ias+Imi+Ise+Icr) + self.k_R*R) - E_d
         
         # 3) Accumulated dE_as/dt
-        self.dE_ac = lambda t,S,E,Ias,Imi,Ise,Icr: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k*(Ias+Imi+Ise+Icr))
+        self.dE_ac = lambda t,S,E,Ias,Imi,Ise,Icr,R: self.alpha(t)*self.beta*S*(self.expinfection*E+Ias+Imi+Ise+Icr)/(self.N+self.k_I*(Ias+Imi+Ise+Icr) + self.k_R*R)
 
 
         # --------------------------- #
@@ -503,10 +603,10 @@ class SEIRHVD:
 
     # UCI and UTI beds saturation function
     def h_sat(self,Hse,Hout,t):
-        return(expit(-self.gw*(Hse+Hout-self.Htot(t))))
+        return(expit(-self.gw*(Hse+Hout-self.H_cap(t))))
     # Ventilators Saturation Function    
     def v_sat(self,V,t):
-        return(expit(-self.gw*(V-self.Vtot(t))))
+        return(expit(-self.gw*(V-self.V_cap(t))))
 
     def setparams(self):
         self.pE_Ias = 0.4  # Transition from exposed to Asymptomatic Infected
@@ -574,7 +674,7 @@ class SEIRHVD:
 
         self.Vc0 = 1029
         self.Hc0 = 1980
-        self.H0=1720 #1980#1903.0
+        self.H=1720 #1980#1903.0
         self.H_cr=80.0
         self.gw=10
         self.D=26.0
@@ -587,7 +687,7 @@ class SEIRHVD:
         self.CH=0
         self.ACV=0
         self.ACH=0
-        self.SeroPrevFactor = 1
+        self.seroprevfactor = 1
         self.population = 8125072
         
         self.Hmax = 3000
@@ -627,20 +727,35 @@ class SEIRHVD:
         self.setrelationalvalues()
 
     def setrelationalvalues(self):
-        self.I = self.I0/(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
         # Active infected
+        if self.I_det:
+            self.I = self.I_det/(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr)
+        else:
+            self.I_det = self.I*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr)
+
         self.Ias= self.pE_Ias*self.I
         self.Imi= self.pE_Imi*self.I
         self.Icr= self.pE_Icr*self.I
         self.Ise = self.pE_Ise*self.I
 
-        self.I_d = self.I_d0/(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
+
+        # New daily Infected
+        if self.I_d_det:
+            self.I_d = self.I_d_det/(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
+        else:
+            self.I_d_det = self.I_d*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
+
         self.Ias_d = self.pE_Ias*self.I_d
         self.Imi_d = self.pE_Imi*self.I_d
         self.Icr_d = self.pE_Icr*self.I_d
         self.Ise_d = self.pE_Ise*self.I_d
 
-        self.I_ac = self.I_ac0/(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
+        # Accumulated Infected
+        if self.I_ac_det:
+            self.I_ac = self.I_ac_det/(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
+        else:
+            self.I_ac_det = self.I_ac*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
+
         self.Ias_ac = self.pE_Ias*self.I_ac
         self.Imi_ac = self.pE_Imi*self.I_ac
         self.Icr_ac = self.pE_Icr*self.I_ac
@@ -652,12 +767,12 @@ class SEIRHVD:
             self.E_d=self.mu*(self.I_d)                
             self.E_ac=self.mu*(self.I_ac)
         # Hospitalizados        
-        self.Hse = self.H0*self.pE_Ise/(self.pE_Ise+self.pE_Icr)
-        self.Hout = self.H0*self.pE_Icr/(self.pE_Ise+self.pE_Icr)
+        self.Hse = self.H*self.pE_Ise/(self.pE_Ise+self.pE_Icr)
+        self.Hout = self.H*self.pE_Icr/(self.pE_Ise+self.pE_Icr)
        
         # Valores globales
-        self.N = self.SeroPrevFactor*self.population
-        self.S = self.N-self.H0-self.V-self.D-self.E-(self.Ias+self.Icr+self.Ise+self.Imi)        
+        self.N = self.seroprevfactor*self.population
+        self.S = self.N-self.H-self.V-self.D-self.E-(self.Ias+self.Icr+self.Ise+self.Imi)        
         #self.I = self.I
 
         #constructor of SEIR class elements, it's initialized when a parameter
@@ -746,7 +861,7 @@ class SEIRHVD:
         
             Hse0=self.Hse
             Hout0=self.Hout
-            V0=self.V
+            V=self.V
 
             Hse_d0= self.Hse_d
             Hout_d0= self.Hout_d
@@ -849,9 +964,9 @@ class SEIRHVD:
             
             ydot[0]=self.dS(t,y[0],y[1],y[2],y[3],y[4],y[5],y[19],y[20])
 
-            ydot[1]=self.dE(t,y[0],y[1],y[2],y[3],y[4],y[5])
-            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[4],y[5],y[6],y[7])
-            ydot[3]=self.dE_ac(t,y[0],y[1],y[4],y[5],y[6],y[7])
+            ydot[1]=self.dE(t,y[0],y[1],y[2],y[3],y[4],y[5],y[25])
+            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[4],y[5],y[6],y[7],y[25])
+            ydot[3]=self.dE_ac(t,y[0],y[1],y[4],y[5],y[6],y[7],y[25])
                                 
             ydot[4]=self.dIas(t,y[1],y[4])
             ydot[5]=self.dImi(t,y[1],y[5])
@@ -974,8 +1089,8 @@ class SEIRHVD:
         self.H_sat = [self.h_sat(self.Hse[i],self.Hout[i],self.t[i]) for i in range(len(self.t))]
         self.V_sat = [self.v_sat(self.V[i],self.t[i]) for i in range(len(self.t))]
 
-        self.V_cap = [self.Vtot(i) for i in self.t]
-        self.H_cap = [self.Htot(i) for i in self.t]
+        self.V_cap = [self.V_cap(i) for i in self.t]
+        self.H_cap = [self.H_cap(i) for i in self.t]
 
         self.H_need = self.Hse_need + self.Hout_need
 
@@ -987,15 +1102,15 @@ class SEIRHVD:
             self.peak_date = self.initdate+timedelta(days=round(self.peak_t))
 
         # Detected Cases
-        self.I_det = self.I*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
-        self.I_d_det = self.I_d*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
-        self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.Ise_det*self.pE_Ise + self.Icr_det*self.pE_Icr )
+        self.I_det = self.I*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
+        self.I_d_det = self.I_d*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
+        self.I_ac_det = self.I_ac*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
 
 
         # Prevalence: 
         self.prevalence_total = self.I_ac/self.population
         self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
-        self.prevalence_detected = [(self.Ias_det*self.Ias[i]+self.Imi_det*self.Imi[i]+self.Ise_det*self.Ise[i]+self.Icr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]        
+        self.prevalence_detected = [(self.pIas_det*self.Ias[i]+self.pImi_det*self.Imi[i]+self.pIse_det*self.Ise[i]+self.pIcr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]        
 
         return(sol)
 
@@ -1143,9 +1258,9 @@ class SEIRHVD:
             ydot=np.zeros(len(y))
             ydot[0]=self.dS(t,y[0],y[1],y[2],y[3],y[4],y[5],y[19],y[20])
 
-            ydot[1]=self.dE(t,y[0],y[1],y[2],y[3],y[4],y[5])
-            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[4],y[5],y[6],y[7])
-            ydot[3]=self.dE_ac(t,y[0],y[1],y[4],y[5],y[6],y[7])
+            ydot[1]=self.dE(t,y[0],y[1],y[2],y[3],y[4],y[5],y[25])
+            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[4],y[5],y[6],y[7],y[25])
+            ydot[3]=self.dE_ac(t,y[0],y[1],y[4],y[5],y[6],y[7],y[25])
                                 
             ydot[4]=self.dIas(t,y[1],y[4])
             ydot[5]=self.dImi(t,y[1],y[5])
@@ -1202,6 +1317,7 @@ class SEIRHVD:
         
         sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
         
+        self.sol = sol
         self.t=sol.t 
         
         self.S=sol.y[0,:]
@@ -1241,7 +1357,6 @@ class SEIRHVD:
         self.Icr_D_ac=sol.y[34,:]
         self.Hse_D_ac=sol.y[35,:]
         self.V_D_ac=sol.y[36,:]
-
         self.V_need=sol.y[37,:]
         self.Hse_need=sol.y[37,:]
         self.Hout_need=sol.y[37,:]
@@ -1250,18 +1365,26 @@ class SEIRHVD:
         self.I = self.Ias + self.Imi + self.Ise + self.Icr
         self.I_d = self.Ias_d + self.Imi_d + self.Ise_d + self.Icr_d
         self.I_ac = self.Ias_ac + self.Imi_ac + self.Ise_ac + self.Icr_ac
-
         self.H = self.Hse + self.Hout
         self.H_d = self.Hse_d + self.Hout_d
         self.H_ac = self.Hse_ac + self.Hout_ac
-
         self.H_sat = [self.h_sat(self.Hse[i],self.Hout[i],self.t[i]) for i in range(len(self.t))]
         self.V_sat = [self.v_sat(self.V[i],self.t[i]) for i in range(len(self.t))]
-
-        self.V_cap = [self.Vtot(i) for i in self.t]
-        self.H_cap = [self.Htot(i) for i in self.t]
-
+        self.V_cap = [self.V_cap(i) for i in self.t]
+        self.H_cap = [self.H_cap(i) for i in self.t]
         self.H_need = self.Hse_need + self.Hout_need
+
+        # Detected Cases-
+        self.I_det = self.Ias*self.pIas_det + self.Imi * self.pImi_det + self.Ise*self.pIse_det + self.Icr*self.pE_Icr
+        self.I_d_det = self.Ias_d*self.pIas_det + self.Imi_d*self.pImi_det + self.Ise_d*self.pIse_det + self.Icr_d*self.pE_Icr 
+        self.I_ac_det = self.Ias_ac*self.pIas_det + self.Imi_ac*self.pImi_det + self.Ise_ac*self.pIse_det + self.Icr_ac*self.pE_Icr 
+
+
+        # Prevalence: 
+        self.prevalence_total = self.I_ac/self.population
+        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
+        self.prevalence_detected = [(self.pIas_det*self.Ias[i]+self.pImi_det*self.Imi[i]+self.pIse_det*self.Ise[i]+self.pIcr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
+
 
         #Cálculo de la fecha del Peak  
         self.peakindex = np.where(self.I==max(self.I))[0][0]
@@ -1270,17 +1393,26 @@ class SEIRHVD:
         if self.initdate:
             self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
             self.peak_date = self.initdate+timedelta(days=round(self.peak_t))
+        else:
+            self.dates = [None for i in range(len(self.t))]
+            self.peak_date = None
 
-        # Detected Cases
-        self.I_det = self.I*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
-        self.I_d_det = self.I_d*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
-        self.I_ac_det = self.I_ac*(self.Ias_det*self.pE_Ias + self.Imi_det*self.pE_Imi + self.pE_Ise + self.pE_Icr )
 
-        # Prevalence: 
-        self.prevalence_total = self.I_ac/self.population
-        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
-        self.prevalence_detected = [(self.Ias_det*self.Ias[i]+self.Imi_det*self.Imi[i]+self.Ise_det*self.Ise[i]+self.Icr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
-        
+
+        # Create results DataFrame
+        self.aux0 = pd.DataFrame({'t':self.t,'dates':self.dates})
+        self.results = self.aux0
+        names = ['S','E','E_d','E_ac','Ias','Imi','Ise','Icr','Ias_d','Imi_d','Ise_d','Icr_d','Ias_ac','Imi_ac','Ise_ac','Icr_ac','Hse','Hout','V','Hse_d','Hout_d','V_d','Hse_ac','Hout_ac','V_ac','R','R_d','D','B','Ise_D_d','Icr_D_d','Hse_D_d','V_D_d','Ise_D_ac','Icr_D_ac','Hse_D_ac','V_D_ac','V_need','Hse_need','Hout_need']
+
+        self.aux = pd.DataFrame(np.transpose(sol.y),columns=names)
+
+        names2 = ['I','I_d','I_ac','H','H_d','H_ac','H_sat','V_sat','V_cap','H_cap','H_need','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_detected']
+        vars2 = [self.I,self.I_d,self.I_ac,self.H,self.H_d,self.H_ac,self.H_sat,self.V_sat,self.V_cap,self.H_cap,self.H_need,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_detected]
+        self.aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
+
+        self.results = pd.concat([self.results,self.aux,self.aux2],axis=1)
+
+        #self.resume = pd.DataFrame({'peak':self.peak,'peak_t':self.peak_t,'peak_date':self.peak_date})
         return(sol)
 
 
