@@ -12,6 +12,7 @@ from datetime import timedelta
 import numpy as np
 from os import path
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates 
 
 import sys
 from pathlib import Path
@@ -46,7 +47,7 @@ from timeutils import timeJStoPy
 
 
 
-def dataretriever(user=None,password=None):
+def dataretriever(user=None,password=None,json=None):
     # Esta funcion devolvera una funcion de request        
     def request(endpoint):
         if user:
@@ -55,8 +56,13 @@ def dataretriever(user=None,password=None):
                 raise Exception('Wrong Credentials')
             else:
                 print('Logged in successfully')
+            if json:                
+                aux = aux.json()
         else:
-            aux = requests.get('http://192.168.2.223:5006/'+endpoint)
+            if json:
+                aux = requests.get('http://192.168.2.223:5006/'+endpoint).json()
+            else:
+                aux = requests.get('http://192.168.2.223:5006/'+endpoint)
         return aux
     return request
 
@@ -188,20 +194,33 @@ class ImportData():
     # -------------------------- #
     #            Plot            #
     # -------------------------- #
-    def plot(self,x,y,label = 'default',color = None,thickness = None,type = 'line',ylabel='',xlabel = ''):
+    def plot(self,y,x='dates',label = 'default',color = None,thickness = None,plottype = 'line',ylabel='',xlabel = ''):
         # Drop na values
-        auxdata = self.data[[x,y]].dropna()
-        if type == 'line':
-            plt.plot(auxdata[x],auxdata[y],label=y+' data') 
-        elif type == 'scatter':
-            plt.scatter(auxdata[x],auxdata[y],label=y+' data') 
+        fig, axs = plt.subplots(1, 1)
+        axs.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+        if plottype == 'line':
+            if type(y) == list:
+                for i in y:
+                    auxdata = self.data[[x,i]].dropna()
+                    axs.plot(auxdata[x],auxdata[i],label=i+' data') 
+            else: 
+                auxdata = self.data[[x,y]].dropna()   
+                axs.plot(auxdata[x],auxdata[y],label=y+' data') 
+        elif plottype == 'scatter':
+            if type(y) == list:
+                for i in y:
+                    auxdata = self.data[[x,i]].dropna()
+                    axs.scatter(auxdata[x],auxdata[i],label=i+' data') 
+            else: 
+                auxdata = self.data[[x,y]].dropna()   
+                axs.scatter(auxdata[x],auxdata[y],label=y+' data')  
         if xlabel:
-            plt.xlabel(xlabel)
+            axs.set_xlabel(xlabel)
         else:
-            plt.xlabel(x)
-
-        plt.ylabel(ylabel)
-        plt.legend(loc=0)        
+            axs.set_xlabel(x)
+        axs.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
+        axs.set_ylabel(ylabel)
+        axs.legend(loc=0)        
         return
 
     # ---------------------------- #
