@@ -22,17 +22,17 @@ To Do:
 def build(input):
     # crear un iterador que recorra el input y cree la función a partir de un comando exec:
     # Acepta diccionarios o strings con forma de diccionario
-
     if type(input)==str:
         input_dict = json.loads(input)
     elif type(input)==dict:
-        input_dic = input.copy()
+        input_dict = input.copy()
     else:
-        print('Constant value function: '+str(input))
+        #print('Constant value function: '+str(input))
         def out(t):
             return input
         setattr(locals()['out'],'constructor',str(input))            
         return out
+    #print(input_dict['function'])
     try:
         print("Executing "+input_dict['function'])
     except:
@@ -42,7 +42,7 @@ def build(input):
     for key, value in input_dict.items():
         aux +=key+"="+str(value)+',' 
     aux +=')'
-    print(aux)
+    #print(aux)
     ldict={}
     exec(aux,globals(),ldict)
     out = ldict['out']
@@ -61,14 +61,21 @@ def functionAddition(functarray):
         return aux
     return f
 
-def fitdata(time,values,degree=4,tsat=-1,endvalue = -10):
-    # Aproximate Hospitals capacity:
+"""
+#----------------------------#
+#          datafit           #
+#----------------------------#
+Function data fits real data with a polynom of a given degree, and then projects the future values with it. 
+
+fitmethod is there in order to add more methods to this function 
+
+"""
+def polyfit(time,values,degree=4,tsat=-1,endvalue = -10,fitmethod='poly'):
     datamodel = np.poly1d(np.polyfit(time, values, degree))
     tsat = time[tsat]
     endvalue = np.mean(values[endvalue:])
     f_out=lambda t: datamodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*endvalue
     return f_out
-
 
 # Custom values through time
 def Events(values,days,functions = []):
@@ -154,7 +161,7 @@ def sawtooth(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='
         return signal.sawtooth(t,width)
     
     if initphase == 'min':
-        phi = np.pi*(2*init/period - 1.1)
+        phi = np.pi*(2*init/period - 0.5/period)
     elif initphase == 'max':
         phi = 2*np.pi*init/period
     else:
@@ -202,16 +209,18 @@ def increase_sigmoid(t0,t1,t2,maxvalue = 1):
     After this it keeps this value until t2, and then goes back to 0
     """                  
     def f(t):
-        return maxvalue*(expit((t-t0-4)*8/(t1-t0)) - expit(df*(t-t2)))      
+        return maxvalue*(expit((t-t0-4)*8/(t1-t0)) - expit(8*(t-t2)))      
     return f
 
 # saturated function
-def sat(satfunct,gw = 20):
+def saturation(satfunct,gw = 20):
     # Importante cambiar el orden de las variables donde se llaman estas funciones! 
-    def aux(t,f1,f2=0):
-        return(expit(-gw*(f1+f2-satfunct(t))))
+    if type(satfunct)== float or type(satfunct)== int:
+        satfunct = build(satfunct)
+    def aux(t,f1,f2=0,f3=0):
+        return(expit(-gw*(f1+f2+f3-satfunct(t))))
     return aux
-        
+    # Hacerlo más elegante con numero variable de inputs =) 
 
 """
 Testing:

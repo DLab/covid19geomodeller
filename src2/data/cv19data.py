@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 sys.path.insert(1, '/utils/')
 sys.path.insert(1, '../utils/')
-from timeutils import timeJStoPy 
+from cv19timeutils import timeJStoPy 
 
 """   
    Import and analyse data 
@@ -45,7 +45,12 @@ from timeutils import timeJStoPy
 
 """
 
+def help():
+    aux = """
+            Functions: 
 
+          """
+    print(aux)
 
 def dataretriever(user=None,password=None,json=None):
     # Esta funcion devolvera una funcion de request        

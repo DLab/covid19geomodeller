@@ -1,7 +1,8 @@
 # Pandemic Suite Configuration File		
 
-title = "Example of a SEIRHVD Configuration File"
+title = 'Example of a SEIRHVD Configuration File'
 date = '2021-03-01'
+user = ''
 
 [model]
 	name = "SEIRHVD"
@@ -137,28 +138,22 @@ date = '2021-03-01'
 	H = 1500
 	V = 1000
 	
-	# Misc
-	name = ''	
-	country = ''
-	state = ''	
-	healtservice = ''
-	realdata = false
-	importdata = false
-	datafile = false			
+	# Deaths
+	D_d = 0
+	D_cu = 0
+
 	
-	#initdate = '2020-12-15'
-	
-[realdata]
-	# Real data will set initial conditions and will be available to be plotted and to calculate errors
-	realdata = true
+[data]
+	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
 	importdata = true
 	datafile = false
 	initdate = '2020-12-15'
 	country = 'Chile'
 	state = '13101'	
-	healtservice = false
-	# The next one is optional
+	healtservice = ''
 	name = 'Santiago'
+	# The next one is optional
+
 	
 [ephemeris]
 	# In case we work with real data, this will help to locate important dates in our plots

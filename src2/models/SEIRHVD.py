@@ -92,6 +92,7 @@ class SEIRHVD:
         #       Initial conditions        #
         # ------------------------------- #
 
+
         # Data object
         if cv19data_obj:
             self.data = cv19data_obj
@@ -818,317 +819,19 @@ class SEIRHVD:
             print("\n")
     """
 
-
-    def integr(self,t0,T,h,E0init=False):
+    def integrate(self,t0=0,T=None,h=0.01,E0init=False):
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,T] function doesn't
         #start. Or it's start if class object is initialze.
-        print('Import odeint')
-        from scikits.odes.odeint import odeint
-
+        if T is None:
+            T = self.tsim
 
         if(not isinstance(self.S, np.ndarray)):
             #pass if object is initalized
-            if(E0init):
-                E0=self.mu*(self.I)
-                E_d0=self.mu*(self.I_d)
-                E_ac0=self.mu*(self.I_ac)
-            else:
-                E0 = self.E
-                E_d0 = self.mu*(self.I_d)
-                E_ac0 = self.mu*(self.I_ac)                
-
-            S0=self.S
-
-            E0=self.E
-            E_d0=self.E_d
-            E_ac0=self.E_ac
-
-            Ias0=self.Ias
-            Imi0=self.Imi
-            Ise0=self.Ise
-            Icr0=self.Icr
-
-            Ias_d0=self.Ias_d
-            Imi_d0=self.Imi_d
-            Ise_d0=self.Ise_d
-            Icr_d0=self.Icr_d   
-
-            Ias_ac0=self.Ias_ac
-            Imi_ac0=self.Imi_ac
-            Ise_ac0=self.Ise_ac
-            Icr_ac0=self.Icr_ac
-        
-            Hse0=self.Hse
-            Hout0=self.Hout
-            V=self.V
-
-            Hse_d0= self.Hse_d
-            Hout_d0= self.Hout_d
-            V_d0= self.V_d
-
-            Hse_ac0= self.Hse_ac
-            Hout_ac0= self.Hout_ac
-            V_ac0= self.V_ac
-
-            R0=self.R
-            R_d0=self.R_d
-
-            D0=self.D
-            B0=self.B
-
-            Ise_D_d0 = self.Ise_D_d
-            Icr_D_d0 = self.Icr_D_d
-            Hse_D_d0 = self.Hse_D_d
-            V_D_d0 = self.V_D_d
-
-            Ise_D_ac0 = self.Ise_D_ac
-            Icr_D_ac0 = self.Icr_D_ac
-            Hse_D_ac0 = self.Hse_D_ac
-            V_D_ac0 = self.V_D_ac
-
-            V_need0=self.V
-            Hse_need0=self.Hse
-            Hout_need0= self.Hout
-
-            self.t=np.arange(t0,T+h,h)
-            
-        elif((min(self.t)<=t0) & (t0<=max(self.t))):
-            #Condition over exiting time in already initialized object
-
-            #Search fot initial time
-            idx=np.searchsorted(self.t,t0)
-
-            #set initial condition
 
             E0 = self.E
-            E_d0 = self.E_d
-            E_ac0 ==self.E_ac
-
-            S0=self.S[idx]
-            Ias0=self.Ias[idx]
-            Imi0=self.Imi[idx]
-            Ise0=self.Ise[idx]
-            Icr0=self.Icr[idx]
-
-            Ias_d0=self.Ias_d[idx]
-            Imi_d0=self.Imi_d[idx]
-            Ise_d0=self.Ise_d[idx]
-            Icr_d0=self.Icr_d[idx]
-
-            Ias_ac0=self.Ias_ac[idx]
-            Imi_ac0=self.Imi_ac[idx]
-            Ise_ac0=self.Ise_ac[idx]
-            Icr_ac0=self.Icr_ac[idx]
-        
-            Hse0=self.Hse[idx]
-            Hout0=self.Hout[idx]
-            V0=self.V[idx]
-
-            Hse_d0=self.Hse_d[idx]
-            Hout_d0=self.Hout_d[idx]
-            V_d0=self.V_d[idx]
-
-            Hse_ac0=self.Hse_ac[idx]
-            Hout_ac0=self.Hout_ac[idx]
-            V_ac0=self.V_ac[idx]
-
-            R0=self.R[idx]
-            R_d0=self.R_d[idx]
-
-            D0=self.D[idx]
-            B0=self.B[idx]
-
-            Ise_D_d0 = self.Ise_D_d[idx]
-            Icr_D_d0 = self.Icr_D_d[idx]
-            Hse_D_d0 = self.Hse_D_d[idx]
-            V_D_d0 = self.V_D_d[idx]
-
-            Ise_D_ac0 = self.Ise_D_ac[idx]
-            Icr_D_ac0 = self.Icr_D_ac[idx]
-            Hse_D_ac0 = self.Hse_D_ac[idx]
-            V_D_ac0 = self.V_D_ac[idx]
-
-            V_need0=self.V[idx]
-            Hse_need0 = self.Hse[idx]
-            Hout_need0 = self.Hout[idx]
-
-            #set time grid
-            self.t=np.arange(self.t[idx],T+h,h)
-
-        else:
-            return()
-
-        
-        def model_SEIR_graph(t,y,ydot):
-            
-            ydot[0]=self.dS(t,y[0],y[1],y[2],y[3],y[4],y[5],y[19],y[20])
-
-            ydot[1]=self.dE(t,y[0],y[1],y[2],y[3],y[4],y[5],y[25])
-            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[4],y[5],y[6],y[7],y[25])
-            ydot[3]=self.dE_ac(t,y[0],y[1],y[4],y[5],y[6],y[7],y[25])
-                                
-            ydot[4]=self.dIas(t,y[1],y[4])
-            ydot[5]=self.dImi(t,y[1],y[5])
-            ydot[6]=self.dIse(t,y[1],y[6],y[16],y[17])
-            ydot[7]=self.dIcr(t,y[1],y[7],y[18])
-
-            ydot[8]=self.dIas_d(t,y[1],y[8])
-            ydot[9]=self.dImi_d(t,y[1],y[9]) 
-            ydot[10]=self.dIse_d(t,y[1],y[10]) 
-            ydot[11]=self.dIcr_d(t,y[1],y[11])            
-
-            ydot[12]=self.dIas_ac(t,y[1])
-            ydot[13]=self.dImi_ac(t,y[1]) 
-            ydot[14]=self.dIse_ac(t,y[1]) 
-            ydot[15]=self.dIcr_ac(t,y[1])
-            
-            ydot[16]=self.dHse(t,y[6],y[16],y[17],y[18])            
-            ydot[17]=self.dHout(t,y[17],y[18])
-            ydot[18]=self.dV(t,y[7],y[16],y[18])
-
-            ydot[19]=self.dHse_d(t,y[6],y[16],y[17],y[19])            
-            ydot[20]=self.dHout_d(t,y[18],y[20])
-            ydot[21]=self.dV_d(t,y[7],y[16],y[18],y[21])
-
-            ydot[22]=self.dHse_ac(t,y[6],y[16],y[17])
-            ydot[23]=self.dHout_ac(t,y[18])
-            ydot[24]=self.dV_ac(t,y[7],y[16],y[18])
-
-            ydot[25]=self.dR(t,y[4],y[5],y[16],y[17],y[25])
-            ydot[26]=self.dR_d(t,y[4],y[5],y[16],y[17],y[25],y[26])
-
-            ydot[27]=self.dD(t,y[6],y[7],y[16],y[17],y[18],y[27])
-            ydot[28]=self.dB(t,y[27])
-
-            ydot[29]=self.dIse_D_d(t,y[6],y[16],y[17],y[29])
-            ydot[30]=self.dIcr_D_d(t,y[7],y[16],y[17],y[18],y[30])
-            ydot[31]=self.dHse_D_d(t,y[16],y[18],y[31])
-            ydot[32]=self.dV_D_d(t,y[18],y[32])
-
-            ydot[33]=self.dIse_D_ac(t,y[6],y[16],y[17])
-            ydot[34]=self.dIcr_D_ac(t,y[7],y[16],y[17],y[18])
-            ydot[35]=self.dHse_D_ac(t,y[16],y[18])
-            ydot[36]=self.dV_D_ac(t,y[18])
-
-            ydot[37]=self.dV_need(t,y[7],y[38],y[37])
-            ydot[38]=self.dHse_need(t,y[6],y[38],y[37])
-            ydot[39]=self.dHout_need(t,y[39],y[37])
-
-
-
-        initcond = np.array([S0,E0,E_d0,E_ac0,Ias0,Imi0,Ise0,Icr0,Ias_d0,Imi_d0,Ise_d0,Icr_d0,Ias_ac0,Imi_ac0,Ise_ac0,Icr_ac0,Hse0,Hout0,V0,Hse_d0,Hout_d0,V_d0,Hse_ac0,
-            Hout_ac0,V_ac0,R0,R_d0,D0,B0,Ise_D_d0,Icr_D_d0,Hse_D_d0,V_D_d0,Ise_D_ac0,Icr_D_ac0,Hse_D_ac0,V_D_ac0,V_need0,Hse_need0,Hout_need0])
-            
-        print('Solving ODE')
-        sol = odeint(model_SEIR_graph, self.t, initcond,method='admo')
-        
-        self.t=sol.values.t 
-        
-        self.S=sol.values.y[:,0]
-
-        self.E=sol.values.y[:,1]
-        self.E_d=sol.values.y[:,2]
-        self.E_ac=sol.values.y[:,3]
-
-        self.Ias=sol.values.y[:,4]
-        self.Imi=sol.values.y[:,5]
-        self.Ise=sol.values.y[:,6]
-        self.Icr=sol.values.y[:,7]
-
-        self.Ias_d=sol.values.y[:,8]
-        self.Imi_d=sol.values.y[:,9]
-        self.Ise_d=sol.values.y[:,10]
-        self.Icr_d=sol.values.y[:,11]
-
-        self.Ias_ac=sol.values.y[:,12]
-        self.Imi_ac=sol.values.y[:,13]
-        self.Ise_ac=sol.values.y[:,14]
-        self.Icr_ac=sol.values.y[:,15]
-
-        self.Hse=sol.values.y[:,16]
-        self.Hout=sol.values.y[:,17]
-        self.V=sol.values.y[:,18]
-
-        self.Hse_d=sol.values.y[:,19]
-        self.Hout_d=sol.values.y[:,20]
-        self.V_d=sol.values.y[:,21]
-
-        self.Hse_ac=sol.values.y[:,22]
-        self.Hout_ac=sol.values.y[:,23]
-        self.V_ac=sol.values.y[:,24]                
-
-        self.R=sol.values.y[:,25]
-        self.R_d=sol.values.y[:,26]
-
-        self.D=sol.values.y[:,27]
-        self.B=sol.values.y[:,28]
-        
-        self.Ise_D_d=sol.values.y[:,29]
-        self.Icr_D_d=sol.values.y[:,30]
-        self.Hse_D_d=sol.values.y[:,31]
-        self.V_D_d=sol.values.y[:,32]
-
-        self.Ise_D_ac=sol.values.y[:,33]
-        self.Icr_D_ac=sol.values.y[:,34]
-        self.Hse_D_ac=sol.values.y[:,35]
-        self.V_D_ac=sol.values.y[:,36]
-
-        self.V_need=sol.values.y[:,37]
-        self.Hse_need=sol.values.y[:,38]
-        self.Hout_need=sol.values.y[:,39]
-
-        self.I = self.Ias + self.Imi + self.Ise + self.Icr
-        self.I_d = self.Ias_d + self.Imi_d + self.Ise_d + self.Icr_d
-        self.I_ac = self.Ias_ac + self.Imi_ac + self.Ise_ac + self.Icr_ac
-
-        self.H = self.Hse + self.Hout
-        self.H_d = self.Hse_d + self.Hout_d
-        self.H_ac = self.Hse_ac + self.Hout_ac
-
-        self.H_sat = [self.h_sat(self.Hse[i],self.Hout[i],self.t[i]) for i in range(len(self.t))]
-        self.V_sat = [self.v_sat(self.V[i],self.t[i]) for i in range(len(self.t))]
-
-        self.V_cap = [self.V_cap(i) for i in self.t]
-        self.H_cap = [self.H_cap(i) for i in self.t]
-
-        self.H_need = self.Hse_need + self.Hout_need
-
-        #Cálculo de la fecha del Peak  
-        self.peakindex = np.where(self.I==max(self.I))[0][0]
-        self.peak = max(self.I)
-        self.peak_t = self.t[self.peakindex]
-        if self.initdate:
-            self.peak_date = self.initdate+timedelta(days=round(self.peak_t))
-
-        # Detected Cases
-        self.I_det = self.I*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
-        self.I_d_det = self.I_d*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
-        self.I_ac_det = self.I_ac*(self.pIas_det*self.pE_Ias + self.pImi_det*self.pE_Imi + self.pIse_det*self.pE_Ise + self.pIcr_det*self.pE_Icr )
-
-
-        # Prevalence: 
-        self.prevalence_total = self.I_ac/self.population
-        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]
-        self.prevalence_detected = [(self.pIas_det*self.Ias[i]+self.pImi_det*self.Imi[i]+self.pIse_det*self.Ise[i]+self.pIcr_det*self.Icr[i])//(self.S[i]+self.E[i]+self.I[i]+self.R[i]+self.V[i]+self.H[i]+self.B[i]) for i in range(len(self.I_ac))]        
-
-        return(sol)
-
-    def integr_sci(self,t0,T,h,E0init=False):
-        #integrator function that star form t0 and finish with T with h as
-        #timestep. If there aren't inital values in [t0,T] function doesn't
-        #start. Or it's start if class object is initialze.
-
-        if(not isinstance(self.S, np.ndarray)):
-            #pass if object is initalized
-            if(E0init):
-                E0=self.mu*(self.I)
-                E_d0=self.mu*(self.I_d)
-                E_ac0=self.mu*(self.I_ac)
-            else:
-                E0 = self.E
-                E_d0 = self.mu*(self.I_d)
-                E_ac0 = self.mu*(self.I_ac)
+            E_d0 = self.mu*(self.I_d)
+            E_ac0 = self.mu*(self.I_ac)
 
             S0=self.S
 
@@ -1195,7 +898,7 @@ class SEIRHVD:
 
             E0 = self.E
             E_d0 = self.E_d
-            E_ac0 ==self.E_ac
+            E_ac0 = self.E_ac
 
             S0=self.S[idx]
             Ias0=self.Ias[idx]
@@ -1256,7 +959,7 @@ class SEIRHVD:
         
         def model_SEIR_graph(t,y):
             ydot=np.zeros(len(y))
-            ydot[0]=self.dS(t,y[0],y[1],y[2],y[3],y[4],y[5],y[19],y[20])
+            ydot[0]=self.dS(t,y[0],y[1],y[4],y[5],y[6],y[7],y[25],y[27])
 
             ydot[1]=self.dE(t,y[0],y[1],y[2],y[3],y[4],y[5],y[25])
             ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[4],y[5],y[6],y[7],y[25])

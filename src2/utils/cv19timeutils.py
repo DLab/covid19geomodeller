@@ -8,6 +8,8 @@ def timeJStoPy(t):
     return datetime.strptime(t[:10],'%Y-%m-%d')
 
 
-def timetxttoDatetime(t):
-    return datetime.strptime(t,'%Y-%m-%d')
+def JS2Datetime(t):
+    return datetime.strptime(t[:10],'%Y-%m-%d')
 
+def txt2Datetime(t):
+    return datetime.strptime(t,'%Y-%m-%d')
