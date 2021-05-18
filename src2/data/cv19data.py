@@ -14,11 +14,14 @@ from os import path
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates 
 
+# cv19gm libraries 
+import os
+path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 import sys
-from pathlib import Path
-sys.path.insert(1, '/utils/')
-sys.path.insert(1, '../utils/')
-from cv19timeutils import timeJStoPy 
+#from pathlib import Path
+sys.path.insert(1, path)
+from utils.cv19timeutils import timeJStoPy 
 
 """   
    Import and analyse data 

@@ -1,56 +1,41 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-SEIRHVD Model
+SEIR Model
 """
 
 import numpy as np
 from scipy.integrate import solve_ivp
-from scipy.special import expit
-from joblib import Parallel, delayed
-from scipy import signal
 import pandas as pd
-from numpy import linalg as LA 
-import multiprocessing  
+import toml
 from datetime import datetime
 from datetime import timedelta
-import toml
+
+
+# Deprecated
+#from scipy.special import expit
+#from joblib import Parallel, delayed
+#import multiprocessing  
+#from scipy import signal
+#from numpy import linalg as LA 
 
 # cv19gm libraries 
+import os
 import sys
-from pathlib import Path
-#sys.path.insert(1, '/utils/')
-sys.path.insert(1, '../utils/')
+path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(1, path)
 
-import cv19data
-import cv19timeutils
-import cv19functions
+import data.cv19data as cv19data
+import utils.cv19timeutils as cv19timeutils
+import utils.cv19functions as cv19functions
 
-"""
-To do:
-  - Ejecutar setparams sólo si es que no se usa archivo de configuración
-  - Estandarizar nombres de variables (creo que está listo)
-  - Función para construir condiciones iniciales y asi optimizar el código
-  - Create reports function inside class
-
-"""
 
 
 class SEIR:  
     """
-        SEIRHVD Object:
+        SEIR model object:
         Construction:
-            SEIRHVD(tsim,beta,mu,alpha,k=0,H_cap=30,V_cap=20)
-        with:
-            tsim: Simulation time
-            beta: Transmition rate
-            mu: E/I initial rate
-            alpha: Movility function (quarantine object function)
-            k: Saturation Kynetics Dynamics factor
-            H_cap: Hospital capacity, either an int or a function(t)
-            V_cap: VMI capacity, either an int or a function(t)
-
-
+            SEIR(self, config = None, inputdata=None)
 
     """
     def __init__(self, config = None, inputdata=None):
@@ -58,8 +43,7 @@ class SEIR:
         # Parameter that defines sigmoid's raising speed
         self.gw=20
         self.config = config
-
-        # Later add the option to initialize it with a default cfg file. 
+        
         if not config:
             print('Missing configuration file ')
             return None
@@ -82,7 +66,8 @@ class SEIR:
 
         # Build functions
         for key in self.cfg['parameters']['dynamic']:
-            if type(self.cfg['parameters']['dynamic'][key])==str:
+            #print(type(self.cfg['parameters']['dynamic'][key]))
+            if True:#type(self.cfg['parameters']['dynamic'][key])==str:
                 self.__dict__.update({key:cv19functions.build(self.cfg['parameters']['dynamic'][key])})
             else:
                 # For inputing functions directly in the dictionary
@@ -95,7 +80,8 @@ class SEIR:
 
         # Data:
         self.__dict__.update(self.cfg['data'])
-        self.initdate = cv19timeutils.txt2Datetime(self.initdate) 
+        if self.initdate:
+            self.initdate = cv19timeutils.txt2Datetime(self.initdate) 
 
         if inputdata:
             self.inputdata = inputdata
@@ -128,7 +114,6 @@ class SEIR:
         # ------------------------------- #
         #       Initial conditions        #
         # ------------------------------- #
-        # Revisar!!
         self.IC = self.cfg['initialconditions']
         for key in self.IC:
             if type(self.IC[key]) == str:
@@ -178,7 +163,7 @@ class SEIR:
        
         # Valores globales
         self.N = self.seroprevfactor*self.population
-        self.S = self.N-self.E-self.I        
+        self.S = self.N-self.E-self.I-self.R
                     
 
     def setnewparams(self):
@@ -198,7 +183,7 @@ class SEIR:
         # --------------------------- # 
        
         # 0) dS/dt:
-        self.dS=lambda t,S,E,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*(self.expinfection*E+I)/(self.N+self.k_I*I + self.k_R*R) + self.eta(t)*R
+        self.dS=lambda t,S,E,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*(self.expinfection*E+I)/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
         
         # --------------------------- #
         #           Exposed           #
@@ -232,7 +217,7 @@ class SEIR:
         # --------------------------- #  
         
         # 5) Total recovered
-        self.dR=lambda t,I,R: self.R_f(t) + I/self.tI_R(t) - self.eta(t)*R
+        self.dR=lambda t,I,R: self.R_f(t) + I/self.tI_R(t) - self.rR_S(t)*R
 
         # 6) Recovered per day
         self.dR_d=lambda t,I,R_d: self.R_f(t) + I/self.tI_R(t) - R_d
@@ -280,8 +265,8 @@ class SEIR:
             print("\n")
     """
 
-    def integr(self,t0,T,h,E0init=False):
-        self.integrate()
+    def integr_sci(self,t0=0,T=None,h=0.01):
+        self.integrate(t0=0,T=None,h=0.01)
         return
 
     # Scipy
@@ -378,7 +363,8 @@ class SEIR:
             return()
             
 
-        
+        initcond = np.array([S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0])
+
         def model_SEIR_graph(t,y):
             ydot=np.zeros(len(y))
             ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
@@ -396,7 +382,7 @@ class SEIR:
                                           
             return(ydot)
 
-        initcond = np.array([S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]) 
+         
         
         sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
         
@@ -420,7 +406,7 @@ class SEIR:
         self.I_d_det = self.I_d*self.pI_det
         self.I_ac_det = self.I_ac*self.pI_det
 
-        self.anaytics()
+        self.analytics()
         self.dfbuild(sol)
 
         return(sol)
@@ -525,11 +511,11 @@ class SEIR:
         self.I_d_det = self.I_d*self.pI_det
         self.I_ac_det = self.I_ac*self.pI_det
 
-        self.anaytics()
+        self.analytics()
         self.dfbuild(sol)
         return(sol)
 
-    def anaytics(self):
+    def analytics(self):
         #Cálculo de la fecha del Peak  
         self.peakindex = np.where(self.I==max(self.I))[0][0]
         self.peak = max(self.I)
@@ -557,4 +543,11 @@ class SEIR:
         self.aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
 
         self.results = pd.concat([self.results,self.aux,self.aux2],axis=1)
+        self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
+
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
+
+
+
+
+        
