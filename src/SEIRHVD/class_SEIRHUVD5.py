@@ -125,7 +125,10 @@ class SEIRHVD:
             self.V = IC.Vr[0]
             self.B = IC.Br[0]
             self.D = IC.Br[1]-IC.Br[0]
-            self.R = 0
+            if 'R' in IC.__dict__:
+                self.R = IC.R[0]
+            else:
+                self.R = 0
             self.I0 = IC.Ir[0]
             self.I_d0 = IC.I_d_r[0]
             self.I_ac0 = IC.I_ac_r[0]
@@ -631,7 +634,7 @@ class SEIRHVD:
        
         # Valores globales
         self.N = self.SeroPrevFactor*self.population
-        self.S = self.N-self.H0-self.V-self.D-self.E-(self.Ias+self.Icr+self.Ise+self.Imi)        
+        self.S = self.N-self.H0-self.V-self.D-self.E-(self.Ias+self.Icr+self.Ise+self.Imi) - self.R
         #self.I = self.I
 
         #constructor of SEIR class elements, it's initialized when a parameter

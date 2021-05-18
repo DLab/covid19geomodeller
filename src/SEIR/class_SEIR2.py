@@ -23,11 +23,11 @@ SEIRQ Model Implementation
 """
 
 class SEIR:  
-    def __init__(self,tsim,alpha,beta,mu,sigma = 0.2, gamma = 0.1, k=0,I0=100,I_ac0=0,I_d0=0,R0=0,population=1000000,expinfection = 1, SeroPrevFactor=1,chi = 0,psi = 0,k_I=0,k_R=0,RealIC=None, initdate = None,SimIC=None,I_det_prop=1,testaccuracy=1):        
+    def __init__(self,tsim,alpha,beta,mu,sigma = 0.2, gamma = 0.1, k=0,I0=100,I_ac0=0,I_d0=0,R0=0,population=1000000,expinfection = 0, SeroPrevFactor=1,chi = 0,psi = 0,k_I=0,k_R=0,RealIC=None, initdate = None,SimIC=None,I_det_prop=1,testaccuracy=1):
         self.tsim = tsim
         self.alpha = alpha
         self.beta = beta
-        self.mu=1.4
+        self.mu=mu
         self.k_I = k_I
         self.k_R = k_R
 
@@ -144,13 +144,15 @@ class SEIR:
         #miminization is performed to adjust the best setting of the actual infected
 
 
-    def integr(self,t0,T,h,E0init=False):
+    def integr(self,t0=0,T=None,h=0.01,E0init=False):
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,T] function doesn't
         #start. Or it's start if class object is initialze.
         print('Import scikits-odes')
         from scikits.odes.odeint import odeint
 
+        if T is None:
+            T = self.tsim
 
         if(not isinstance(self.S, np.ndarray)):
             #pass if object is initalized
@@ -237,14 +239,16 @@ class SEIR:
         # Prevalence: 
         self.prevalence_total = self.I_ac/self.population
         self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
-        self.prevalence_det = [self.I_det*self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
+        self.prevalence_det = [self.I_det_prop*self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
                
         return(sol)
 
-    def integr_sci(self,t0,T,h,E0init=False):
+    def integr_sci(self,t0=0,T=None,h=0.01,E0init=False):
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,T] function doesn't
         #start. Or it's start if class object is initialze.
+        if T is None:
+            T = self.tsim
        
         if(not isinstance(self.S, np.ndarray)):
             #pass if object is initalized
