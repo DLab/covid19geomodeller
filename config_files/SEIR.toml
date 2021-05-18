@@ -6,21 +6,21 @@ user = 'Samuel'
 
 [model]
 	name = "SEIR"
-	compartments  = ['S','E','I','R'] # Nombres de los estados
-	#variables  = ['S','S_d','S_ac','E','E_d','E_ac','I','I_d','I_ac','R','R_d','R_ac']
+	compartments  = ['S','E','I','R'] 
 	
 
 [data]
 	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
 	datafile = false # File path for importing data from file 
 	importdata = false # Import data from external source
-	# parameters to use when importanting from external sources 
-	initdate = '2020-12-18'
-	country = 'Chile'
-	state = '13'
+
+	# parameters to use when importing from external sources 
+	initdate = ''
+	country = ''
+	state = ''
 	county = ''#'13101'
 	healthservice = ''
-	loc_name= 'Santiago' # optional 
+	loc_name= '' # optional 
 
 
 [parameters]
@@ -29,23 +29,24 @@ user = 'Samuel'
 	t_end = 500 # Final day
 	timestep = 0.01 # Timestep for solver
 	
+	# Saturation dynamic
 	k_I = 0
 	k_R = 0
 
-	seroprevfactor = 1
-	expinfection = 0
+	seroprevfactor = 1 # Fraction of the total population that take part on the dynamic at the beginning
+	expinfection = 0 # Factor in which exposed infect, default is 0
 
-	mu = 0.298
+	mu = 0.298 # E(0) = mu*I(0)
 	
 	# Subreport
 	pI_det = 1		
 	
 	[parameters.dynamic]
-	beta = 0.15
-	alpha = '{"function":"Events","values":[0.45,0.85],"days":[[0,100],[100,500]]}'  # Refer to function constructor library
+	beta = 0.2
+	alpha = 1
 	
 	# External flux rates over time 
-	S_f = 0
+	S_f = 0#'{"function":"Events","values":[10000,-10000],"days":[[190,200],[210,220]]}'
 	E_f = 0
 	I_f = 0
 	R_f = 0	
@@ -53,10 +54,14 @@ user = 'Samuel'
 	# -------------------------- #
 	#   Transition Parameters    # 
 	# -------------------------- #	
+	# Transition time between exposed and infectious
         tE_I = 5.0 # 1/sigma
+	# Transition time between infectious and removed
         tI_R = 10.0 # 1/gamma
 	
-	eta = 0 # Immunity loss rate
+	# Average Immunity loss rate (1/time)
+	rR_S = 0 
+	
 [initialconditions]
 	# total population in area
 	population = 1000000
@@ -78,14 +83,10 @@ user = 'Samuel'
 	I_ac = 0
 	I_ac_det = 15000
 
+	# Leave E and E_d as false for using mu
 	E = false
 	E_d = false
 	
-[ephemeris]
-	# In case we work with real data, this will help to locate important dates in our plots
-	newyear = '2020-12-31'
-	fiestaspatrias = '2020-09-18'
 
-
-
+	
 
