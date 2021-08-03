@@ -28,6 +28,7 @@ sys.path.insert(1, path)
 import data.cv19data as cv19data
 import utils.cv19timeutils as cv19timeutils
 import utils.cv19functions as cv19functions
+import utils.cv19files as cv19files
 
 
 
@@ -38,8 +39,10 @@ class SEIR:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config = None, inputdata=None):
+    def __init__(self, config = None, inputdata=None,aux=None,**kwargs):
         
+        if aux:
+            kwargs.update(aux)
         # Parameter that defines sigmoid's raising speed
         self.gw=20
         self.config = config
@@ -49,85 +52,14 @@ class SEIR:
             return None
 
         # ------------------------------- #
-        #         Load parameters         #
+        #         Parameters Load         #
         # ------------------------------- #
-        if type(config) == dict:
-            self.cfg = config    
-        else:
-            self.cfg = toml.load(config)
-                
-        # Model
-        self.model = self.cfg['model']
-
-        # Import fixed variables
-        self.__dict__.update(self.cfg['parameters']['static'])
-        
-        self.tsim = self.t_end - self.t_init
-
-        # Build functions
-        for key in self.cfg['parameters']['dynamic']:
-            #print(type(self.cfg['parameters']['dynamic'][key]))
-            if True:#type(self.cfg['parameters']['dynamic'][key])==str:
-                self.__dict__.update({key:cv19functions.build(self.cfg['parameters']['dynamic'][key])})
-            else:
-                # For inputing functions directly in the dictionary
-                self.__dict__.update({key:self.cfg['parameters']['dynamic'][key]})
-        
-        
-        # Ephemeris
-        if 'ephemeris' in self.cfg:
-            self.ephemeris = self.cfg['ephemeris']
-
-        # Data:
-        self.__dict__.update(self.cfg['data'])
-        if self.initdate:
-            self.initdate = cv19timeutils.txt2Datetime(self.initdate) 
-
-        if inputdata:
-            self.inputdata = inputdata
-            self.data = self.inputdata.data
-            self.initdate = self.inputdata.initdate
-            #if not type(self.initdate) == datetime.datetime:
-            #    self.initdate = cv19timeutils.txt2Datetime(self.initdate)                
-
-            #self.country = self.inputdata.country 
-            self.state = self.inputdata.tstate 
-            #self.county = self.inputdata.county 
-            #self.healtservice = self.inputdata.healtservice 
-            #self.loc_name = self.inputdata.loc_name             
-
-        else:
-            if self.datafile:
-                # Falta construir funcion para cargar datos desde archivos, pero primero tengo que construir ese archivo 
-                self.data = pd.DataFrame(self.cfg['data']['datafile'])
-                self.inputdata = None
-            elif self.importdata:                	            
-                #self.inputdata = cv19data.ImportData(country=self.country,state=self.state,county=self.county,healthservice=self.healthservice,initdate=self.initdate,user = None,password = None)
-                self.inputdata = cv19data.ImportData(tstate=self.state,initdate=self.initdate,user = None,password = None)
-                self.inputdata.importdata()
-                self.data = self.inputdata.data
-            else: 
-                print('No external data added')
-                self.data = None
-                self.inputdata = None
-
-        # ------------------------------- #
-        #       Initial conditions        #
-        # ------------------------------- #
-        self.IC = self.cfg['initialconditions']
-        for key in self.IC:
-            if type(self.IC[key]) == str:
-                # Crear error cuando no haya archivo de datos
-                self.__dict__.update({key:self.data[self.IC[key]][0]})
-            else:
-                self.__dict__.update({key:self.IC[key]})
-
-
-
+        cv19files.loadconfig(self,config,inputdata,**kwargs)
         self.setrelationalvalues()
         self.setequations()
 
-        print('SEIR object created')
+        self.solved = False
+        #print('SEIR object created')
 
     # ------------------- #
     #  Valores Iniciales  #
@@ -165,12 +97,6 @@ class SEIR:
         self.N = self.seroprevfactor*self.population
         self.S = self.N-self.E-self.I-self.R
                     
-
-    def setnewparams(self):
-        self.setequations()
-        self.setrelationalvalues()
-        print('State parameters updated')
-
 
     def setequations(self):
         """
@@ -229,41 +155,6 @@ class SEIR:
         self.dFlux = lambda t: self.S_f(t) + self.E_f(t) + self.I_f(t) + self.R_f(t) 
 
 
-    """
-    def calculateindicators(self):
-        self.R_ef
-        self.SHFR
-        # Peak
-        self.peak
-        self.peakindex
-        self.peak_t
-        self.peak_date
-
-
-        # SeroPrevalence Calculation
-
-        # Errors (if real data)
-
-        # Active infected
-        print('wip')
-
-    def resume(self):        
-        print("Resumen de resultados:")
-        qtype = ""
-        for i in range(self.numescenarios):
-            if self.inputarray[i][-1]==0:
-                qtype = "Cuarentena total"
-            if self.inputarray[i][-1]>0:
-                qtype ="Cuarentena Dinámica"            
-
-            print("Escenario "+str(i))
-            print("Tipo de Cuarentena: "+qtype+'\nmov_rem: '+str(self.inputarray[i][2])+'\nmov_max: '+str(self.inputarray[i][2])+
-            "\nInicio cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime('%Y/%m/%d')+"\nFin cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime('%Y/%m/%d'))
-            print("Peak infetados \n"+"Peak value: "+str(self.peak[i])+"\nPeak date: "+str(self.peak_date[i]))
-            print("Fallecidos totales:"+str(max(self.B[i])))
-            print("Fecha de colapso hospitalario \n"+"Camas: "+self.H_colapsedate[i]+"\nVentiladores: "+self.V_colapsedate[i])
-            print("\n")
-    """
 
     def integr_sci(self,t0=0,T=None,h=0.01):
         self.integrate(t0=0,T=None,h=0.01)
@@ -278,7 +169,8 @@ class SEIR:
         if T is None:
             T = self.tsim
 
-        if(not isinstance(self.S, np.ndarray)):
+        # Check if we already simulated the array
+        if not self.solved:
 
             S0=self.S
             if self.E:
@@ -360,6 +252,7 @@ class SEIR:
             self.t=np.arange(self.t[idx],T+h,h)
 
         else:
+            print('Already solved')
             return()
             
 
@@ -408,6 +301,7 @@ class SEIR:
 
         self.analytics()
         self.dfbuild(sol)
+        self.solved = True
 
         return(sol)
 
@@ -426,7 +320,7 @@ class SEIR:
         if T is None:
             T = self.tsim
 
-        if not isinstance(self.S, np.ndarray):
+        if not self.solved:
 
             S0=self.S
             if self.E:
@@ -467,6 +361,7 @@ class SEIR:
             self.t=np.arange(self.t[idx],T+h,h)
 
         else:
+            print('Already solved')
             return()
 
         
@@ -513,6 +408,9 @@ class SEIR:
 
         self.analytics()
         self.dfbuild(sol)
+
+        self.solved = True
+        
         return(sol)
 
     def analytics(self):
@@ -549,5 +447,35 @@ class SEIR:
 
 
 
+    """
+ 
+    def calculateindicators(self):
+        self.R_ef
+        self.SHFR
+
+        # SeroPrevalence Calculation
+
+        # Errors (if real data)
+
+        # Active infected
+        print('wip')
+
+    def resume(self):        
+        print("Resumen de resultados:")
+        qtype = ""
+        for i in range(self.numescenarios):
+            if self.inputarray[i][-1]==0:
+                qtype = "Cuarentena total"
+            if self.inputarray[i][-1]>0:
+                qtype ="Cuarentena Dinámica"            
+
+            print("Escenario "+str(i))
+            print("Tipo de Cuarentena: "+qtype+'\nmov_rem: '+str(self.inputarray[i][2])+'\nmov_max: '+str(self.inputarray[i][2])+
+            "\nInicio cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime('%Y/%m/%d')+"\nFin cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime('%Y/%m/%d'))
+            print("Peak infetados \n"+"Peak value: "+str(self.peak[i])+"\nPeak date: "+str(self.peak_date[i]))
+            print("Fallecidos totales:"+str(max(self.B[i])))
+            print("Fecha de colapso hospitalario \n"+"Camas: "+self.H_colapsedate[i]+"\nVentiladores: "+self.V_colapsedate[i])
+            print("\n")
+    """
 
         
