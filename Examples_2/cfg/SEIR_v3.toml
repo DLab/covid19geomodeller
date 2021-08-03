@@ -36,7 +36,7 @@ user = 'Samuel'
 	seroprevfactor = 1 # Fraction of the total population that take part on the dynamic at the beginning
 	expinfection = 0 # Factor in which exposed infect, default is 0
 
-	mu = 0.5 # E(0) = mu*I(0)
+	mu = 0.298 # E(0) = mu*I(0)
 	
 	# Subreport
 	pI_det = 1		
