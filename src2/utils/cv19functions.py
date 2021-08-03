@@ -14,25 +14,38 @@ import json
 #                                                   #
 # ------------------------------------------------- #
 
-
-To Do:
-    * Crear una opción para el build donde si recibe un arreglo con diccionarios creadores de funciones, los sume con functionAddition. 
-    * A fitdata agregar la opción de trabajar con objetos de nuestras clases de datos. 
+To Do:    
+    * Agregar tipos de subidas y bajadas al Events function
+    * Reducir las funciones de subida y bajada continuas en 1 con tipo de subida y bajada
+    * Revisar el valor por defecto de events
+    * Revisar si se puede simplificar la llamada a events 
+    * Considerar el crear funciones directamente, sin pasar por ese formato que cree   
 """
 def build(input):
+    """
+    Function builder
     # crear un iterador que recorra el input y cree la función a partir de un comando exec:
     # Acepta diccionarios o strings con forma de diccionario
+    """
+    
     if type(input)==str:
         input_dict = json.loads(input)
     elif type(input)==dict:
         input_dict = input.copy()
-    else:
-        #print('Constant value function: '+str(input))
+    elif callable(input):
+        setattr(locals()['out'],'constructor','User defined Function')
+        return input
+    elif type(input) == tuple:
+        return addbuild(*input)
+    elif type(input) == list:
+        # For building iterable simulations
+        return input        
+    else:        
         def out(t):
             return input
         setattr(locals()['out'],'constructor',str(input))            
         return out
-    #print(input_dict['function'])
+    
     try:
         print("Executing "+input_dict['function'])
     except:
@@ -49,32 +62,46 @@ def build(input):
     setattr(locals()['out'],'constructor',str(input))
     return locals()['out']
 
-def functionAddition(functarray):
+# Build + function addition.
+def addbuild(*input):
     """
-    Creates the function that results adding the functions present in the function array
+    Creates a function Build a functions and adds t 
+    # Construir funcion que sume multiples funciones 
+    """
+    aux = []
+    for i in input:
+        aux.append(build(i))
+    return functionAddition(*aux)
+
+# Function addition
+def functionAddition(*functions):
+    """
+    Creates the function that results adding the functions received. 
     Receives a list where each element is a function that receives 1 argument
     """
     def f(t):
         aux = 0
-        for i in functarray:    
+        for i in functions:    
             aux += i(t)
         return aux
     return f
 
-"""
-#----------------------------#
-#          datafit           #
-#----------------------------#
-Function data fits real data with a polynom of a given degree, and then projects the future values with it. 
 
-fitmethod is there in order to add more methods to this function 
-
-"""
-def polyfit(time,values,degree=4,tsat=-1,endvalue = -10,fitmethod='poly'):
+def polyfit(values,time = None,degree=4,endvalue_index = -5):
+    """
+    polyfit:
+    Function data fits real data with a polynom of a given degree, and then projects the future values with it.
+    values: values to fit
+    time: time array from data to fit. If no time array given, daily data is assumed 
+    degree: polynom degree    
+    """
+    if not time:
+        time = np.array(range(len(values)))
     datamodel = np.poly1d(np.polyfit(time, values, degree))
-    tsat = time[tsat]
-    endvalue = np.mean(values[endvalue:])
-    f_out=lambda t: datamodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*endvalue
+    # transition time from data to fixed value
+    tchange = time[-1]#[tchange]
+    endvalue = np.mean(values[endvalue_index:])
+    f_out=lambda t: datamodel(t)*(1-expit(t-tchange)) + expit(t-tchange)*endvalue
     return f_out
 
 # Custom values through time
@@ -118,8 +145,7 @@ def Events(values,days,functions = []):
     plt.show()
     """
 
-
-
+# Periodic square function
 def square(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min',duty=0.5):
     # phase en fraccion del periodo
     def f(t): 
@@ -137,7 +163,7 @@ def square(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='mi
 
     return aux
 
-
+# Sine function
 def sine(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min'):
     # phase en fraccion del periodo
     def f(t): 
@@ -155,6 +181,7 @@ def sine(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min'
 
     return aux
 
+# Sawtooth function
 def sawtooth(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min',width=1):
     # phase en fraccion del periodo
     def f(t): 
@@ -172,8 +199,6 @@ def sawtooth(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='
 
     return aux
 
-
-
 # Increasing functions
 def increase_linear(t0,t1,t2,maxvalue = 0,increaserate=1):
     """
@@ -190,7 +215,6 @@ def increase_linear(t0,t1,t2,maxvalue = 0,increaserate=1):
     aux = lambda t: f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + maxvalue*(expit(10*(t-t1)) - expit(10*(t-t2)))
     return aux
 
-
 def increase_quadratic(t0,t1,t2,maxvalue = 1):
     """
     Creates a function that starts growing quadratically from t = t0, until it reaches the maxvalue. 
@@ -202,7 +226,6 @@ def increase_quadratic(t0,t1,t2,maxvalue = 1):
     aux = lambda t: f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + maxvalue*(expit(10*(t-t1)) - expit(10*(t-t2)))
     return aux
 
-
 def increase_sigmoid(t0,t1,t2,maxvalue = 1):
     """
     Creates a function that grows like a sigmoid from t = t0, until it reaches the maxvalue. 
@@ -212,22 +235,22 @@ def increase_sigmoid(t0,t1,t2,maxvalue = 1):
         return maxvalue*(expit((t-t0-4)*8/(t1-t0)) - expit(8*(t-t2)))      
     return f
 
-# saturated function
+# Saturation function
 def saturation(satfunct,gw = 20):
-    # Importante cambiar el orden de las variables donde se llaman estas funciones! 
-    if type(satfunct)== float or type(satfunct)== int:
+    """
+    Saturation function
+    Binary function that indicates when the sum of functions are bigger than the saturation function.
+    input: 
+        satfunct: Upper limit function
+    return:
+        0 when the functions given are smaller than the saturation function 
+        1 when they are bigger or equal
+    """
+    
+    if not callable(satfunct):    
         satfunct = build(satfunct)
-    def aux(t,f1,f2=0,f3=0):
-        return(expit(-gw*(f1+f2+f3-satfunct(t))))
+    def aux(t,*functions):
+        f = functionAddition(*functions)
+        return(expit(gw*(f-satfunct(t))))
     return aux
-    # Hacerlo más elegante con numero variable de inputs =) 
-
-"""
-Testing:
-
-#def increasingfunct
-t = np.array(np.arange(0,50,0.1)) 
-plt.plot(t,aux(t))
-plt.show() 
-
-"""
+    
