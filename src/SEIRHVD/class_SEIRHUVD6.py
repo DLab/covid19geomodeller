@@ -22,7 +22,7 @@ To do:
 
 
 SEIRHVD Implementation
-Instructions: 
+Instructions:
     Init a simSEIRHVD objecting giving the simulation condictions:
         - tsim: Simulation time
         - max_mov:
@@ -30,7 +30,7 @@ Instructions:
         - qp:
         - iqt:
         - fqt:
-        - movfunct: 
+        - movfunct:
 
 """
 
@@ -109,12 +109,12 @@ class SEIRHVD:
             #Hcmodel = np.poly1d(np.polyfit(IC.sochimi_tr, IC.Hr_tot, 4))
             Hcmodel = np.poly1d(30000)
             tsat = IC.sochimi_tr[-1]
-            Hmax = np.mean(IC.Hr_tot[-10:])
+            Hmax = np.mean(IC.Hr_tot[-3:])
             self.Htot=lambda t: Hcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Hmax  
 
             Vcmodel = np.poly1d(np.polyfit(IC.sochimi_tr, IC.Vr_tot, 4))
             tsat = IC.sochimi_tr[-1]
-            Vmax = np.mean(IC.Vr_tot[-10:])
+            Vmax = np.mean(IC.Vr_tot[-3:])
             self.Vtot=lambda t: Vcmodel(t)*(1-expit(t-tsat)) + expit(t-tsat)*Vmax #+ 1000
 
             # Set Initial values

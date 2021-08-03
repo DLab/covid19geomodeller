@@ -678,6 +678,7 @@ class ImportData():
             usage 
                 I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = '13101',initdate = datetime(2020,5,15))      
         """
+        
         print('Importing Daily Infected')
 
         if self:
@@ -1068,6 +1069,82 @@ class ImportData():
         else:        
             return UCI_capacity,UCI_use_covid,UCI_use_noncovid,UCI_dates,UCI_tr
 
+
+
+
+    # ----------------------------- #
+    #    Datos Ocupacion de Camas   #
+    # ----------------------------- #
+    def importICUBedOccupationMinciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto58/Camas_UCI_diarias.csv',user=None,password=None):
+        """
+        Import ICU Bed Occupation data per region.
+        Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
+        input:
+            - tstate: región
+            - initdate: Fecha de inicio
+            - endpoint: Data endpoint
+        output:
+            - sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot, 
+             (data frame, fechas, dias desde inicio sim, Hospitalizados, capacidad hospitalizados, ventilados, capacidad ventilados) 
+        
+        Normal Usage:
+            sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot = importSOCHIMI(tstate = '13', initdate = datetime(2020,5,15))
+        """
+        print('Importing ICU Beds Data from Minciencia') 
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            #request = self.request
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
+            #request = requestdata(user,password)
+
+
+        aux = pd.read_csv(endpoint)
+        
+        # dates
+        dates = [datetime.strptime(aux.columns[i],'%Y-%m-%d') for i in range(2,len(aux.columns))]
+
+        # data
+        regiones = ['Tarapacá','Antofagasta','Atacama','Coquimbo','Valparaíso','O’Higgins','Maule','Biobío','Araucanía','Los Lagos','Aysén','Magallanes','Metropolitana','Los Ríos','Arica y Parinacota','Ñuble']
+        
+        tstate_names = []
+        
+        if type(tstate) == list:
+            states = [i for i in tstate if len(i)==2]            
+            for i in states:                
+                tstate_names.append(regiones[int(i)-1])
+            
+            data = aux.loc[aux['Region'].isin(tstate_names)]
+        else:
+            data = aux.loc[aux['Region']==regiones[int(tstate)-1]]
+        
+        capacity = data.loc[data['Serie']=='Camas UCI habilitadas'].iloc[:,2:].sum(axis=0)
+        occupied_covid = data.loc[data['Serie']=='Camas UCI ocupadas COVID-19'].iloc[:,2:].sum(axis=0)
+        occupied_non_covid = data.loc[data['Serie']=='Camas UCI ocupadas no COVID-19'].iloc[:,2:].sum(axis=0)
+
+        index = np.where(np.array(dates) >= initdate)[0][0] 
+
+        UCI_capacity =list(capacity[index:])
+        UCI_use_covid =list(occupied_covid[index:])
+        UCI_use_noncovid =list(occupied_non_covid[index:])
+
+        UCI_dates = dates[index:]
+        UCI_tr = [(UCI_dates[i]-initdate).days for i in range(len(UCI_dates))]       
+               
+
+        if self:
+            self.UCI_capacity = UCI_capacity
+            self.UCI_use_covid = UCI_use_covid
+            self.UCI_use_noncovid = UCI_use_noncovid                        
+            self.UCI_dates = UCI_dates
+            self.UCI_tr = UCI_tr
+            return
+        else:        
+            return UCI_capacity,UCI_use_covid,UCI_use_noncovid,UCI_dates,UCI_tr
 
 
 
@@ -1956,7 +2033,8 @@ class ImportData():
         self.importDailyInfected()
         #self.importSOCHIMI()
         #self.importSOCHIMIMinCiencia()
-        self.importICUBedOccupation()
+        #self.importICUBedOccupation()
+        self.importICUBedOccupationMinciencia()
         #self.importAccumulatedDeaths()
         self.importDeathsDEIS()
         self.importActiveInfectedMinciencia()
