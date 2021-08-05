@@ -24,7 +24,7 @@ import utils.cv19timeutils as cv19timeutils
 #                   File manager                    #
 #                                                   #
 # ------------------------------------------------- #
-To do:
+Todo:
     [] Capacidad de guardar un archivo de configuración de un objeto de simulación en un archivo toml
 Functions:
     loadconfig: Load parameters from a configuration file or object
@@ -35,6 +35,13 @@ Functions:
  
 """
 def loadconfig(sim,config,inputdata,**kwargs):
+    """[summary]
+
+    Args:
+        sim ([type]): [description]
+        config ([type]): [description]
+        inputdata ([type]): [description]
+    """
     # ------------------------------- #
     #        Parameters Load          #
     # ------------------------------- #

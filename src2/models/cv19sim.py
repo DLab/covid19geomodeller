@@ -19,7 +19,7 @@ from copy import deepcopy
 #from importlib import import_module
 
 """
-To do:
+Todo:
     [x] Resolver la interaccion del cv19functions con las listas    
     [x] Decidir como decidir qué modelo usar y luego como importarlo
     [x] Encontrar los parámetros "iterables" (listas) en el config y el kwargs
@@ -62,16 +62,20 @@ class cv19sim():
                 iterables.update({key:value})
 
         #print('There are '+ str(len(iterables))+' iterable parameters')
+               
 
-        # Pop iterables from kwargs
-        for key in iterables:
-            if key in kwargs:
-                kwargs.pop(key)
-
-        buildsim = simapply(config,model,inputdata,**kwargs)
-        expandediterables = iterate(iterables)
-
-        self.sims = buildsim(expandediterables)
+        if iterables:
+            # Pop iterables from kwargs
+            for key in iterables:
+                if key in kwargs:
+                    kwargs.pop(key)
+            expandediterables = iterate(iterables)
+            buildsim = simapply(config,model,inputdata,**kwargs)            
+            self.sims = buildsim(expandediterables)
+        else:
+            self.sims = [model(config,inputdata,**kwargs)]
+            print('Simulating over 1 level and 1 element')
+               
         self.vectintegrate = np.vectorize(integrate)
         
     def integrate(self):
@@ -79,12 +83,24 @@ class cv19sim():
         return
 
 def simapply(config,model,inputdata,**kwargs):
+    """Builds an array of models instances using the iterable variables array
+
+    Args:
+        config ([dict or path]): base configuration file
+        model (cv19model): compartmental model class
+        inputdata (cv19data): (optional) Input data for IC and fitting
+    """
     def aux(x):
         return(model(config,inputdata,**kwargs,**x))
     aux2 = np.vectorize(aux)
     return(aux2)
 
 def integrate(x):
+    """Solves EDOs in models instances
+
+    Args:
+        x (cv19model): cv19model instance
+    """
     x.integrate()
     return()
 

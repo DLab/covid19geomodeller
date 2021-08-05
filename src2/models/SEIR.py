@@ -252,7 +252,7 @@ class SEIR:
             self.t=np.arange(self.t[idx],T+h,h)
 
         else:
-            print('Already solved')
+            #print('Already solved')
             return()
             
 

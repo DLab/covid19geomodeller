@@ -104,15 +104,22 @@ def polyfit(values,time = None,degree=4,endvalue_index = -5):
     f_out=lambda t: datamodel(t)*(1-expit(t-tchange)) + expit(t-tchange)*endvalue
     return f_out
 
-# Custom values through time
+# TODO: Add default value
+# TODO: Change functions to *args
+
 def Events(values,days,functions = []):
     """
     Event creator function. Create a time dependent function that returns the values setted in the 
     values vector for the periods specified in the days vector. 
-    Input:
-    * values: list with the values for the different intervals
-    * days: list of lists of len == 2 with the values for the function on that v.
-    
+
+
+    Args:
+        values (list): list with the values for the different intervals
+        days (list): ist of lists of len == 2 with the values for the function on that v.
+        functions (list, optional): [description]. Defaults to [].
+
+    Returns:
+        [type]: [description]
     """
 
     # for one interval
@@ -133,7 +140,7 @@ def Events(values,days,functions = []):
             return values[j]*(expit(10*(t-days[j][0])) - expit(10*(t-days[j][1]))) 
         aux_f.append(auxf)
 
-    out = functionAddition(aux_f)    
+    out = functionAddition(*aux_f)    
     return out
 
 
