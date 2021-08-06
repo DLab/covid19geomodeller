@@ -28,14 +28,14 @@ Todo:
     [ ] Instanciar objetos del modelo correspondiente a partir del arreglo de configuración
     [ ] Crear función que simule las funciones en todos los arreglos. Fundamental paralelizar! 
 
-    [ ] Construir una función resumen que imprima las características principales
+Todo: [ ] Construir una función resumen que imprima las características principales
         * tipo de modelo
         * variables a iterar
         * Condiciones iniciales reales 
 """
 
 class cv19sim():
-    def __init__(self,config,model='SEIR', inputdata = None, **kwargs):
+    def __init__(self,config,model='SEIR', inputdata = None, verbose=False,**kwargs):
 
         config = deepcopy(config)            
         if model == 'SEIR':
@@ -58,7 +58,8 @@ class cv19sim():
         # Find iterable parameters:
         for key,value in aux.items():
             if type(value)==list:
-                print(key+':'+str(value))
+                if verbose:
+                    print(key+':'+str(value))
                 iterables.update({key:value})
 
         #print('There are '+ str(len(iterables))+' iterable parameters')
@@ -69,12 +70,13 @@ class cv19sim():
             for key in iterables:
                 if key in kwargs:
                     kwargs.pop(key)
-            expandediterables = iterate(iterables)
+            expandediterables = iterate(iterables,verbose=verbose)
             buildsim = simapply(config,model,inputdata,**kwargs)            
             self.sims = buildsim(expandediterables)
         else:
             self.sims = [model(config,inputdata,**kwargs)]
-            print('Simulating over 1 level and 1 element')
+            if verbose:
+                print('Simulating over 1 level and 1 element')
                
         self.vectintegrate = np.vectorize(integrate)
         
@@ -104,7 +106,7 @@ def integrate(x):
     x.integrate()
     return()
 
-def iterate(config, iterables=None,**kwargs,):
+def iterate(config, iterables=None,verbose=False,**kwargs,):
     if iterables == None:
         iterables = {}
         nelements = 1
@@ -112,7 +114,8 @@ def iterate(config, iterables=None,**kwargs,):
             if type(value) == list:
                 iterables.update({key:value})
                 nelements*=len(value)
-        print('Simulating over '+str(len(iterables))+' levels and '+str(nelements)+' elements')        
+        if verbose:
+            print('Simulating over '+str(len(iterables))+' levels and '+str(nelements)+' elements')        
         
     
     if iterables:

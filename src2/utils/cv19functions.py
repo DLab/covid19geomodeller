@@ -46,10 +46,10 @@ def build(input):
         setattr(locals()['out'],'constructor',str(input))            
         return out
     
-    try:
-        print("Executing "+input_dict['function'])
-    except:
-        raise SyntaxError("No function defined")
+    #try:
+    #    print("Executing "+input_dict['function'])        
+    #except:
+    #    raise SyntaxError("No function defined")
     aux = 'out=' + input_dict['function']+"("
     del input_dict['function']
     for key, value in input_dict.items():
