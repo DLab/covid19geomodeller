@@ -11,8 +11,6 @@ import toml
 from datetime import datetime
 from datetime import timedelta
 
-
-
 # cv19gm libraries 
 import os
 import sys
@@ -33,12 +31,8 @@ class SEIRHVD:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config, inputdata=None):
-        
-        # Parameter that defines sigmoid's raising speed
-        self.gw=20
-        self.config = config
-        
+    def __init__(self, config, inputdata=None,verbose = False,**kwargs):        
+
         if not config:
             print('Missing configuration file ')
             return None
@@ -46,20 +40,32 @@ class SEIRHVD:
         # ------------------------------- #
         #        Parameters Load          #
         # ------------------------------- #
-
-        # Load configuration file
-        cv19files.loadconfig(self,config,inputdata)
+        self.config = config  
+        if verbose:
+            print('Loading configuration file')
+        cv19files.loadconfig(self,config,inputdata,**kwargs) # Load configuration file
         
-        # Hospital capacity:
+        # Hospital capacity:        
+        if verbose:
+            print('Building hospital capacity model')        
+        
         # Use data
         if type(self.cfg['initialconditions']['H_cap'])==str:            
             self.H_cap = cv19functions.polyfit(self.data[self.H_cap],time=self.data[self.H_cap+'_t'])            
 
-        self.H_sat = cv19functions.saturation(self.H_cap)        
+        self.H_sat = cv19functions.saturation(self.H_cap)
+        
+        if verbose:
+            print('Initializing parameters and variables')
         self.setrelationalvalues()
+        if verbose:
+            print('Building equations')            
         self.setequations()
+        
+        self.solved = False
 
-        print('SEIR object created')
+        if verbose:
+            print('SEIRHVD object created')
 
     # ------------------- #
     #  Valores Iniciales  #
@@ -140,17 +146,17 @@ class SEIRHVD:
         # --------------------------- # 
        
         # 0) dS/dt:
-        self.dS=lambda t,S,Im,Icr,Iv,Phi,R: - self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) + self.rR_S(t)/self.tR_s(t)*R - self.Psi(t) + self.S_f(t)
+        self.dS=lambda t,S,Im,Icr,Iv,R,Phi: - self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) + self.pR_S(t)/self.tR_s(t)*R - self.Psi(t) + self.S_f(t)
         
         # 1) dS_v/dt:
-        self.dSv=lambda t,Sv,Im,Icr,Iv,Phi,R: -(1-self.v)*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) + self.Psi(t) + self.Sv_f(t)
+        self.dSv=lambda t,Sv,Im,Icr,Iv,R,Phi: -(1-self.v)*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) + self.Psi(t) + self.Sv_f(t)
                 
         # --------------------------- #
         #           Exposed           #
         # --------------------------- #        
         
         # 2) dE/dt
-        self.dE = lambda t,S,E,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) - E*(self.rE_Im(t)/self.tE_Im(t)+self.rE_Icr(t)/self.tE_Icr(t)) + self.E_f(t)
+        self.dE = lambda t,S,E,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) - E*(self.pE_Im(t)/self.tE_Im(t)+self.pE_Icr(t)/self.tE_Icr(t)) + self.E_f(t)
         
         # 3) dE_d/dt*-
         self.dE_d = lambda t,S,E_d,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) - E_d
@@ -187,36 +193,32 @@ class SEIRHVD:
         #        Hospitalized          #
         # ---------------------------- #  
         # 12) Hospitalized
-        self.dH=lambda t,Iv,Icr,H: (1-self.H_sat(H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - self.pH_R(t)/self.tH_R(t)*H - self.pH_D(t)/self.tH_D(t)*H  + self.H_f(t)
+        self.dH=lambda t,Icr,Iv,H: (1-self.H_sat(H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - self.pH_R(t)/self.tH_R(t)*H - self.pH_D(t)/self.tH_D(t)*H  + self.H_f(t)
 
         # 13) Hospitalized: Daily 
-        self.dH_d=lambda t,Iv,Icr,H,H_d: (1-self.H_sat(H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - H_d
+        self.dH_d=lambda t,Icr,Iv,H,H_d: (1-self.H_sat(H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - H_d
 
         # ------------------------- #
         #           Deaths          #
         # ------------------------- #  
         # 14) Deaths: total
-        self.dD=lambda t,Iv,Icr,H: self.H_sat(H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  + self.D_f(t)
+        self.dD=lambda t,Icr,Iv,H: self.H_sat(H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  + self.D_f(t)
 
         # 15) Deaths: Daily
-        self.dD_d=lambda t,Iv,Icr,H,D_d: self.H_sat(H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  - D_d
+        self.dD_d=lambda t,Icr,Iv,H,D_d: self.H_sat(H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  - D_d
 
         # --------------------------- #
         #         Recovered           #
         # --------------------------- #  
         
-        # 5) Total recovered
+        # 16) Total recovered
         self.dR=lambda t,Im,Iv,H,R: self.pIv_R(t)/self.tIv_R(t)*Iv + 1/self.tIm_R(t)*Im + self.pH_R(t)/self.tH_R(t)*H - self.pR_S(t)/self.tR_S(t)*R + self.R_f(t)
 
-        # 5) Total recovered
+        # 17) Total recovered
         self.dR_d=lambda t,Im,Iv,H,R_d: self.pIv_R(t)/self.tIv_R(t)*Iv + 1/self.tIm_R(t)*Im + self.pH_R(t)/self.tH_R(t)*H - R_d
 
-        # Recovered Accumulated
-        #self.dR_ac =lambda t,I: self.pI_R/self.tI_R(t)*I 
-
-        # 7) External Flux:
+        # 18) External Flux:
         self.dPhi = lambda t: self.S_f(t) + self.Sv_f(t) + self.E_f(t) + self.Ev_f(t) + self.Im_f(t) + self.Icr_f(t) + self.Iv_f(t) + self.H_f(t) + self.D_f(t) + self.R_f(t) 
-
 
 
     def integr_sci(self,t0=0,T=None,h=0.01):
@@ -233,20 +235,39 @@ class SEIRHVD:
             T = self.tsim
 
         if(not isinstance(self.S, np.ndarray)):
-
             S0=self.S
+            Sv0=self.Sv
+
             if self.E:
                 E0 = self.E
                 E_d0 = self.E_d
+                E0 = self.Ev
+                E_d0 = self.Ev_d                
             else:
                 E0 = self.mu*(self.I)
                 E_d0 = self.mu*(self.I_d)
-            I0=self.I
-            I_d0=self.I_d
+                
+                Ev0 = self.mu*(self.Iv)
+                Ev_d0 = self.mu*(self.Iv_d)
+
+
+            Im0=self.Im
+            Im_d0=self.Im_d
+            Icr0=self.Icr
+            Icr_d0=self.Icr_d
+            Iv0=self.Iv
+            Iv_d0=self.Iv_d
+
+            H0 = self.H
+            H_d0 = self.H_d
+            
+            D0 = self.D
+            D_d0 = self.D_d
+
             R0=self.R
             R_d0=0
 
-            Flux0=0            
+            Phi0=0
 
             self.t=np.arange(t0,T+h,h)
             
@@ -317,23 +338,38 @@ class SEIRHVD:
             return()
             
 
-        initcond = np.array([S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0])
+        initcond = np.array([S0,Sv0,E0,E_d0,Ev0,Ev_d0,Im0,Im_d0,Icr0,Icr_d0,Iv0,Iv_d0,H0,H_d0,D0,D_d0,R0,R_d0,Phi0])
 
         def model_SEIR_graph(t,y):
             ydot=np.zeros(len(y))
-            ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
+            ydot[0]=self.dS(t,y[0],y[6],y[8],y[10],y[16],y[18])
+            ydot[1]=self.dSv(t,y[1],y[6],y[8],y[10],y[16],y[18])
 
-            ydot[1]=self.dE(t,y[0],y[1],y[3],y[5])
-            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[3],y[5])
+            ydot[2]=self.dE(t,y[0],y[2],y[6],y[8],y[10],y[18])
+            ydot[3]=self.dE_d(t,y[0],y[3],y[6],y[8],y[10],y[18])
 
-            ydot[3]=self.dI(t,y[1],y[3])
-            ydot[4]=self.dI_d(t,y[1],y[4])
+            ydot[4]=self.dEv(t,y[1],y[4],y[6],y[8],y[10],y[18])
+            ydot[5]=self.dEv_d(t,y[1],y[5],y[6],y[8],y[10],y[18])
 
-            ydot[5]=self.dR(t,y[3],y[5])
-            ydot[6]=self.dR_d(t,y[3],y[6])
+            ydot[6]=self.dIm(t,y[2],y[6])
+            ydot[7]=self.dIm_d(t,y[2],y[7])
 
-            ydot[7]=self.dFlux(t)      
-                                          
+            ydot[8]=self.dIcr(t,y[2],y[8])
+            ydot[9]=self.dIcr_d(t,y[2],y[9])
+
+            ydot[10]=self.dIv(t,y[4],y[10])
+            ydot[11]=self.dIv_d(t,y[4],y[11])                        
+
+            ydot[12]=self.dH(t,y[8],y[10],y[12])
+            ydot[13]=self.dH_d(t,y[8],y[10],y[12],y[13])
+
+            ydot[14]=self.dD(t,y[8],y[10],y[12])
+            ydot[15]=self.dD_d(t,y[8],y[10],y[12],y[15])
+
+            ydot[16]=self.dR(t,y[6],y[10],y[12],y[16])
+            ydot[17]=self.dR_d(t,y[6],y[10],y[12],y[17])
+
+            ydot[18]=self.dPhi(t)
             return(ydot)
 
          
@@ -344,21 +380,54 @@ class SEIRHVD:
         self.t=sol.t 
         
         self.S=sol.y[0,:]
-        self.E=sol.y[1,:]
-        self.E_d=sol.y[2,:]
-        self.I=sol.y[3,:]
-        self.I_d=sol.y[4,:]
-        self.R=sol.y[5,:]
-        self.R_d=sol.y[6,:]
-        self.Flux=sol.y[7,:]
+        self.Sv=sol.y[1,:]
+        self.E=sol.y[2,:]
+        self.E_d=sol.y[3,:]
+        self.Ev=sol.y[4,:]
+        self.Ev_d=sol.y[5,:]
+        self.Im=sol.y[6,:]
+        self.Im_d=sol.y[7,:]
+        self.Icr=sol.y[8,:]
+        self.Icr_d=sol.y[9,:]
+        self.Iv=sol.y[10,:]
+        self.Iv_d=sol.y[11,:]
+        self.H=sol.y[12,:]
+        self.H_d=sol.y[13,:]
+        self.D=sol.y[14,:]
+        self.D_d=sol.y[15,:]
+        self.R=sol.y[16,:]
+        self.R_d=sol.y[17,:]
+        self.Phi=sol.y[18,:]
 
+        # Calculate accumulated variables
         self.E_ac = np.cumsum(self.E_d)
-        self.I_ac = np.cumsum(self.I_d) + self.I_ac
+        self.Ev_ac = np.cumsum(self.Ev_d)
+
+        self.Im_ac = np.cumsum(self.Im_d) + self.Im_ac
+        self.Icr_ac = np.cumsum(self.Icr_d) + self.Icr_ac
+        self.Iv_ac = np.cumsum(self.Iv_d) + self.Iv_ac
+
         self.R_ac = np.cumsum(self.R_d)
 
-        self.I_det = self.I*self.pI_det
-        self.I_d_det = self.I_d*self.pI_det
-        self.I_ac_det = self.I_ac*self.pI_det
+        self.Im_det = self.Im*self.pI_det
+        self.Im_d_det = self.Im_d*self.pI_det
+        self.Im_ac_det = self.Im_ac*self.pI_det
+
+        self.Icr_det = self.Icr*self.pI_det
+        self.Icr_d_det = self.Icr_d*self.pI_det
+        self.Icr_ac_det = self.Icr_ac*self.pI_det
+
+        self.Iv_det = self.Iv*self.pI_det
+        self.Iv_d_det = self.Iv_d*self.pI_det
+        self.Iv_ac_det = self.Iv_ac*self.pI_det
+
+        self.I = self.Im + self.Icr + self.Iv
+        self.I_d = self.Im_d + self.Icr_d + self.Iv_d
+        self.I_ac = self.Im_ac + self.Icr_ac + self.Iv_ac
+
+        self.I_det = self.Im_det + self.Icr_det + self.Iv_det
+        self.I_d_det = self.Im_d_det + self.Icr_d_det + self.Iv_d_det
+        self.I_ac_det = self.Im_ac_det + self.Icr_ac_det + self.Iv_ac_det
 
         self.analytics()
         self.dfbuild(sol)
@@ -380,21 +449,40 @@ class SEIRHVD:
         if T is None:
             T = self.tsim
 
-        if not isinstance(self.S, np.ndarray):
-
+        if(not isinstance(self.S, np.ndarray)):
             S0=self.S
+            Sv0=self.Sv
+
             if self.E:
                 E0 = self.E
                 E_d0 = self.E_d
+                E0 = self.Ev
+                E_d0 = self.Ev_d                
             else:
                 E0 = self.mu*(self.I)
                 E_d0 = self.mu*(self.I_d)
-            I0=self.I
-            I_d0=self.I_d
+                
+                Ev0 = self.mu*(self.Iv)
+                Ev_d0 = self.mu*(self.Iv_d)
+
+
+            Im0=self.Im
+            Im_d0=self.Im_d
+            Icr0=self.Icr
+            Icr_d0=self.Icr_d
+            Iv0=self.Iv
+            Iv_d0=self.Iv_d
+
+            H0 = self.H
+            H_d0 = self.H_d
+            
+            D0 = self.D
+            D_d0 = self.D_d
+
             R0=self.R
             R_d0=0
 
-            Flux0=0            
+            Phi0=0
 
             self.t=np.arange(t0,T+h,h)
             
@@ -425,45 +513,95 @@ class SEIRHVD:
 
         
         def model_SEIR_graph(t,y,ydot):
+            ydot[0]=self.dS(t,y[0],y[6],y[8],y[10],y[16],y[18])
+            ydot[1]=self.dSv(t,y[1],y[6],y[8],y[10],y[16],y[18])
+
+            ydot[2]=self.dE(t,y[0],y[2],y[6],y[8],y[10],y[18])
+            ydot[3]=self.dE_d(t,y[0],y[3],y[6],y[8],y[10],y[18])
+
+            ydot[4]=self.dEv(t,y[1],y[4],y[6],y[8],y[10],y[18])
+            ydot[5]=self.dEv_d(t,y[1],y[5],y[6],y[8],y[10],y[18])
+
+            ydot[6]=self.dIm(t,y[2],y[6])
+            ydot[7]=self.dIm_d(t,y[2],y[7])
+
+            ydot[8]=self.dIcr(t,y[2],y[8])
+            ydot[9]=self.dIcr_d(t,y[2],y[9])
+
+            ydot[10]=self.dIv(t,y[4],y[10])
+            ydot[11]=self.dIv_d(t,y[4],y[11])                        
+
+            ydot[12]=self.dH(t,y[8],y[10],y[12])
+            ydot[13]=self.dH_d(t,y[8],y[10],y[12],y[13])
+
+            ydot[14]=self.dD(t,y[8],y[10],y[12])
+            ydot[15]=self.dD_d(t,y[8],y[10],y[12],y[15])
+
+            ydot[16]=self.dR(t,y[6],y[10],y[12],y[16])
+            ydot[17]=self.dR_d(t,y[6],y[10],y[12],y[17])
+
+            ydot[18]=self.dPhi(t)
+
             
-            ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
-
-            ydot[1]=self.dE(t,y[0],y[1],y[3],y[5])
-            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[3],y[5])
-
-            ydot[3]=self.dI(t,y[1],y[3])
-            ydot[4]=self.dI_d(t,y[1],y[4])
-
-            ydot[5]=self.dR(t,y[3],y[5])
-            ydot[6]=self.dR_d(t,y[3],y[6])
-
-            ydot[7]=self.dFlux(t)
-
-            
-        initcond = np.array([S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0])                                
+        initcond = np.array([S0,Sv0,E0,E_d0,Ev0,Ev_d0,Im0,Im_d0,Icr0,Icr_d0,Iv0,Iv_d0,H0,H_d0,D0,D_d0,R0,R_d0,Phi0])
+                                
 
 
         sol = odeint(model_SEIR_graph, self.t, initcond,method='admo')
         
         self.sol = sol
         self.t=sol.values.t 
-        
-        self.S=sol.values.y[:,0]
-        self.E=sol.values.y[:,1]        
-        self.E_d=sol.values.y[:,2]
-        self.I=sol.values.y[:,3]
-        self.I_d=sol.values.y[:,4]
-        self.R=sol.values.y[:,5]
-        self.R_d=sol.values.y[:,6]
-        self.Flux=sol.values.y[:,7]
 
+        self.S=sol.values.y[:,0]
+        self.Sv=sol.values.y[:,1]
+        self.E=sol.values.y[:,2]
+        self.E_d=sol.values.y[:,3]
+        self.Ev=sol.values.y[:,4]
+        self.Ev_d=sol.values.y[:,5]
+        self.Im=sol.values.y[:,6]
+        self.Im_d=sol.values.y[:,7]
+        self.Icr=sol.values.y[:,8]
+        self.Icr_d=sol.values.y[:,9]
+        self.Iv=sol.values.y[:,10]
+        self.Iv_d=sol.values.y[:,11]
+        self.H=sol.values.y[:,12]
+        self.H_d=sol.values.y[:,13]
+        self.D=sol.values.y[:,14]
+        self.D_d=sol.values.y[:,15]
+        self.R=sol.values.y[:,16]
+        self.R_d=sol.values.y[:,17]
+        self.Phi=sol.values.y[:,18]
+
+
+        # Calculate accumulated variables
         self.E_ac = np.cumsum(self.E_d)
-        self.I_ac = np.cumsum(self.I_d) + self.I_ac
+        self.Ev_ac = np.cumsum(self.Ev_d)
+
+        self.Im_ac = np.cumsum(self.Im_d) + self.Im_ac
+        self.Icr_ac = np.cumsum(self.Icr_d) + self.Icr_ac
+        self.Iv_ac = np.cumsum(self.Iv_d) + self.Iv_ac
+
         self.R_ac = np.cumsum(self.R_d)
 
-        self.I_det = self.I*self.pI_det
-        self.I_d_det = self.I_d*self.pI_det
-        self.I_ac_det = self.I_ac*self.pI_det
+        self.Im_det = self.Im*self.pI_det
+        self.Im_d_det = self.Im_d*self.pI_det
+        self.Im_ac_det = self.Im_ac*self.pI_det
+
+        self.Icr_det = self.Icr*self.pI_det
+        self.Icr_d_det = self.Icr_d*self.pI_det
+        self.Icr_ac_det = self.Icr_ac*self.pI_det
+
+        self.Iv_det = self.Iv*self.pI_det
+        self.Iv_d_det = self.Iv_d*self.pI_det
+        self.Iv_ac_det = self.Iv_ac*self.pI_det
+
+        self.I = self.Im + self.Icr + self.Iv
+        self.I_d = self.Im_d + self.Icr_d + self.Iv_d
+        self.I_ac = self.Im_ac + self.Icr_ac + self.Iv_ac
+
+        self.I_det = self.Im_det + self.Icr_det + self.Iv_det
+        self.I_d_det = self.Im_d_det + self.Icr_d_det + self.Iv_d_det
+        self.I_ac_det = self.Im_ac_det + self.Icr_ac_det + self.Iv_ac_det
 
         self.analytics()
         self.dfbuild(sol)
@@ -488,16 +626,28 @@ class SEIRHVD:
        
     def dfbuild(self,sol):        
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
-        names = ['S','E','E_d','I','I_d','R','R_d','Flux']
+        names = ['S','Sv','E','E_d','Ev','Ev_d','Im','Im_d','Icr','Icr_d','Iv','Iv_d','H','H_d','D','D_d','R','R_d','Phi']
         
         self.aux = pd.DataFrame(np.transpose(sol.y),columns=names)       
 
-        names2 = ['E_ac','I_ac','R_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
-        vars2 = [self.E_ac,self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
+        names2 = ['E_ac','Ev_ac','Im_ac','Icr_ac','Iv_ac','R_ac','Im_det','Im_d_det','Im_ac_det','Icr_det','Icr_d_det','Icr_ac_det',
+        'Iv_det','Iv_d_det','Iv_ac_det','I','I_d','I_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
+        vars2 = [self.E_ac,self.Ev_ac,self.Im_ac,self.Icr_ac,self.Iv_ac,self.R_ac,self.Im_det,self.Im_d_det,self.Im_ac_det,
+        self.Icr_det,self.Icr_d_det,self.Icr_ac_det,self.Iv_det,self.Iv_d_det,self.Iv_ac_det,self.I,self.I_d,self.I_ac,
+        self.I_det,self.I_d_det,self.I_ac_det,
+        self.prevalence_total,self.prevalence_susc,self.prevalence_det]
+        
         self.aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
 
         self.results = pd.concat([self.results,self.aux,self.aux2],axis=1)
-        self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
+
+        # Cast int
+        for i in self.results.keys():
+            if not i in ['prevalence_total','prevalence_susc','prevalence_det']:
+                self.results[i] = self.results[i].astype('int')
+
+        #self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,
+        #'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
 
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
 

@@ -19,19 +19,13 @@ from copy import deepcopy
 #from importlib import import_module
 
 """
-Todo:
-    [x] Resolver la interaccion del cv19functions con las listas    
-    [x] Decidir como decidir qué modelo usar y luego como importarlo
-    [x] Encontrar los parámetros "iterables" (listas) en el config y el kwargs
-    [x] Crear función recursiva que cree for anidados que recorran los elementos del los parámetros iterables
-    [x] Construir arreglo de diccionarios de configuración
-    [ ] Instanciar objetos del modelo correspondiente a partir del arreglo de configuración
-    [ ] Crear función que simule las funciones en todos los arreglos. Fundamental paralelizar! 
-
 Todo: [ ] Construir una función resumen que imprima las características principales
         * tipo de modelo
         * variables a iterar
         * Condiciones iniciales reales 
+Todo: [ ] Sacar variables para hacerlas accesibles desde el objeto principal
+Todo: [ ] simplificar la vectorización de la función de integración
+Todo: [ ] Paralelizar la integración de las EDOs dentro de lo posible
 """
 
 class cv19sim():
@@ -39,9 +33,12 @@ class cv19sim():
 
         config = deepcopy(config)            
         if model == 'SEIR':
+            self.modelname = model
             from models.SEIR import SEIR
             model = SEIR
+             
         elif model == 'SEIRHVD':
+            self.modelname = model
             from models.SEIRHVD import SEIRHVD
             model = SEIRHVD
 
@@ -51,7 +48,7 @@ class cv19sim():
 
 
         sims = []
-        iterables = {}
+        self.iterables = {}
         # create auxiliar object         
         aux = cv19files.unwrapconfig(config,**kwargs)        
         
@@ -60,17 +57,17 @@ class cv19sim():
             if type(value)==list:
                 if verbose:
                     print(key+':'+str(value))
-                iterables.update({key:value})
+                self.iterables.update({key:value})
 
         #print('There are '+ str(len(iterables))+' iterable parameters')
                
 
-        if iterables:
+        if self.iterables:
             # Pop iterables from kwargs
-            for key in iterables:
+            for key in self.iterables:
                 if key in kwargs:
                     kwargs.pop(key)
-            expandediterables = iterate(iterables,verbose=verbose)
+            expandediterables = iterate(self.iterables,verbose=verbose)
             buildsim = simapply(config,model,inputdata,**kwargs)            
             self.sims = buildsim(expandediterables)
         else:
@@ -84,6 +81,29 @@ class cv19sim():
         self.vectintegrate(self.sims)
         return
 
+    def resume(self):
+        """Resume:
+        Prints a resume of the object with
+
+        Model type:
+        Simulated:
+        Number of simulations: 
+        Iterated variables:
+        RealData:
+            * CUT
+            * Dates
+        """
+        print('Model: '+self.modelname)
+        print('Iterables: '+self.iterables)
+        return
+    
+    def extract(self):
+        """Extract variables from simulation objects
+        """
+        shape = np.shape(self.sims)
+        
+
+        
 def simapply(config,model,inputdata,**kwargs):
     """Builds an array of models instances using the iterable variables array
 

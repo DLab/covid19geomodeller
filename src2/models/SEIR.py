@@ -7,17 +7,8 @@ SEIR Model
 import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
-import toml
 from datetime import datetime
 from datetime import timedelta
-
-
-# Deprecated
-#from scipy.special import expit
-#from joblib import Parallel, delayed
-#import multiprocessing  
-#from scipy import signal
-#from numpy import linalg as LA 
 
 # cv19gm libraries 
 import os
@@ -39,27 +30,29 @@ class SEIR:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config = None, inputdata=None,aux=None,**kwargs):
-        
-        if aux:
-            kwargs.update(aux)
-        # Parameter that defines sigmoid's raising speed
-        self.gw=20
-        self.config = config
-        
+    def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
+    
         if not config:
             print('Missing configuration file ')
             return None
-
+        
         # ------------------------------- #
         #         Parameters Load         #
         # ------------------------------- #
+        self.config = config
+        if verbose:
+            print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
+        if verbose:
+            print('Initializing parameters and variables')
         self.setrelationalvalues()
+        if verbose:
+            print('Building equations')          
         self.setequations()
 
         self.solved = False
-        #print('SEIR object created')
+        if verbose:
+            print('SEIR object created')
 
     # ------------------- #
     #  Valores Iniciales  #
@@ -99,10 +92,8 @@ class SEIR:
                     
 
     def setequations(self):
-        """
-        # --------------------------- #
-        #    Diferential Ecuations    #
-        # --------------------------- #
+        """        
+        Sets Diferential Equations
         """
         # --------------------------- #
         #        Susceptibles         #
@@ -162,9 +153,13 @@ class SEIR:
 
     # Scipy
     def integrate(self,t0=0,T=None,h=0.01):
-        #integrator function that star form t0 and finish with T with h as
-        #timestep. If there aren't inital values in [t0,mu*(self.I_ac)T] function doesn't
-        #start. Or it's start if class object is initialze.
+        """
+        Solves ODEs using scipy.integrate
+        Args:
+            t0 (int, optional): Initial time. Defaults to 0.
+            T ([type], optional): Endtime. Defaults to time given when building the object
+            h (float, optional): Time step. Defaults to 0.01.            
+        """
 
         if T is None:
             T = self.tsim
@@ -309,11 +304,17 @@ class SEIR:
 
 
 
-    # sckits: slower but better
-    def integr(self,t0=0,T=None,h=0.01,E0init=False):
-        #integrator function that star form t0 and finish with T with h as
-        #timestep. If there aren't inital values in [t0,T] function doesn't
-        #start. Or it's start if class object is initialze.
+    
+    def integr(self,t0=0,T=None,h=0.01):
+        """
+        Solves ODEs using scikits-odes
+        sckits: slower but better response to stiffness
+        Args:
+            t0 (int, optional): Initial time. Defaults to 0.
+            T ([type], optional): Endtime. Defaults to time given when building the object
+            h (float, optional): Time step. Defaults to 0.01.            
+        """
+
         print('Import scikits-odes')
         from scikits.odes.odeint import odeint
 
@@ -414,6 +415,10 @@ class SEIR:
         return(sol)
 
     def analytics(self):
+        """
+        Perform simulation analytics after running it.
+        It calculates peaks, prevalence, and will include R(t). 
+        """
         #Cálculo de la fecha del Peak  
         self.peakindex = np.where(self.I==max(self.I))[0][0]
         self.peak = max(self.I)
@@ -429,23 +434,28 @@ class SEIR:
         self.prevalence_total = self.I_ac/self.population
         self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
         self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
+        return
        
-    def dfbuild(self,sol):        
+    def dfbuild(self,sol):
+        """
+        Builds a dataframe with the simulation results
+        """
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
         names = ['S','E','E_d','I','I_d','R','R_d','Flux']
         
-        self.aux = pd.DataFrame(np.transpose(sol.y),columns=names)       
+        aux = pd.DataFrame(np.transpose(sol.y),columns=names)       
 
         names2 = ['E_ac','I_ac','R_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
         vars2 = [self.E_ac,self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
-        self.aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
+        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
 
-        self.results = pd.concat([self.results,self.aux,self.aux2],axis=1)
+        self.results = pd.concat([self.results,aux,aux2],axis=1)
         self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
 
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
+        return
 
-
+    
 
     """
  
