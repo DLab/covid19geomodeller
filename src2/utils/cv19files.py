@@ -126,7 +126,10 @@ def loadconfig(sim,config,inputdata,**kwargs):
             sim.cfg['initialconditions'][key] = value
         if type(value) == str:
             # Crear error cuando no haya archivo de datos y fecha inicial
-            sim.__dict__.update({key:sim.data[value][0]})
+            try:
+                sim.__dict__.update({key:sim.data[value][0]})
+            except:
+                sim.__dict__.update({key:sim.inputdata.__dict__[value]})
         else:
             sim.__dict__.update({key:value})
     return

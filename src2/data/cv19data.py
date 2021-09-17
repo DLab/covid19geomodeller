@@ -122,8 +122,9 @@ class ImportData():
         data = ImportData(state,initdate, user, password)
 
 
-        To Do:
-         - Agregar credenciales desde importDeathDEIS hacia abajo
+        Todo: Agregar credenciales desde importDeathDEIS hacia abajo
+        Todo: Opción de guardar data en un archivo csv
+        Todo: Opción de cargar data desde un archivo csv
 
     """    
     def __init__(self,tstate=None, initdate = None,enddate = datetime.now(),user = None,password = None, localdata = None):
@@ -168,7 +169,7 @@ class ImportData():
     # --------------------------- #
 
     def importdata(self):
-        print('Importing General Data')
+        print('Importing general data')
         try:
             self.importPopulation()
         except:
@@ -198,6 +199,33 @@ class ImportData():
         #self.importpcrpop()        
         #self.importfallecidosexcesivos()        
         print('Done')
+
+    # --------------------------- #
+    #    Importar data para SEIR    #
+    # --------------------------- #
+
+    def importdatalight(self):
+        print('Importing basic data')
+        try:
+            self.importPopulation()
+        except:
+            print('Dlab Endpoint Error')
+            self.importPopulationMinCiencia()
+        try:
+            self.importActiveInfected()
+        except:
+            print('Dlab Endpoint Error')
+            self.importActiveInfectedMinciencia()
+        try:
+            self.importAccumulatedInfected()
+        except:
+            print('Dlab Endpoint Error')            
+            self.importAccumulatedInfectedMinCiencia()
+
+        self.importDailyInfected()
+        
+        print('Done')
+
 
     # -------------------------- #
     #            Plot            #
@@ -722,8 +750,9 @@ class ImportData():
             counties = [i for i in tstate if len(i)>2 ]
             states = [i for i in tstate if len(i)==2 ]            
             aux = []
-            data = pd.DataFrame(request(endpoint_counties).json()['data'])
-            dates = pd.DataFrame(request(endpoint_counties).json()['dates'])[0]            
+            auxdata = request(endpoint_counties).json()
+            data = pd.DataFrame(auxdata['data'])
+            dates = pd.DataFrame(auxdata['dates'])[0]            
             for i in states:
                 aux.append(data.filter(regex='^'+i,axis=1))
             
@@ -735,17 +764,20 @@ class ImportData():
         else:
             # National
             if tstate == '0' or tstate == 0:
-                I_d_r = pd.DataFrame(request(endpoint_national).json()['cases'])[0]
-                dates = pd.DataFrame(request(endpoint_national).json()['dates'])[0]
+                auxdata = request(endpoint_national).json()
+                I_d_r = pd.DataFrame(auxdata['cases'])[0]
+                dates = pd.DataFrame(auxdata['dates'])[0]
             # Regions                
             if len(tstate) == 2:
-                I_d_r = pd.DataFrame(request(endpoint_regions).json()['data'])[tstate]
-                dates = pd.DataFrame(request(endpoint_regions).json()['dates'])[0]                
+                auxdata = request(endpoint_regions).json()
+                I_d_r = pd.DataFrame(auxdata['data'])[tstate]
+                dates = pd.DataFrame(auxdata['dates'])[0]                
                 
             # Counties
             elif len(tstate) > 2:
-                I_d_r = pd.DataFrame(request(endpoint_counties).json()['data'])[tstate]
-                dates = pd.DataFrame(request(endpoint_counties).json()['dates'])[0]
+                auxdata = request(endpoint_counties).json()
+                I_d_r = pd.DataFrame(auxdata['data'])[tstate]
+                dates = pd.DataFrame(auxdata['dates'])[0]
                 
 
         # Get and filter by dates
@@ -758,7 +790,7 @@ class ImportData():
 
 
         # Update database
-        print('updating database')
+        #print('updating database')
         self.data = dfappend(self.data,I_d_r,I_d_tr,name) 
 
         if self:
