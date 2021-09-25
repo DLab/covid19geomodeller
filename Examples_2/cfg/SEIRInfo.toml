@@ -1,0 +1,99 @@
+# Pandemic Suite Configuration File		
+
+title = 'Example of a SEIR Configuration File'
+date = '2021-04-20'
+user = 'Samuel'
+
+[model]
+	# Esto no tiene utilidad por ahora, pero si será utilizado en versiones futuras del software
+	name = "SEIR"
+	compartments  = ['S','E','I','R'] 
+	
+
+[data]
+	# Esta categoría configura el uso de data real para inicializar el modelo.
+	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
+	
+	datafile = 'string'# File path for importing data from file 
+	importdata = 'boolean' # Import data from remote server
+
+	# parameters to use when importing from external sources 
+	initdate = 'datetime' #'Fecha en formato string d/m/Y, podría expandir los formatos aceptables'
+	country = 'string' # Nombre del país, vamos a partir con Chile y USA, así que puede ser un selector 
+	# Si elige Chile
+	cut = 'string' # Tanto para region como comuna. Si es una agrupación de comunas es una lista con los cut, pej: ['13101','13102']  
+
+	# Si elige USA
+	state = 'string'  # Estado
+	county = 'string' # County
+
+
+[parameters]
+	[parameters.static]
+	t_init = 'int' # Initial day
+	t_end = 'int' # Final day
+	
+	timestep = 'float - [0.01-0.1]' # Timestep for solver, creo que lo podemos sacar 
+	
+	# Saturation dynamic
+	k_I = 'float' # sin rango 
+	k_R = 'float' # sin rango 
+
+	seroprevfactor = 'float' # Entre 0 y 1. Fraction of the total population that take part on the dynamic at the beginning
+	expinfection = 'float' # Entre 0 y 1. Factor in which exposed infect, default is 0
+
+	mu = 'float' # Mayor a 0, podríamos limitar su valor máximo a 20, normalmente toma un valor cercano al R0
+	
+	# Subreport
+	pI_det = 'float' # Entre 0 y 1		
+	
+	[parameters.dynamic]
+	beta = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	alpha = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	
+	# External flux rates over time 
+	S_f = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	E_f = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	I_f = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	R_f = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	
+	# -------------------------- #
+	#   Transition Parameters    # 
+	# -------------------------- #	
+	# Transition time between exposed and infectious
+        tE_I = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	# Transition time between infectious and removed
+        tI_R = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	
+	# Average Immunity loss rate (1/time)
+	rR_S = 'Float o string' # float para tener un valor fijo, string para asignarle una función
+	
+[initialconditions]
+	# total population in area
+	population = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+
+	# Recovered	
+	R = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+
+	# Infected
+	# Note: In case real and detected values are >0, real value will be used
+	
+	# Active Infected
+	I = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+	I_det = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+
+	# New daily Infected
+	I_d = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+	I_d_det = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+	
+	# Accumulated Infected	
+	I_ac = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+	I_ac_det = 'Float o string' # float para tener un valor fijo, string para asignarle el valor de una variable de la data
+
+	# Leave E and E_d as '' for using mu
+	E = 'Float o string' 
+	E_d = 'Float o string' 
+	
+
+	
+
