@@ -33,10 +33,11 @@ def build(input):
     elif type(input)==dict:
         input_dict = input.copy()
     elif callable(input):
+        out = input
         setattr(locals()['out'],'constructor','User defined Function')
         return input
     elif type(input) == tuple:
-        return addbuild(*input)
+        return build_add(*input)
     elif type(input) == list:
         # For building iterable simulations
         return input        
@@ -63,7 +64,7 @@ def build(input):
     return locals()['out']
 
 # Build + function addition.
-def addbuild(*input):
+def build_add(*input):
     """
     Creates a function Build a functions and adds t 
     # Construir funcion que sume multiples funciones 
@@ -71,17 +72,21 @@ def addbuild(*input):
     aux = []
     for i in input:
         aux.append(build(i))
-    return functionAddition(*aux)
+    return func_add(*aux)
 
 # Function addition
-def functionAddition(*functions):
+def func_add(*functions):
     """
     Creates the function that results adding the functions received. 
     Receives a list where each element is a function that receives 1 argument
     """
+    initfunctions = []
+    for i in functions:
+        initfunctions.append(build(i)) 
+
     def f(t):
         aux = 0
-        for i in functions:    
+        for i in initfunctions:
             aux += i(t)
         return aux
     return f
@@ -104,29 +109,25 @@ def polyfit(values,time = None,degree=4,endvalue_index = -5):
     f_out=lambda t: datamodel(t)*(1-expit(t-tchange)) + expit(t-tchange)*endvalue
     return f_out
 
-# TODO: Add default value
-# TODO: Change functions to *args
 
-def Events(values,days,functions = []):
-    """
-    Event creator function. Create a time dependent function that returns the values setted in the 
-    values vector for the periods specified in the days vector. 
+def events(values,days,default=0,*functions):
+    """Event creator function. Create a time dependent function that returns the values (or functions) given in the 
+    values vector for the intervals specified in the days vector. 
 
 
     Args:
         values (list): list with the values for the different intervals
-        days (list): ist of lists of len == 2 with the values for the function on that v.
-        functions (list, optional): [description]. Defaults to [].
+        days (list): list of lists of len == 2 with the values for the function on that v.
+        default (float, optional): value that the function takes in undefined intervals. Defaults to 0
+        
+        functions: extra functions to add with no interval definition
 
     Returns:
-        [type]: [description]
+        out (function): function created
     """
 
-    # for one interval
-    #if type(not days[0]) == list and len(days == 2):
-    #    days = [[days[0],days[1]]]
+    gw = 20
 
-    # define default function
     f = lambda t:0
 
     aux_f = [f]
@@ -134,130 +135,206 @@ def Events(values,days,functions = []):
         aux_f.append(i)
         
 
-    
+    fvalues = []
+    for i in values:
+        fvalues.append(build(i))
+
     for i in range(len(values)):
         def auxf(t,j=i):
-            return values[j]*(expit(10*(t-days[j][0])) - expit(10*(t-days[j][1]))) 
+            return (fvalues[j])(t)*(expit(gw*(t-days[j][0])) - expit(gw*(t-days[j][1]))) 
         aux_f.append(auxf)
 
-    out = functionAddition(*aux_f)    
+    #
+    # Default value
+    #
+
+    # find overlapping intervals
+    dayssort = np.array(days)    
+    dayssort = dayssort[np.argsort(dayssort[:,0])]
+
+    overlapdays = [dayssort[0,0]]
+    aux = dayssort[0,1]
+    for i in range(1,len(dayssort)):
+        for j in range(2):
+            if not j and aux < dayssort[i,j]:
+                overlapdays.append(aux)
+                overlapdays.append(dayssort[i,j])
+                aux = dayssort[i,1]
+                break
+            elif j and aux < dayssort[i,j]:
+                aux = dayssort[i,j]
+    overlapdays.append(aux)
+    overlapdays = np.reshape(overlapdays,(int(len(overlapdays)/2),2))
+    
+    # Create default function
+    for i in range(len(overlapdays)):
+        def auxf(t,j=i):
+            return -default*((expit(gw*(t-overlapdays[j][0])) - expit(gw*(t-overlapdays[j][1])))) 
+        aux_f.append(auxf)
+    aux_f.append(lambda t:default)
+    
+    # Create final function adding them all
+    out = func_add(*aux_f)    
     return out
 
 
-    """
-    days = [[3,10],[15,25],[8,17]]
-    values = [1,5,3]
-    t = np.array(np.arange(0,30,0.1))
-    plt.plot(t,sumfunct(t))
-    plt.show()
-    """
 
 # Periodic square function
-def square(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min',duty=0.5):
+def square(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase='min',duty=0.5):
     # phase en fraccion del periodo
     def f(t): 
         return signal.square(t,duty)
     
     if initphase == 'min':
-        phi = np.pi*(2*init/period - 1.1)
+        phi = np.pi*(2*t_init/period - 1.1)
     elif initphase == 'max':
-        phi = 2*np.pi*init/period
+        phi = 2*np.pi*t_init/period
     else:
-        phi = 2*np.pi*(init/period - initphase)
+        phi = 2*np.pi*(t_init/period - initphase)
     def aux(t):    
-        return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
-        (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
+        return (expit(10*(t-t_init)) - expit(10*(t-t_end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
+        (1-(expit(10*(t-t_init)) - expit(10*(t-t_end))))*default
 
     return aux
 
 # Sine function
-def sine(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min'):
+def sine(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase='min'):
     # phase en fraccion del periodo
     def f(t): 
         return np.cos(t)
     
     if initphase == 'min':
-        phi = np.pi*(2*init/period - 1)
+        phi = np.pi*(2*t_init/period - 1)
     elif initphase == 'max':
-        phi = 2*np.pi*init/period
+        phi = 2*np.pi*t_init/period
     else:
-        phi = 2*np.pi*(init/period - initphase)
+        phi = 2*np.pi*(t_init/period - initphase)
     def aux(t):    
-        return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
-        (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
+        return (expit(10*(t-t_init)) - expit(10*(t-t_end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
+        (1-(expit(10*(t-t_init)) - expit(10*(t-t_end))))*default
 
     return aux
 
 # Sawtooth function
-def sawtooth(min_val=0,max_val=1,period=14,init=0,end=1000,off_val=0,initphase='min',width=1):
+def sawtooth(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase='min',width=1):
     # phase en fraccion del periodo
     def f(t): 
         return signal.sawtooth(t,width)
     
     if initphase == 'min':
-        phi = np.pi*(2*init/period - 0.5/period)
+        phi = np.pi*(2*t_init/period - 0.5/period)
     elif initphase == 'max':
-        phi = 2*np.pi*init/period
+        phi = 2*np.pi*t_init/period
     else:
-        phi = 2*np.pi*(init/period - initphase)
+        phi = 2*np.pi*(t_init/period - initphase)
     def aux(t):    
-        return (expit(10*(t-init)) - expit(10*(t-end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
-        (1-(expit(10*(t-init)) - expit(10*(t-end))))*off_val
+        return (expit(10*(t-t_init)) - expit(10*(t-t_end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
+        (1-(expit(10*(t-t_init)) - expit(10*(t-t_end))))*default
 
     return aux
 
-# Increasing functions
-def increase_linear(t0,t1,t2,maxvalue = 0,increaserate=1):
+# Value transition functions
+def linear_transition(t_init,t_end,initvalue=0,endvalue = 1):
+    """linearTransition
+    Creates a function which performs a linear transition from initvalue to endvalue between t_init and t_end.
+    Args:
+        t_init (int): Transition beginning
+        t_end (int): Transition end
+        initvalue (int, optional): Initial value. Defaults to 0.
+        endvalue (int, optional): End value. Defaults to 1.
+
+    Returns:
+        function: function that performs the linear transition
     """
-    Creates a function that starts growing linearly from t = t0, with the specified increase rate until it reaches the final
-    value, which is either maxvalue or increaserate*(t1-t0). After this it keeps this value until t2, and then goes back to 0
+    a = np.polyfit([t_init,t_end],[initvalue,endvalue],1)        
+    f = lambda t: np.poly1d(a)(t)
+    out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
+    return out
+
+
+def quadratic_transition(t_init,t_end,initvalue=0,endvalue = 1,concavity=0):
+    """quadraticTransition
+    Creates a function which performs a quadratic transition from initvalue to endvalue between t_init and t_end.
+
+    Args:
+        t_init (int): Transition beginning
+        t_end (int): Transition end
+        initvalue (int, optional): Initial value. Defaults to 0.
+        endvalue (int, optional): End value. Defaults to 1.
+        concavity (int, optional): Function's concavity. 0: convex, 1: concave. Defaults to convex.
+
+    Returns:
+        function: function that performs the quadratic transition
     """
-    if maxvalue == 0:
-        #a = np.polyfit([t0,t0+1],[0,increaserate],1)
-        maxvalue = increaserate*(t1-t0)
+
+    # convex increase or concave decrease
+    if (not concavity and endvalue>=initvalue) or (concavity and initvalue>endvalue):
+        t_aux = 2*t_init - t_end 
+        v_aux = endvalue
+        
+    # concave increase or convex decrease
+    elif (concavity and endvalue>=initvalue) or (not concavity and initvalue>endvalue):
+        t_aux = 2*t_end - t_init 
+        v_aux = initvalue
+        
+    a = np.polyfit([t_init,t_end,t_aux],[initvalue,endvalue,v_aux],2)
+    f = lambda t: np.poly1d(a)(t)
     
-    a = np.polyfit([t0,t1],[0,maxvalue],1)        
-    f = lambda t: np.poly1d(a)(t)
+    out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
+    return out    
 
-    aux = lambda t: f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + maxvalue*(expit(10*(t-t1)) - expit(10*(t-t2)))
-    return aux
 
-def increase_quadratic(t0,t1,t2,maxvalue = 1):
+def sigmoidal_transition(t_init,t_end,initvalue=0,endvalue = 1,gw=8):
+    """Sigmoidal Transition
+    Creates a function which performs a sigmoidal transition from initvalue to endvalue between t_init and t_end.
+
+    Args:
+        t_init (int): Transition beginning
+        t_end (int): Transition end
+        initvalue (int, optional): Initial value. Defaults to 0.
+        endvalue (int, optional): End value. Defaults to 1.
+        gw (float, optional): Gain weight. Calibrates the "strength" of the sigmoid change 
+
+    Returns:
+        function: function that performs the sigmoidal transition
     """
-    Creates a function that starts growing quadratically from t = t0, until it reaches the maxvalue. 
-    After this it keeps this value until t2, and then goes back to 0
-    """
-    a = np.polyfit([t0,t1,2*t0-t1],[0,maxvalue,maxvalue],2)
-    f = lambda t: np.poly1d(a)(t)
 
-    aux = lambda t: f(t)*(expit(10*(t-t0)) - expit(10*(t-t1))) + maxvalue*(expit(10*(t-t1)) - expit(10*(t-t2)))
-    return aux
-
-def increase_sigmoid(t0,t1,t2,maxvalue = 1):
-    """
-    Creates a function that grows like a sigmoid from t = t0, until it reaches the maxvalue. 
-    After this it keeps this value until t2, and then goes back to 0
-    """                  
-    def f(t):
-        return maxvalue*(expit((t-t0-4)*8/(t1-t0)) - expit(8*(t-t2)))      
-    return f
+    out = lambda t:  initvalue + (endvalue-initvalue)*(expit((t-(t_init+t_end)/2)*gw/(t_end-t_init))) 
+    return out 
 
 # Saturation function
-def saturation(satfunct,gw = 20):
+def saturation(upperlimit):
+    """ Function that builds binary functions which indicates when the sum of the arguments are bigger than the saturation function.
+
+    Args:
+        upperlimit (function or cv19function builder arg): Upper limit function
+
+    Returns:
+        saturationfunction (function): binary function with time multiple arguments that returns 1 when the arguments addition function
+            Args:
+                t (float): time value
+                *args: multiple arguments which are added and then compared with the saturation value at time t
+            Returns:
+                int: 
+                    0 when the functions given are smaller than the saturation function 
+                    1 when they are bigger or equal
     """
-    Saturation function
-    Binary function that indicates when the sum of functions are bigger than the saturation function.
-    input: 
-        satfunct: Upper limit function
-    return:
-        0 when the functions given are smaller than the saturation function 
-        1 when they are bigger or equal
-    """
-    
-    if not callable(satfunct):    
-        satfunct = build(satfunct)
+    gw = 20 # gain weight    
+    upperlimit = build(upperlimit)
+
     def aux(t,*functions):
-        f = functionAddition(*functions)
-        return(expit(gw*(f-satfunct(t))))
+        """binary function with time multiple arguments that returns 1 when the arguments addition function
+
+        Args:
+            t (float): time value
+            *args: multiple arguments which are added and then compared with the saturation value at time t
+        
+        Returns:
+        int: 
+            0 when the functions given are smaller than the saturation function 
+            1 when they are bigger or equal
+        """
+        f = build_add(*functions)
+        return(expit(gw*(f(t)-upperlimit(t))))
     return aux
     
