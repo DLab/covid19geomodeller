@@ -146,26 +146,26 @@ class SEIRHVD:
         # --------------------------- # 
        
         # 0) dS/dt:
-        self.dS=lambda t,S,Im,Icr,Iv,R,Phi: - self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) + self.pR_S(t)/self.tR_s(t)*R - self.Psi(t) + self.S_f(t)
+        self.dS=lambda t,S,Im,Icr,Iv,R,Phi: - self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) + self.pR_S(t)/self.tR_S(t)*R - self.Psi(t) + self.S_f(t)
         
         # 1) dS_v/dt:
-        self.dSv=lambda t,Sv,Im,Icr,Iv,R,Phi: -(1-self.v)*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) + self.Psi(t) + self.Sv_f(t)
+        self.dSv=lambda t,Sv,Im,Icr,Iv,R,Phi: -(1-self.v(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) + self.Psi(t) + self.Sv_f(t)
                 
         # --------------------------- #
         #           Exposed           #
         # --------------------------- #        
         
         # 2) dE/dt
-        self.dE = lambda t,S,E,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) - E*(self.pE_Im(t)/self.tE_Im(t)+self.pE_Icr(t)/self.tE_Icr(t)) + self.E_f(t)
+        self.dE = lambda t,S,E,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - E*(self.pE_Im(t)/self.tE_Im(t)+self.pE_Icr(t)/self.tE_Icr(t)) + self.E_f(t)
         
         # 3) dE_d/dt*-
-        self.dE_d = lambda t,S,E_d,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) - E_d
+        self.dE_d = lambda t,S,E_d,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - E_d
 
         # 4) dEv/dt
-        self.dEv = lambda t,Sv,Ev,Im,Icr,Iv,Phi: (1-self.v)*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) - Ev/self.tEv_Iv(t) + self.Ev_f(t) 
+        self.dEv = lambda t,Sv,Ev,Im,Icr,Iv,Phi: (1-self.v(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - Ev/self.tEv_Iv(t) + self.Ev_f(t) 
 
         # 5) dEv_d/dt
-        self.dEv_d = lambda t,Sv,Ev_d,Im,Icr,Iv,Phi: (1-self.v)*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v*Iv)/(self.N0+Phi) - Ev_d
+        self.dEv_d = lambda t,Sv,Ev_d,Im,Icr,Iv,Phi: (1-self.v(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - Ev_d
         
         # --------------------------- #
         #           Infected          #
@@ -193,19 +193,19 @@ class SEIRHVD:
         #        Hospitalized          #
         # ---------------------------- #  
         # 12) Hospitalized
-        self.dH=lambda t,Icr,Iv,H: (1-self.H_sat(H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - self.pH_R(t)/self.tH_R(t)*H - self.pH_D(t)/self.tH_D(t)*H  + self.H_f(t)
+        self.dH=lambda t,Icr,Iv,H: (1-self.H_sat(t,H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - self.pH_R(t)/self.tH_R(t)*H - self.pH_D(t)/self.tH_D(t)*H  + self.H_f(t)
 
         # 13) Hospitalized: Daily 
-        self.dH_d=lambda t,Icr,Iv,H,H_d: (1-self.H_sat(H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - H_d
+        self.dH_d=lambda t,Icr,Iv,H,H_d: (1-self.H_sat(t,H))*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) - H_d
 
         # ------------------------- #
         #           Deaths          #
         # ------------------------- #  
         # 14) Deaths: total
-        self.dD=lambda t,Icr,Iv,H: self.H_sat(H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  + self.D_f(t)
+        self.dD=lambda t,Icr,Iv,H: self.H_sat(t,H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  + self.D_f(t)
 
         # 15) Deaths: Daily
-        self.dD_d=lambda t,Icr,Iv,H,D_d: self.H_sat(H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  - D_d
+        self.dD_d=lambda t,Icr,Iv,H,D_d: self.H_sat(t,H)*(1/self.tIcr_H(t)*Icr + self.pIv_H(t)/self.tIv_H(t)*Iv) + self.pH_D(t)/self.tH_D(t)*H  - D_d
 
         # --------------------------- #
         #         Recovered           #
@@ -241,8 +241,8 @@ class SEIRHVD:
             if self.E:
                 E0 = self.E
                 E_d0 = self.E_d
-                E0 = self.Ev
-                E_d0 = self.Ev_d                
+                Ev0 = self.Ev
+                Ev_d0 = self.Ev_d                
             else:
                 E0 = self.mu*(self.I)
                 E_d0 = self.mu*(self.I_d)
@@ -409,26 +409,11 @@ class SEIRHVD:
 
         self.R_ac = np.cumsum(self.R_d)
 
-        self.Im_det = self.Im*self.pI_det
-        self.Im_d_det = self.Im_d*self.pI_det
-        self.Im_ac_det = self.Im_ac*self.pI_det
-
-        self.Icr_det = self.Icr*self.pI_det
-        self.Icr_d_det = self.Icr_d*self.pI_det
-        self.Icr_ac_det = self.Icr_ac*self.pI_det
-
-        self.Iv_det = self.Iv*self.pI_det
-        self.Iv_d_det = self.Iv_d*self.pI_det
-        self.Iv_ac_det = self.Iv_ac*self.pI_det
-
         self.I = self.Im + self.Icr + self.Iv
         self.I_d = self.Im_d + self.Icr_d + self.Iv_d
-        self.I_ac = self.Im_ac + self.Icr_ac + self.Iv_ac
+        self.I_ac = self.Im_ac + self.Icr_ac + self.Iv_ac        
 
-        self.I_det = self.Im_det + self.Icr_det + self.Iv_det
-        self.I_d_det = self.Im_d_det + self.Icr_d_det + self.Iv_d_det
-        self.I_ac_det = self.Im_ac_det + self.Icr_ac_det + self.Iv_ac_det
-
+        self.underreport()
         self.analytics()
         self.dfbuild(sol)
 
@@ -583,26 +568,11 @@ class SEIRHVD:
 
         self.R_ac = np.cumsum(self.R_d)
 
-        self.Im_det = self.Im*self.pI_det
-        self.Im_d_det = self.Im_d*self.pI_det
-        self.Im_ac_det = self.Im_ac*self.pI_det
-
-        self.Icr_det = self.Icr*self.pI_det
-        self.Icr_d_det = self.Icr_d*self.pI_det
-        self.Icr_ac_det = self.Icr_ac*self.pI_det
-
-        self.Iv_det = self.Iv*self.pI_det
-        self.Iv_d_det = self.Iv_d*self.pI_det
-        self.Iv_ac_det = self.Iv_ac*self.pI_det
-
         self.I = self.Im + self.Icr + self.Iv
         self.I_d = self.Im_d + self.Icr_d + self.Iv_d
         self.I_ac = self.Im_ac + self.Icr_ac + self.Iv_ac
 
-        self.I_det = self.Im_det + self.Icr_det + self.Iv_det
-        self.I_d_det = self.Im_d_det + self.Icr_d_det + self.Iv_d_det
-        self.I_ac_det = self.Im_ac_det + self.Icr_ac_det + self.Iv_ac_det
-
+        self.underreport()  
         self.analytics()
         self.dfbuild(sol)
         return(sol)
@@ -617,12 +587,42 @@ class SEIRHVD:
             self.peak_date = self.initdate+timedelta(days=round(self.peak_t)) 
         else:
             self.dates = [None for i in range(len(self.t))]
-            self.peak_date = None            
+            self.peak_date = None
 
-        # Prevalence: 
+        # Prevalence:
         self.prevalence_total = self.I_ac/self.population
-        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
-        self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
+        self.prevalence_susc = np.array([self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))])
+        self.prevalence_det = np.array([self.I_ac_det[i]/(self.S[i]+self.E[i]+self.I_det[i]+self.R[i]) for i in range(len(self.I_ac))])
+
+        self.CFR = np.array([self.pH_D(t)*self.pE_Icr(t) for t in self.t])
+
+    def underreport(self):
+        """Calculates the detected cases using the underreport factor
+        """
+        # ToDo: Revisar el cálculo del subreporte
+
+        if False:
+            self.Im_det = [self.Im[i]*self.pI_det(self.t(i)) for i in range(len(self.t))]
+            self.Im_d_det = [self.Im_d[i]*self.pI_det(self.t(i)) for i in range(len(self.t))]
+            self.Im_ac_det = np.cumsum(self.Im_d_det)
+
+        self.Im_det = self.Im*self.pI_det(0)
+        self.Im_d_det = self.Im_d*self.pI_det(0)
+        self.Im_ac_det = self.Im_ac*self.pI_det(0)
+
+        self.Icr_det = self.Icr*self.pI_det(0)
+        self.Icr_d_det = self.Icr_d*self.pI_det(0)
+        self.Icr_ac_det = self.Icr_ac*self.pI_det(0)
+
+        self.Iv_det = self.Iv*self.pI_det(0)
+        self.Iv_d_det = self.Iv_d*self.pI_det(0)
+        self.Iv_ac_det = self.Iv_ac*self.pI_det(0)
+
+
+        self.I_det = self.Im_det + self.Icr_det + self.Iv_det
+        self.I_d_det = self.Im_d_det + self.Icr_d_det + self.Iv_d_det
+        self.I_ac_det = self.Im_ac_det + self.Icr_ac_det + self.Iv_ac_det
+
        
     def dfbuild(self,sol):        
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
@@ -631,11 +631,11 @@ class SEIRHVD:
         self.aux = pd.DataFrame(np.transpose(sol.y),columns=names)       
 
         names2 = ['E_ac','Ev_ac','Im_ac','Icr_ac','Iv_ac','R_ac','Im_det','Im_d_det','Im_ac_det','Icr_det','Icr_d_det','Icr_ac_det',
-        'Iv_det','Iv_d_det','Iv_ac_det','I','I_d','I_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
+        'Iv_det','Iv_d_det','Iv_ac_det','I','I_d','I_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det','CFR']
         vars2 = [self.E_ac,self.Ev_ac,self.Im_ac,self.Icr_ac,self.Iv_ac,self.R_ac,self.Im_det,self.Im_d_det,self.Im_ac_det,
         self.Icr_det,self.Icr_d_det,self.Icr_ac_det,self.Iv_det,self.Iv_d_det,self.Iv_ac_det,self.I,self.I_d,self.I_ac,
         self.I_det,self.I_d_det,self.I_ac_det,
-        self.prevalence_total,self.prevalence_susc,self.prevalence_det]
+        self.prevalence_total,self.prevalence_susc,self.prevalence_det,self.CFR]
         
         self.aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
 
@@ -643,8 +643,9 @@ class SEIRHVD:
 
         # Cast int
         for i in self.results.keys():
-            if not i in ['prevalence_total','prevalence_susc','prevalence_det']:
+            if not i in ['dates','prevalence_total','prevalence_susc','prevalence_det','CFR']:
                 self.results[i] = self.results[i].astype('int')
+                #pass
 
         #self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,
         #'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
