@@ -63,9 +63,9 @@ user = ''
 	#   Transition Parameters    # 
 	# -------------------------- #
 	# Exposed
-	pE_Im = 0.95
+	pE_Im = 1.0
 	tE_Im = 5.0 
-	pE_Icr = 0.05
+	pE_Icr = 0.0
 	tE_Icr = 3.0 
 
 	# Vaccinated exposed

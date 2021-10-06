@@ -32,19 +32,19 @@ user = ''
 
 	popfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
 
-	mu = 0.298 # E(0) = mu*I(0)
+	mu = 0.8 # E(0) = mu*I(0)
 	
 	
 	[parameters.dynamic]
 		
 	# Contagion and movility
 	alpha = 1
-	beta = 0.2
+	beta = 0.3
 	beta_v = 0.05
 	
 	# Vaccination
 	Psi = 0 # Vaccines per day
-	v = 0.9 # Vaccine effectivity
+	v = 0.7 # Vaccine effectivity
 	
 	# External flux rates over time 
 	S_f = 0
@@ -64,24 +64,24 @@ user = ''
 	# -------------------------- #
 	# Exposed
 	pE_Im = 0.95
-	tE_Im = 3.0 
+	tE_Im = 4.0 
 	pE_Icr = 0.05
-	tE_Icr = 3.0 
+	tE_Icr = 4.0 
 
 	# Vaccinated exposed
 	tEv_Iv = 3.0 
 
 	# Infectious (asymptomatic + mild + severe)
-        tIm_R = 12.0 
+        tIm_R = 5.0 
 	
 	# Infectious (critical)
-        tIcr_H = 7.0
+        tIcr_H = 5.0
     
 	# Infectious (vaccinated)
-        pIv_R = 0.95
+        pIv_R = 0.99
         tIv_R = 12.0 
 
-        pIv_H = 0.05
+        pIv_H = 0.01
         tIv_H = 7.0
         
         # Hospitalized (IMV)
@@ -96,12 +96,11 @@ user = ''
 	tR_S = 90 # time
 	
 	# Subreport: Detected infected are calculated from the real infected given in the IC
-	pIcr_det = 1	
+	pI_det = 1	
+	pIcr_det = 1
 	pIm_det = 1
 	pIv_det = 1
-	pI_det = 1	
 
-	
 	
 [initialconditions]
 
@@ -119,13 +118,13 @@ user = ''
 	Iv_ac = false
 	
 	# Hospitalization 
-	H_cap = 3000 # Capacity
-	H = 1500 # Use
-	H_d = 300 # Use
+	H_cap = 4000 # Capacity
+	H = 0 # Use
+	H_d = 0 # Use
 	
 	# Deaths
-	D = 1000
-	D_d = 50
+	D = 0
+	D_d = 0
 
 	# Recovered
 	R = 5000
