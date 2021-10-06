@@ -120,6 +120,7 @@ user = ''
 	# Hospitalization 
 	H_cap = 3000 # Capacity
 	H = 1500 # Use
+	H_d = 200 # Use
 	
 	# Deaths
 	D = 1000
