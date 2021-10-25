@@ -26,6 +26,9 @@ Todo: [ ] Construir una función resumen que imprima las características princi
 Todo: [ ] Sacar variables para hacerlas accesibles desde el objeto principal
 Todo: [ ] simplificar la vectorización de la función de integración
 Todo: [ ] Paralelizar la integración de las EDOs dentro de lo posible
+Todo: [x] Agregar SEIRHVD
+Todo: [ ]  
+
 """
 
 class cv19sim():

@@ -53,12 +53,19 @@ def loadconfig(sim,config,inputdata,**kwargs):
     # sim
     sim.model = sim.cfg['model']
 
+    # Copies
+    copies = {}
+
     # Import fixed variables
     for key,value in sim.cfg['parameters']['static'].items():
         if key in kwargs:
             value = kwargs[key]
             sim.cfg['parameters']['static'][key]=value
-        sim.__dict__.update({key:value})
+        if type(value) == str:
+            print(key+' '+value)
+            copies.update({key:value})
+        else:
+            sim.__dict__.update({key:value})
         
     
     sim.tsim = sim.t_end - sim.t_init
@@ -67,8 +74,11 @@ def loadconfig(sim,config,inputdata,**kwargs):
     for key,value in sim.cfg['parameters']['dynamic'].items():        
         if key in kwargs:
             value = kwargs[key]
-            sim.cfg['parameters']['dynamic'][key] = value                
-        sim.__dict__.update({key:cv19functions.build(value)})
+            sim.cfg['parameters']['dynamic'][key] = value
+        if type(value) == str:
+            copies.update({key:value})
+        else:                            
+            sim.__dict__.update({key:cv19functions.build(value)})
         
     # Ephemeris
     if 'ephemeris' in sim.cfg:
@@ -132,6 +142,11 @@ def loadconfig(sim,config,inputdata,**kwargs):
                 sim.__dict__.update({key:sim.inputdata.__dict__[value]})
         else:
             sim.__dict__.update({key:value})
+    
+    # Update copies
+    for key,value in copies.items():
+        sim.__dict__.update({key:sim.__dict__[value]})
+
     return
 
 def saveconfig(filename,config):    
