@@ -46,7 +46,7 @@ user = 'Samuel'
 	alpha = 1
 	
 	# External flux rates over time 
-	S_f = 0#'{"function":"Events","values":[10000,-10000],"days":[[190,200],[210,220]]}'
+	S_f = 0#'{"function":"events","values":[10000,-10000],"days":[[190,200],[210,220]]}'
 	E_f = 0
 	I_f = 0
 	R_f = 0	

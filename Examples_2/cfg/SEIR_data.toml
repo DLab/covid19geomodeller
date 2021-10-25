@@ -42,7 +42,7 @@ user = 'Samuel'
 	
 	[parameters.dynamic]
 	beta = 0.15
-	alpha = '{"function":"Events","values":[0.45,0.85],"days":[[0,100],[100,500]]}'  # Refer to function constructor library
+	alpha = '{"function":"events","values":[0.45,0.85],"days":[[0,100],[100,500]]}'  # Refer to function constructor library
 	
 	# External flux rates over time 
 	S_f = 0
