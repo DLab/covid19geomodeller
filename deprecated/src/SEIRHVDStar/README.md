@@ -1,3 +1,0 @@
-# SEIRHVD - Metapopulation
-
-hopefully soon..
