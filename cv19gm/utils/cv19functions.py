@@ -5,6 +5,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 from scipy.special import expit
 import json
+import pandas as pd
 
 
 """
@@ -90,24 +91,6 @@ def func_add(*functions):
             aux += i(t)
         return aux
     return f
-
-
-def polyfit(values,time = None,degree=4,endvalue_index = -5):
-    """
-    polyfit:
-    Function data fits real data with a polynom of a given degree, and then projects the future values with it.
-    values: values to fit
-    time: time array from data to fit. If no time array given, daily data is assumed 
-    degree: polynom degree    
-    """
-    if not time:
-        time = np.array(range(len(values)))
-    datamodel = np.poly1d(np.polyfit(time, values, degree))
-    # transition time from data to fixed value
-    tchange = time[-1]#[tchange]
-    endvalue = np.mean(values[endvalue_index:])
-    f_out=lambda t: datamodel(t)*(1-expit(t-tchange)) + expit(t-tchange)*endvalue
-    return f_out
 
 
 def events(values,days,default=0,*functions):
@@ -338,3 +321,57 @@ def saturation(upperlimit):
         return(expit(gw*(f(t)-upperlimit(t))))
     return aux
     
+
+def data_function(data,futurefunction):
+    """Creates a function that returns the data during its length
+
+    Args:
+        data (list| np.array|pd.Series|pd.DataFrame ): Data 
+        futurefunction ([type]): [description]
+    """
+    if isinstance(data, pd.DataFrame):
+        data = list(data.iloc[0])
+    elif isinstance(data, pd.Series):
+        data = list(data)
+
+    auxf = build(futurefunction)
+        
+    def aux(t):
+        if t < len(data):
+            return data[int(t)]
+        else:
+            return auxf(t)
+    
+    return aux
+
+
+def polyfit(values,time = None,degree=4,endvalue_index = -5):
+    """
+    polyfit:
+    Function data fits real data with a polynom of a given degree, and then projects the future values with it.
+    values: values to fit
+    time: time array from data to fit. If no time array given, daily data is assumed 
+    degree: polynom degree    
+    """
+    if not time:
+        time = np.array(range(len(values)))
+    datamodel = np.poly1d(np.polyfit(time, values, degree))
+    # transition time from data to fixed value
+    tchange = time[-1]#[tchange]
+    endvalue = np.mean(values[endvalue_index:])
+    f_out=lambda t: datamodel(t)*(1-expit(t-tchange)) + expit(t-tchange)*endvalue
+    return f_out
+
+def interpolate_data(data):
+    """Interpolates the data in order to have a daily array of data
+
+    Args:
+        data ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+
+    # Work in progress
+    aux = data
+    return aux

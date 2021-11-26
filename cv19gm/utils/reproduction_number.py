@@ -5,24 +5,12 @@ dlab : Computational Biology Lab
 Questions to : sropert@dlab.cl, fcastillo@dlab.cl
 """
 import pandas as pd
-import numpy as np
-from scipy.interpolate import interp1d
-from datetime import timedelta
-import datetime as dtime
-import json
-import requests
-import os
 # rpy2 imports
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 import rpy2.robjects as robjects
 pandas2ri.activate()
-#plot imports
-from matplotlib import pyplot as plt
-from matplotlib import dates as mdates
-import seaborn as sns
-import matplotlib.image as mpimg
-from scipy import stats as sps
+
 # R library
 global eps
 eps = importr("EpiEstim")

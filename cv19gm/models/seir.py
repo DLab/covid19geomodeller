@@ -45,10 +45,10 @@ class SEIR:
         cv19files.loadconfig(self,config,inputdata,**kwargs)
         if verbose:
             print('Initializing parameters and variables')
-        self.setrelationalvalues()
+        self.set_relational_values()
         if verbose:
             print('Building equations')          
-        self.setequations()
+        self.set_equations()
 
         self.solved = False
         if verbose:
@@ -58,7 +58,7 @@ class SEIR:
     #  Valores Iniciales  #
     # ------------------- #
    
-    def setrelationalvalues(self):
+    def set_relational_values(self):
         # Active infected
         if self.I_det:
             self.I = self.I_det/self.pI_det
@@ -91,7 +91,7 @@ class SEIR:
         self.S = self.N-self.E-self.I-self.R
                     
 
-    def setequations(self):
+    def set_equations(self):
         """        
         Sets Diferential Equations
         """
@@ -145,14 +145,12 @@ class SEIR:
         # 7) External Flux:
         self.dFlux = lambda t: self.S_f(t) + self.E_f(t) + self.I_f(t) + self.R_f(t) 
 
-
-
-    def integr_sci(self,t0=0,T=None,h=0.01):
-        self.integrate(t0=0,T=None,h=0.01)
-        return
+    def integrate(self,t0=0,T=None,h=0.01):
+        print('The use of integrate() is now deprecated. Use solve() instead.')
+        self.solve(t0=t0,T=T,h=h)
 
     # Scipy
-    def integrate(self,t0=0,T=None,h=0.01):
+    def solve(self,t0=0,T=None,h=0.01):
         """
         Solves ODEs using scipy.integrate
         Args:
@@ -183,68 +181,6 @@ class SEIR:
 
             self.t=np.arange(t0,T+h,h)
             
-        elif False:#((min(self.t)<=t0) & (t0<=max(self.t))):
-            #Condition over exiting time in already initialized object
-
-            #Search fot initial time
-            idx=np.searchsorted(self.t,t0)
-
-            #set initial condition
-
-            E0 = self.E[idx]
-            E_d0 = self.E_d[idx]
-            E_ac0 = self.E_ac[idx]
-
-            S0=self.S[idx]
-            Ias0=self.Ias[idx]
-            Imi0=self.Imi[idx]
-            Ise0=self.Ise[idx]
-            Icr0=self.Icr[idx]
-
-            Ias_d0=self.Ias_d[idx]
-            Imi_d0=self.Imi_d[idx]
-            Ise_d0=self.Ise_d[idx]
-            Icr_d0=self.Icr_d[idx]
-
-            Ias_ac0=self.Ias_ac[idx]
-            Imi_ac0=self.Imi_ac[idx]
-            Ise_ac0=self.Ise_ac[idx]
-            Icr_ac0=self.Icr_ac[idx]
-        
-            Hse0=self.Hse[idx]
-            Hout0=self.Hout[idx]
-            V0=self.V[idx]
-
-            Hse_d0=self.Hse_d[idx]
-            Hout_d0=self.Hout_d[idx]
-            V_d0=self.V_d[idx]
-
-            Hse_ac0=self.Hse_ac[idx]
-            Hout_ac0=self.Hout_ac[idx]
-            V_ac0=self.V_ac[idx]
-
-            R0=self.R[idx]
-            R_d0=self.R_d[idx]
-
-            D0=self.D[idx]
-            B0=self.B[idx]
-
-            Ise_D_d0 = self.Ise_D_d[idx]
-            Icr_D_d0 = self.Icr_D_d[idx]
-            Hse_D_d0 = self.Hse_D_d[idx]
-            V_D_d0 = self.V_D_d[idx]
-
-            Ise_D_ac0 = self.Ise_D_ac[idx]
-            Icr_D_ac0 = self.Icr_D_ac[idx]
-            Hse_D_ac0 = self.Hse_D_ac[idx]
-            V_D_ac0 = self.V_D_ac[idx] 
-
-            V_need0=self.V[idx]
-            Hse_need0=self.Hse[idx]
-            Hout_need0= self.Hout[idx]
-
-            #set time grid
-            self.t=np.arange(self.t[idx],T+h,h)
 
         else:
             #print('Already solved')
@@ -295,124 +231,11 @@ class SEIR:
         self.I_ac_det = self.I_ac*self.pI_det
 
         self.analytics()
-        self.dfbuild(sol)
+        self.df_build()
         self.solved = True
 
-        return(sol)
+        return 
 
-
-
-
-
-    
-    def integr(self,t0=0,T=None,h=0.01):
-        """
-        Solves ODEs using scikits-odes
-        sckits: slower but better response to stiffness
-        Args:
-            t0 (int, optional): Initial time. Defaults to 0.
-            T ([type], optional): Endtime. Defaults to time given when building the object
-            h (float, optional): Time step. Defaults to 0.01.            
-        """
-
-        print('Import scikits-odes')
-        from scikits.odes.odeint import odeint
-
-        if T is None:
-            T = self.tsim
-
-        if not self.solved:
-
-            S0=self.S
-            if self.E:
-                E0 = self.E
-                E_d0 = self.E_d
-            else:
-                E0 = self.mu*(self.I)
-                E_d0 = self.mu*(self.I_d)
-            I0=self.I
-            I_d0=self.I_d
-            R0=self.R
-            R_d0=0
-
-            Flux0=0            
-
-            self.t=np.arange(t0,T+h,h)
-            
-        elif False:#((min(self.t)<=t0) & (t0<=max(self.t))):
-            #Condition over exiting time in already initialized object
-
-            #Search fot initial time
-            idx=np.searchsorted(self.t,t0)
-
-            #set initial condition
-
-            S0=self.S[idx]
-            E0=self.E[idx]
-            
-            I0=self.I[idx]
-            R0=self.R[idx]                        
-            I_ac0=self.I_ac[idx]
-            I_d0=self.I_d[idx]
-
-            e0 = self.e[idx]
-            e_I0 = self.e_I[idx]
-            
-            #set time grid
-            self.t=np.arange(self.t[idx],T+h,h)
-
-        else:
-            print('Already solved')
-            return()
-
-        
-        def model_SEIR_graph(t,y,ydot):
-            
-            ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
-
-            ydot[1]=self.dE(t,y[0],y[1],y[3],y[5])
-            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[3],y[5])
-
-            ydot[3]=self.dI(t,y[1],y[3])
-            ydot[4]=self.dI_d(t,y[1],y[4])
-
-            ydot[5]=self.dR(t,y[3],y[5])
-            ydot[6]=self.dR_d(t,y[3],y[6])
-
-            ydot[7]=self.dFlux(t)
-
-            
-        initcond = np.array([S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0])                                
-
-
-        sol = odeint(model_SEIR_graph, self.t, initcond,method='admo')
-        
-        self.sol = sol
-        self.t=sol.values.t 
-        
-        self.S=sol.values.y[:,0]
-        self.E=sol.values.y[:,1]        
-        self.E_d=sol.values.y[:,2]
-        self.I=sol.values.y[:,3]
-        self.I_d=sol.values.y[:,4]
-        self.R=sol.values.y[:,5]
-        self.R_d=sol.values.y[:,6]
-        self.Flux=sol.values.y[:,7]
-
-        self.E_ac = np.cumsum(self.E_d)
-        self.I_ac = np.cumsum(self.I_d) + self.I_ac
-        self.R_ac = np.cumsum(self.R_d)
-
-        self.I_det = self.I*self.pI_det
-        self.I_d_det = self.I_d*self.pI_det
-        self.I_ac_det = self.I_ac*self.pI_det
-
-        self.analytics()
-        self.dfbuild(sol)
-
-        self.solved = True
-        
-        return(sol)
 
     def analytics(self):
         """
@@ -436,14 +259,14 @@ class SEIR:
         self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
         return
        
-    def dfbuild(self,sol):
+    def df_build(self):
         """
         Builds a dataframe with the simulation results
         """
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
         names = ['S','E','E_d','I','I_d','R','R_d','Flux']
         
-        aux = pd.DataFrame(np.transpose(sol.y),columns=names)       
+        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names)       
 
         names2 = ['E_ac','I_ac','R_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
         vars2 = [self.E_ac,self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]

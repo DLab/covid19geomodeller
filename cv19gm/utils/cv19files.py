@@ -34,6 +34,14 @@ Functions:
 
  
 """
+def isdict(var):
+    try:
+        json.loads(var)
+        return True
+    except:
+        return False
+
+
 def loadconfig(sim,config,inputdata,**kwargs):
     """[summary]
 
@@ -61,8 +69,8 @@ def loadconfig(sim,config,inputdata,**kwargs):
         if key in kwargs:
             value = kwargs[key]
             sim.cfg['parameters']['static'][key]=value
-        if type(value) == str:
-            print(key+' '+value)
+        if type(value) == str and not isdict(value):
+            #print(key+' '+value)
             copies.update({key:value})
         else:
             sim.__dict__.update({key:value})
@@ -75,7 +83,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
         if key in kwargs:
             value = kwargs[key]
             sim.cfg['parameters']['dynamic'][key] = value
-        if type(value) == str:
+        if type(value) == str and not isdict(value):
             copies.update({key:value})
         else:                            
             sim.__dict__.update({key:cv19functions.build(value)})

@@ -21,7 +21,7 @@ path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 import sys
 #from pathlib import Path
 sys.path.insert(1, path)
-from utils.cv19timeutils import timeJStoPy 
+from cv19gm.utils.cv19timeutils import timeJStoPy 
 
 """   
    Import and analyse data 
@@ -168,30 +168,30 @@ class ImportData():
     #    Importar toda la data    #
     # --------------------------- #
 
-    def importdata(self):
+    def import_data(self):
         print('Importing general data')
         try:
-            self.importPopulation()
+            self.imp_population()
         except:
             print('Dlab Endpoint Error')
-            self.importPopulationMinCiencia()
+            self.imp_population_mcyt()
         try:
-            self.importActiveInfected()
+            self.imp_infected_active()
         except:
             print('Dlab Endpoint Error')
-            self.importActiveInfectedMinciencia()
+            self.imp_infected_active_mcyt()
         try:
-            self.importAccumulatedInfected()
+            self.imp_infected_accumulated()
         except:
             print('Dlab Endpoint Error')            
-            self.importAccumulatedInfectedMinCiencia()
+            self.imp_infected_accumulated_mcyt()
 
-        self.importDailyInfected()
+        self.imp_infected_daily()
         #self.importSOCHIMI()
         #self.importSOCHIMIMinCiencia()
-        self.importICUBedOccupation()
+        self.imp_hosp_icu()
         #self.importAccumulatedDeaths()
-        self.importDeathsDEIS()
+        self.imp_deaths_deis()
         #self.importActiveInfectedMinciencia()
 
         #self.importDeathsHospitalized()
@@ -204,7 +204,7 @@ class ImportData():
     #    Importar data para SEIR    #
     # --------------------------- #
 
-    def importdatalight(self):
+    def import_data_lite(self):
         print('Importing basic data')
         try:
             self.importPopulation()
@@ -281,7 +281,7 @@ class ImportData():
     # ------------------------------ #
     #       Add Data Manually        #
     # ------------------------------ #
-    def adddata(self,data,dates=None,days=None,initdate=None):
+    def add_data(self,data,dates=None,days=None,initdate=None):
         print('Adding Data')
         # We use initdate in the case they give a days vector and it doesn't fit the actual data size        
         
@@ -293,7 +293,7 @@ class ImportData():
     #            Population            #
     # -------------------------------- #
 
-    def importPopulation(self=None,endpoint = '',tstate = '',user=None,password=None):     
+    def imp_population(self=None,endpoint = '',tstate = '',user=None,password=None):     
         """
             Import PopulationendpointComunas
             This Function imports the selected area population. 
@@ -367,7 +367,7 @@ class ImportData():
         else:        
             return population
 
-    def importPopulationMinCiencia(self=None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv',tstate = ''):     
+    def imp_population_mcyt(self=None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv',tstate = ''):     
         """
             Import Population
             This Function imports the selected area population from the Minciencia Github Repository 
@@ -419,7 +419,7 @@ class ImportData():
     #          Active Infected         #
     # -------------------------------- #
 
-    def importActiveInfected(self=None,tstate = '',initdate=None,endpoint = 'getActiveCasesAllComunas',user=None,password=None, name='I'):
+    def imp_infected_active(self=None,tstate = '',initdate=None,endpoint = 'getActiveCasesAllComunas',user=None,password=None, name='I'):
         """
             Import Active infected
             This function imports the active infected calculated as the infected that are within their 14 days since exposure.
@@ -506,7 +506,7 @@ class ImportData():
     # ---------------------------------------- #
     #    Datos Infectados activos Minciencia   #
     # ---------------------------------------- #
-    def importActiveInfectedMinciencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv',name = 'I' ):     
+    def imp_infected_active_mcyt(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv',name = 'I' ):     
         """
             Import Active infected Minciencia
             input: 
@@ -566,7 +566,7 @@ class ImportData():
     # -------------------------------- #
     #      Accumulated Infected        #
     # -------------------------------- #
-    def importAccumulatedInfected(self=None,tstate = '',initdate = None, endpoint = 'getTotalCasesAllComunas',user=None,password=None, name = 'I_ac'):     
+    def imp_infected_accumulated(self=None,tstate = '',initdate = None, endpoint = 'getTotalCasesAllComunas',user=None,password=None, name = 'I_ac'):     
         """
             Import acumulated infected
             This Function imports the selected area accumulated infected from CyV Endpoint
@@ -654,7 +654,7 @@ class ImportData():
             return I_ac_r,I_ac_r_tr,I_ac_r_dates
 
 
-    def importAccumulatedInfectedMinCiencia(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_ac'):     
+    def imp_infected_accumulated_mcyt(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_ac'):     
         """
             Import acumulated infected
             input: 
@@ -709,7 +709,7 @@ class ImportData():
     #      Daily infected Smoothed     #
     # -------------------------------- #
     # Created by Felipe Castillo
-    def importDailyInfected(self=None,tstate = '',initdate = None,endpoint = 'getTotalCasesAllComunas',user=None,password=None, name = 'I_d'):     
+    def imp_infected_daily(self=None,tstate = '',initdate = None,endpoint = 'getTotalCasesAllComunas',user=None,password=None, name = 'I_d'):     
         """
             Import daily infected
             input: 
@@ -802,72 +802,11 @@ class ImportData():
         else:        
             return np.array(I_d_r), I_d_tr, I_d_dates
                 
-
-    # -------------------------------------------------- #
-    #       Daily infected Informe Diario Minciencia     #
-    # -------------------------------------------------- #
-
-    def importDailyInfectedNacional(self=None,tstate = '',initdate = None,endpoint = 'getNationalNewCases',user=None,password=None,name = 'I_d'):     
-        """
-            Import daily infected
-            input: 
-                - tstate: [string or string list] CUT por comuna o región
-                - initdate: datetime object with the initial date
-                - endpoint (optional): 
-            output: 
-                - I_d_r: Real Daily infected
-                - I_d_r_tr: days from simulation first day
-                - I_d_r_dates: data dates
-            usage 
-                I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = '13101',initdate = datetime(2020,5,15))      
-        """
-        print('Importing Daily Infected')
-
-
-        if self:
-            tstate = self.tstate
-            initdate = self.initdate
-            request = self.request
-        else:
-            if not tstate:
-                raise Exception("State code missing")
-            if not initdate:
-                raise Exception("Initial date missing")
-            request = dataretriever(user,password)
-
-
-        data = pd.DataFrame(request(endpoint).json()['cases'])[0]
-        dates = pd.DataFrame(request(endpoint).json()['dates'])[0]       
-
-
-        # Get and filter by dates               
-        I_d_r_dates = [timeJStoPy(i) for i in dates]        
-
-        index = np.where(np.array(I_d_r_dates) >= initdate)[0][0] 
-        I_d_r = np.array(data[index:])
-        I_d_r_dates = I_d_r_dates[index:]
-        I_d_r_tr = [(I_d_r_dates[i]-initdate).days for i in range(len(I_d_r))]       
-
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,I_d_r,I_d_r_tr,name)          
-                
-        if self:
-            self.I_d_r = I_d_r#np.array(I_d_r_smooth[0])
-            self.I_d_r_tr = I_d_r_tr
-            self.I_d_r_dates = I_d_r_dates
-            self.I_d_r_raw = I_d_r
-            return
-        else:        
-            return I_d_r, I_d_r_tr, I_d_r_dates
-                
-
-
     # ------------------------------------------ #
     #      Daily infected Smoothed MinCiencia    #
     # ------------------------------------------ #
     # Created by Felipe Castillo
-    def importDailyInfectedMinCiencia(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_d' ):     
+    def imp_infected_daily_mcyt(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_d' ):     
         """
             Import daily infected
             input: 
@@ -940,11 +879,71 @@ class ImportData():
 
 
 
+    # -------------------------------------------------- #
+    #       Daily infected Informe Diario Minciencia     #
+    # -------------------------------------------------- #
+
+    def imp_infected_daily_national(self=None,tstate = '',initdate = None,endpoint = 'getNationalNewCases',user=None,password=None,name = 'I_d'):     
+        """
+            Import daily infected
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - I_d_r: Real Daily infected
+                - I_d_r_tr: days from simulation first day
+                - I_d_r_dates: data dates
+            usage 
+                I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = '13101',initdate = datetime(2020,5,15))      
+        """
+        print('Importing Daily Infected')
+
+
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            request = self.request
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")
+            request = dataretriever(user,password)
+
+
+        data = pd.DataFrame(request(endpoint).json()['cases'])[0]
+        dates = pd.DataFrame(request(endpoint).json()['dates'])[0]       
+
+
+        # Get and filter by dates               
+        I_d_r_dates = [timeJStoPy(i) for i in dates]        
+
+        index = np.where(np.array(I_d_r_dates) >= initdate)[0][0] 
+        I_d_r = np.array(data[index:])
+        I_d_r_dates = I_d_r_dates[index:]
+        I_d_r_tr = [(I_d_r_dates[i]-initdate).days for i in range(len(I_d_r))]       
+
+        # Update database
+        print('updating database')
+        self.data = dfappend(self.data,I_d_r,I_d_r_tr,name)          
+                
+        if self:
+            self.I_d_r = I_d_r#np.array(I_d_r_smooth[0])
+            self.I_d_r_tr = I_d_r_tr
+            self.I_d_r_dates = I_d_r_dates
+            self.I_d_r_raw = I_d_r
+            return
+        else:        
+            return I_d_r, I_d_r_tr, I_d_r_dates
+                
+   
+
     # ----------------------------------------------------- #
     #      Daily infected Smoothed with backpropagation     #
     # ----------------------------------------------------- #
     # Created by Felipe Castillo
-    def importDailyInfectedBackprop(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_d' ):     
+    def imp_infected_daily_mcyt_backprop(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv', name = 'I_d' ):     
         """
             Import daily infected smoothed with Backpropagation
             This function smoothes the daily infected thata and distributes homogeneously the 30k excess cases added in ~2020-6-16
@@ -1015,7 +1014,6 @@ class ImportData():
             return I_d_r_smooth, I_d_r_tr, I_d_r_dates
                 
     
-
     # --------------------------------------------------------- #
     #                 Ocupación Hospitalaria                    #
     # --------------------------------------------------------- #    
@@ -1023,7 +1021,7 @@ class ImportData():
     # ------------------ #
     #    Datos Sochimi   #
     # ------------------ #
-    def importSOCHIMI(self=None,tstate = '', initdate = None, endpoint = "getBedsAndVentilationByState?state=",user=None,password=None):
+    def imp_sochimi(self=None,tstate = '', initdate = None, endpoint = "getBedsAndVentilationByState?state=",user=None,password=None):
         """
         Import SOCHIMI data per state.
         Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
@@ -1102,7 +1100,7 @@ class ImportData():
     # ------------------ #
     #    Datos Sochimi   #
     # ------------------ #
-    def importSOCHIMIMinCiencia(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto48/SOCHIMI.csv'):
+    def imp_sochimi_mcyt(self=None,tstate = '', initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto48/SOCHIMI.csv'):
         """
         Import SOCHIMI data per state.
         Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
@@ -1192,7 +1190,7 @@ class ImportData():
     # ----------------------------- #
     #    Datos Ocupacion de Camas   #
     # ----------------------------- #
-    def importICUBedOccupation(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None, name = ['UCI_capacity','UCI_use_covid','UCI_use_noncovid']):
+    def imp_hosp_icu(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None, name = ['UCI_capacity','UCI_use_covid','UCI_use_noncovid']):
         """
         Import ICU Bed Occupation data per region.
         Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
@@ -1289,7 +1287,7 @@ class ImportData():
     # ---------------------------------------------- #
     #    Datos Ocupacion de Camas y Ventiladores     #
     # ---------------------------------------------- #
-    def importHospitalization(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None, name = ['UCI_capacity','UCI_use_covid','UCI_use_noncovid']):
+    def imp_hosp_vmibeds(self=None,tstate = '', initdate = None, endpoint = "getRegionalIcuBedOccupation",user=None,password=None, name = ['UCI_capacity','UCI_use_covid','UCI_use_noncovid']):
         """
         Import ICU Bed Occupation data per region.
         Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
@@ -1393,7 +1391,7 @@ class ImportData():
     # -------------------------------- #
     #    Datos Fallecidos acumulados   #
     # -------------------------------- #
-    def importAccumulatedDeaths(self=None,tstate = '',initdate = None, endpoint = 'getMinsalDeathsByState?state=',user=None,password=None ):     
+    def imp_deaths_accumulated(self=None,tstate = '',initdate = None, endpoint = 'getMinsalDeathsByState?state=',user=None,password=None ):     
         """
             Import Acumulated Deaths - Regional
             input: 
@@ -1444,7 +1442,7 @@ class ImportData():
     #    Datos Fallecidos acumulados   #
     # -------------------------------- #
     """
-    def importAccumulatedDeathsMinCiencia(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto14/FallecidosCumulativo.csv' ):     
+    def imp_deaths_accumulated_mcyt(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto14/FallecidosCumulativo.csv' ):     
         #
         #    Import Accumulated Deaths
         #    input: 
@@ -1493,7 +1491,7 @@ class ImportData():
     # ----------------------------- #
     #          Deaths (DEIS)        #
     # ----------------------------- #
-    def importDeathsDEIS(self=None,tstate = '',initdate = None,endpointreg = 'getDeathsByState?state=',endpointcom = 'getDeathsByComuna?comuna=',user=None,password=None,name = ['D_confirmed','D_suspected','D_ac_confirmed','D_ac_suspected']):
+    def imp_deaths_deis(self=None,tstate = '',initdate = None,endpointreg = 'getDeathsByState?state=',endpointcom = 'getDeathsByComuna?comuna=',user=None,password=None,name = ['D_confirmed','D_suspected','D_ac_confirmed','D_ac_suspected']):
         """
             Import Accumulated Deaths
             input: 
@@ -1564,14 +1562,17 @@ class ImportData():
         
 
 
+        B_r_confirmed = D_r_confirmed.cumsum()
+        B_r_suspected = D_r_suspected.cumsum()
+
         index = np.where(np.array(D_r_dates) >= initdate)[0][0] 
         D_r_confirmed = D_r_confirmed[index:]
         D_r_suspected = D_r_suspected[index:]
         D_r_dates = D_r_dates[index:]
         D_r_tr = [(D_r_dates[i]-initdate).days for i in range(len(D_r_dates))]
 
-        B_r_confirmed = D_r_confirmed.cumsum()
-        B_r_suspected = D_r_suspected.cumsum()
+        B_r_confirmed = B_r_confirmed[index:]
+        B_r_suspected = B_r_suspected[index:]
 
 
         # Update database
@@ -1596,7 +1597,7 @@ class ImportData():
     # -------------------------------------- #
     #          Deaths (DEIS) MinCiencia      #
     # -------------------------------------- #
-    def importDeathsDEISMinCiencia(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv',user=None,password=None,name = ['D_confirmed','D_suspected','D_ac_confirmed','D_ac_suspected']):     
+    def imp_deaths_deis_mcyt(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv',user=None,password=None,name = ['D_confirmed','D_suspected','D_ac_confirmed','D_ac_suspected']):     
         """
             Import Accumulated Deaths
             input: 
@@ -1700,7 +1701,7 @@ class ImportData():
     # ------------------------------------ #
     #    Datos Fallecidos Hospitalizados   #
     # ------------------------------------ #
-    def importDeathsHospitalized(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv' ):     
+    def imp_hospitalized_deaths(self=None,tstate = '',initdate = None, endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto57/fallecidos_hospitalizados.csv' ):     
         """
             Import Accumulated Deaths
             input: 
@@ -1812,7 +1813,7 @@ class ImportData():
     # -------------------------- #
     #    Fallecidos excesivos    #
     # -------------------------- #
-    def importfallecidosexcesivos(self,path = '/home/samuel/Documents/Dlab/data/Excess_dead_daily.csv'):
+    def imp_deaths_excess(self,path = '/home/samuel/Documents/Dlab/data/Excess_dead_daily.csv'):
         #path = '/home/samuel/Documents/Dlab/data/Excess_dead_daily.csv'
         
         excess_dead = pd.read_csv(path)
@@ -1832,9 +1833,9 @@ class ImportData():
 
 
     # -------------------------------- #
-    #       Datos PCR y polbación      #
+    #      PCR and population data     #
     # -------------------------------- #
-    def importpcrpop(self,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto7/PCR.csv'):
+    def imp_pcr_population(self,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto7/PCR.csv'):
         cut =  ['15','01','02','03','04','05','13','06','07','16','08','09','14','10','11','12','00']
         index = cut.index(self.tstate[:2])
         self.population = pd.read_csv(endpoint).iloc[index]['Poblacion'] 
@@ -1851,7 +1852,7 @@ class ImportData():
     # ----------------------------- #
     #    Import Adjacency Matrix    #
     # ----------------------------- #
-    def importAdjacencyRegional(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getRegionalAdjacencyMatrix', N = 1):
+    def imp_adj_matrix_regional(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getRegionalAdjacencyMatrix', N = 1):
         """
         Import adjacency data 
         N is the adjacency order, with 0 meaning the immediate neighbors, 1 the neighbor's neighbors, and so on.
@@ -1890,7 +1891,7 @@ class ImportData():
             return adjacency, adjacency_lvl
 
 
-    def importAdjacencyNational(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getNationalAdjacencyMatrix', N = 1):
+    def imp_adj_matrix_national(self,tstate= '', endpoint = 'http://192.168.2.223:5006/getNationalAdjacencyMatrix', N = 1):
         """
         Import adjacency data 
         N is the adjacency order, with 0 meaning the immediate neighbors, 1 the neighbor's neighbors, and so on.
@@ -1935,7 +1936,7 @@ class ImportData():
     # ---------------------- #
     #    Import Lockdowns    #
     # ---------------------- #
-    def importLockdowns(self,tstate= '', endpoint = '', N = 1):
+    def imp_lockdowns(self,tstate= '', endpoint = '', N = 1):
         """
         Import Lockdowns data 
         So far from local data
@@ -1988,7 +1989,7 @@ class ImportData():
     # ------------------------------------------- #
     #    Import Effective Reproduction Number     #
     # ------------------------------------------- #
-    def importR(self=None,tstate = '',initdate = None,endpointcounty = 'http://192.168.2.223:5006/getEffectiveReproductionAllComunas', endpointstates = 'http://192.168.2.223:5006/getEffectiveReproductionAllStates',user=None,password=None):     
+    def imp_reproduction_number(self=None,tstate = '',initdate = None,endpointcounty = 'http://192.168.2.223:5006/getEffectiveReproductionAllComunas', endpointstates = 'http://192.168.2.223:5006/getEffectiveReproductionAllStates',user=None,password=None):     
         """
             Import Effective Reproduction Number
             input: 
@@ -2265,13 +2266,6 @@ class ImportData():
 
 
 
-    def help(self):
-        help= """
-                Import Data Library
-
-
-              """
-        print(help)
 #self.importfallecidosacumulados()
 #self.importinfectadosactivosminciencia()
 #self.importsochimi()

@@ -1,22 +1,23 @@
 import numpy as np
 import pandas as pd
 import toml
-from datetime import datetime
-from datetime import timedelta
+#from datetime import datetime
+#from datetime import timedelta
 
 
-import os
-import sys
-path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(1, path)
+#import os
+#import sys
+#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+#sys.path.insert(1, path)
 
-import data.cv19data as cv19data
-import utils.cv19timeutils as cv19timeutils
-import utils.cv19functions as cv19functions
-import utils.cv19files as cv19files
+#import cv19gm.data.cv19data as cv19data
+#import cv19gm.utils.cv19timeutils as cv19timeutils
+#import cv19gm.utils.cv19functions as cv19functions
+
+import cv19gm.utils.cv19files as cv19files
 from copy import deepcopy
 
-#from importlib import import_module
+
 
 """
 Todo: [ ] Construir una función resumen que imprima las características principales
@@ -31,18 +32,18 @@ Todo: [ ]
 
 """
 
-class cv19sim():
+class CV19SIM():
     def __init__(self,config,model='SEIR', inputdata = None, verbose=False,**kwargs):
 
         config = deepcopy(config)            
         if model == 'SEIR':
             self.modelname = model
-            from models.SEIR import SEIR
+            from cv19gm.models.seir import SEIR
             model = SEIR
              
         elif model == 'SEIRHVD':
             self.modelname = model
-            from models.SEIRHVD import SEIRHVD
+            from cv19gm.models.seirhvd import SEIRHVD
             model = SEIRHVD
 
         # Leer el archivo de configuracion
@@ -78,10 +79,15 @@ class cv19sim():
             if verbose:
                 print('Simulating over 1 level and 1 element')
                
-        self.vectintegrate = np.vectorize(integrate)
+        self.vectsolve = np.vectorize(solve)
         
     def integrate(self):
-        self.vectintegrate(self.sims)
+        print('The use of integrate() is now deprecated. Use solve() instead.')
+        self.vectsolve(self.sims)
+        return        
+        
+    def solve(self):
+        self.vectsolve(self.sims)
         return
 
     def resume(self):
@@ -120,13 +126,13 @@ def simapply(config,model,inputdata,**kwargs):
     aux2 = np.vectorize(aux)
     return(aux2)
 
-def integrate(x):
+def solve(x):
     """Solves EDOs in models instances
 
     Args:
         x (cv19model): cv19model instance
     """
-    x.integrate()
+    x.solve()
     return()
 
 def iterate(config, iterables=None,verbose=False,**kwargs,):

@@ -12,5 +12,4 @@ flask
 flask_cors
 matplotlib
 ipython
-scikits.odes
 pygmo

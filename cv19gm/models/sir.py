@@ -7,22 +7,17 @@ SEIRHVD Model
 import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.special import expit
-from joblib import Parallel, delayed
+
 from scipy import signal
 import pandas as pd
-from numpy import linalg as LA 
-import multiprocessing  
-#import SEIR_plots
 
-from datetime import datetime
-from datetime import timedelta
 
 """
-SEIRQ Model Implementation
+SIR Model Implementation
 
 """
 
-class SEIR:  
+class SIR:  
     def __init__(self,tsim,beta,gamma = 0.1, I0=100,I_ac0=0,I_d0=0,R0=0,population=1000000, initdate = None):        
         self.tsim = tsim
         
@@ -69,8 +64,11 @@ class SEIR:
         # Daily Infected
         self.dI_d = lambda t,S,I,I_d: self.beta*S*I/self.N - I_d 
     
+    def integrate(self,t0,T=None,h=0.01):
+        print('The use of integrate() is now deprecated. Use solve() instead.')
+        self.solve(t0=t0,T=T,h=h)
 
-    def integr_sci(self,t0,T,h,E0init=False):
+    def solve(self,t0,T,h,E0init=False):
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,T] function doesn't
         #start. Or it's start if class object is initialze.
