@@ -7,7 +7,6 @@ scipy
 dill
 requests
 pathlib
-argparse
 flask
 flask_cors
 matplotlib
