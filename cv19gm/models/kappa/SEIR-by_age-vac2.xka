@@ -33,8 +33,8 @@
 %token: new_V
 
 #rules
-'expose' P(s~S,vac~F),P(s~I,r0~{x},age~{x}) -> P(s~E,...),P(r0~{x+1},...) | 1: new_E @ (3000-(x-35)^2)/2000.0 * 'alfa'*'beta'/'N'
-'expose-vac' P(s~S,vac~T),P(s~I,r0~{x},age~{x}) -> P(s~E,...),P(r0~{x+1},...) | 1: new_E @ 'r_vac'*(3000-(x-35)^2)/2000.0 * 'alfa'*'beta'/'N'
+'expose' P(s~S,vac~F),P(s~I,r0~{r},age~{x}) -> P(s~E,...),P(r0~{r+1},...) | 1: new_E @ (3000-(x-35)^2)/2000.0 * 'alfa'*'beta'/'N'
+'expose-vac' P(s~S,vac~T),P(s~I,r0~{r},age~{x}) -> P(s~E,...),P(r0~{r+1},...) | 1: new_E @ 'r_vac'*(3000-(x-35)^2)/2000.0 * 'alfa'*'beta'/'N'
 'infect' P(s~E) -> P(s~I) | 1: new_I @ 'r_EI'
 'remove' P(s~I,age) -> P(s~R,age) | 1: new_R @ 'r_IR'
 'imm. loss' P(s~R) -> P(s~S) | 1: new_S @ 'r_RS'
