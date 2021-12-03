@@ -322,19 +322,19 @@ def saturation(upperlimit):
     return aux
     
 
-def data_function(data,futurefunction):
+def data_function(data,future):
     """Creates a function that returns the data during its length
 
     Args:
         data (list| np.array|pd.Series|pd.DataFrame ): Data 
-        futurefunction ([type]): [description]
+        future ([type]): [description]
     """
     if isinstance(data, pd.DataFrame):
         data = list(data.iloc[0])
     elif isinstance(data, pd.Series):
         data = list(data)
 
-    auxf = build(futurefunction)
+    auxf = build(future)
         
     def aux(t):
         if t < len(data):

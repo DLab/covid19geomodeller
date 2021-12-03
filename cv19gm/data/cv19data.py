@@ -490,11 +490,11 @@ class ImportData():
         Ir_dates=Ir_dates[index:]
         tr = [(Ir_dates[i]-initdate).days for i in range(len(Ir))]
 
-        # Add data to Pandas DataFrame
-        print('updating database')
-        self.data = dfappend(self.data,Ir,tr,name)
         
         if self:
+            # Add data to Pandas DataFrame
+            print('updating database')
+            self.data = dfappend(self.data,Ir,tr,name)            
             self.Ir = Ir
             self.Ir_dates = Ir_dates
             self.tr = tr            
@@ -549,12 +549,13 @@ class ImportData():
         I_minciencia_r_dates = I_minciencia_r_dates[index:]
         I_minciencia_r_tr = [(I_minciencia_r_dates[i]-initdate).days for i in range(len(I_minciencia_r))]
         
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,I_minciencia_r,I_minciencia_r_tr,name)
+
 
 
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,I_minciencia_r,I_minciencia_r_tr,name)            
             self.I_minciencia_r = I_minciencia_r
             self.I_minciencia_r_dates = I_minciencia_r_dates
             self.I_minciencia_r_tr = I_minciencia_r_tr
@@ -641,11 +642,10 @@ class ImportData():
         I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]        
 
 
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,I_ac_r,I_ac_r_tr,name)
-
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,I_ac_r,I_ac_r_tr,name)            
             self.I_ac_r = I_ac_r
             self.I_ac_r_dates = I_ac_r_dates
             self.I_ac_r_tr = I_ac_r_tr
@@ -693,11 +693,12 @@ class ImportData():
         I_ac_r_dates = I_ac_r_dates[index:]
         I_ac_r_tr = [(I_ac_r_dates[i]-initdate).days for i in range(len(I_ac_r))]     
 
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,I_ac_r,I_ac_r_tr,name)           
+         
                
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,I_ac_r,I_ac_r_tr,name)              
             self.I_ac_r = np.array(I_ac_r)
             self.I_ac_r_dates = I_ac_r_dates
             self.I_ac_r_tr = I_ac_r_tr
@@ -789,11 +790,12 @@ class ImportData():
         I_d_tr = [(I_d_dates[i]-initdate).days for i in range(len(I_d_r))]        
 
 
-        # Update database
-        #print('updating database')
-        self.data = dfappend(self.data,I_d_r,I_d_tr,name) 
+
 
         if self:
+            # Update database
+            #print('updating database')
+            self.data = dfappend(self.data,I_d_r,I_d_tr,name)             
             self.I_d_r = np.array(I_d_r)
             self.I_d_r_tr = I_d_tr
             self.I_d_r_dates = I_d_dates
@@ -864,11 +866,11 @@ class ImportData():
             I_d_r_smooth[outliers_init:outliers_end] = float((I_d_r_smooth.iloc[outliers_init-2]+I_d_r_smooth.iloc[outliers_end+1])/2)
             I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,np.array(I_d_r_smooth[0]),I_d_r_tr,name)  
         
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,np.array(I_d_r_smooth[0]),I_d_r_tr,name)              
             self.I_d_r = np.array(I_d_r_smooth[0])
             self.I_d_r_tr = I_d_r_tr
             self.I_d_r_dates = I_d_r_dates
@@ -924,11 +926,11 @@ class ImportData():
         I_d_r_dates = I_d_r_dates[index:]
         I_d_r_tr = [(I_d_r_dates[i]-initdate).days for i in range(len(I_d_r))]       
 
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,I_d_r,I_d_r_tr,name)          
                 
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,I_d_r,I_d_r_tr,name)               
             self.I_d_r = I_d_r#np.array(I_d_r_smooth[0])
             self.I_d_r_tr = I_d_r_tr
             self.I_d_r_dates = I_d_r_dates
@@ -1001,11 +1003,11 @@ class ImportData():
 
         I_d_r_smooth = I_d_r_smooth.rolling(7, win_type='gaussian', min_periods=1, center=True).mean(std=2).round()
 
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,I_d_r_smooth,I_d_r_tr,name)  
 
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,I_d_r_smooth,I_d_r_tr,name)              
             self.I_d_r = I_d_r_smooth
             self.I_d_r_tr = I_d_r_tr
             self.I_d_r_dates = I_d_r_dates
@@ -1266,14 +1268,13 @@ class ImportData():
         UCI_dates = dates[index:]
         UCI_tr = [(UCI_dates[i]-initdate).days for i in range(len(UCI_dates))]       
                
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  
-        self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  
-        self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])  
-        
-
+       
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  
+            self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  
+            self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])              
             self.UCI_capacity = UCI_capacity
             self.UCI_use_covid = UCI_use_covid
             self.UCI_use_noncovid = UCI_use_noncovid                        
@@ -1369,14 +1370,14 @@ class ImportData():
         UCI_dates = dates[index:]
         UCI_tr = [(UCI_dates[i]-initdate).days for i in range(len(UCI_dates))]       
                
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  
-        self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  
-        self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])  
-        
 
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  
+            self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  
+            self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])
+
             self.UCI_capacity = UCI_capacity
             self.UCI_use_covid = UCI_use_covid
             self.UCI_use_noncovid = UCI_use_noncovid                        
@@ -1575,14 +1576,15 @@ class ImportData():
         B_r_suspected = B_r_suspected[index:]
 
 
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,D_r_confirmed,D_r_tr,name[0])  
-        self.data = dfappend(self.data,D_r_suspected,D_r_tr,name[1])  
-        self.data = dfappend(self.data,B_r_confirmed,D_r_tr,name[2]) 
-        self.data = dfappend(self.data,B_r_suspected,D_r_tr,name[3]) 
 
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,D_r_confirmed,D_r_tr,name[0])  
+            self.data = dfappend(self.data,D_r_suspected,D_r_tr,name[1])  
+            self.data = dfappend(self.data,B_r_confirmed,D_r_tr,name[2]) 
+            self.data = dfappend(self.data,B_r_suspected,D_r_tr,name[3]) 
+
             self.Dr = D_r_confirmed
             self.Dr_suspected = D_r_suspected
             self.Br = B_r_confirmed
@@ -1677,15 +1679,15 @@ class ImportData():
         B_r_confirmed = D_r_confirmed.cumsum()
         B_r_suspected = D_r_suspected.cumsum()
 
-        # Update database
-        print('updating database')
-        self.data = dfappend(self.data,D_r_confirmed,D_r_tr,name[0])  
-        self.data = dfappend(self.data,D_r_suspected,D_r_tr,name[1])  
-        self.data = dfappend(self.data,B_r_confirmed,D_r_tr,name[2]) 
-        self.data = dfappend(self.data,B_r_suspected,D_r_tr,name[3]) 
-
 
         if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,D_r_confirmed,D_r_tr,name[0])  
+            self.data = dfappend(self.data,D_r_suspected,D_r_tr,name[1])  
+            self.data = dfappend(self.data,B_r_confirmed,D_r_tr,name[2]) 
+            self.data = dfappend(self.data,B_r_suspected,D_r_tr,name[3])             
+            
             self.Dr = D_r_confirmed
             self.Dr_suspected = D_r_suspected
             self.Br = B_r_confirmed
