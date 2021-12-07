@@ -19,9 +19,6 @@ from flask import request
 from flask import send_file
 from flask_cors import CORS
 
-import dill as pickle
-
-
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
