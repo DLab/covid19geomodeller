@@ -60,21 +60,21 @@ class SEIR:
    
     def set_relational_values(self):
         # Active infected
-        if self.I_det:
+        if hasattr(self,'I_det'):
             self.I = self.I_det/self.pI_det
         else:
             self.I_det = self.I*self.pI_det
 
 
         # New daily Infected
-        if self.I_d_det:
+        if hasattr(self,'I_d_det'):
             self.I_d = self.I_d_det/self.pI_det
         else:
             self.I_d_det = self.I_d*self.pI_det
 
 
         # Accumulated Infected
-        if self.I_ac_det:
+        if hasattr(self,'I_ac_det'):
             self.I_ac = self.I_ac_det/self.pI_det
         else:
             self.I_ac_det = self.I_ac*self.pI_det
@@ -82,14 +82,40 @@ class SEIR:
         
         # Exposed
         #if not self.Einit:
-        self.E = self.mu*self.I
-        self.E_d=self.mu*self.I_d                
-        self.E_ac=self.mu*self.I_ac
+        if not hasattr(self,'E'):
+            self.E = self.mu*self.I
+        if not hasattr(self,'E_d'):
+            self.E_d=self.mu*self.I_d                
+        if not hasattr(self,'E_ac'):    
+            self.E_ac=self.mu*self.I_ac
        
         # Valores globales
+        if not hasattr(self,'seroprevfactor'):
+            self.seroprevfactor = 1
+        
         self.N = self.seroprevfactor*self.population
         self.S = self.N-self.E-self.I-self.R
-                    
+
+        if not hasattr(self,'S_f'):
+            self.S_f = lambda t:0
+        
+        if not hasattr(self,'E_f'):
+            self.E_f = lambda t:0
+
+        if not hasattr(self,'I_f'):
+            self.I_f = lambda t:0
+        
+        if not hasattr(self,'R_f'):
+            self.R_f = lambda t:0
+
+        if not hasattr(self,'expinfection'):
+            self.expinfection=0
+
+        if not hasattr(self,'k_I'):
+            self.k_I=0
+
+        if not hasattr(self,'k_R'):
+            self.k_R=0            
 
     def set_equations(self):
         """        

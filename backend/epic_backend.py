@@ -2,14 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-import numpy as np
-
-from timeit import default_timer as timer
-
-from datetime import datetime
+import json
 
 import logging
-import json
 
 from cv19gm.cv19sim import CV19SIM
 
@@ -72,24 +67,38 @@ def simulate():
      3.- Simular. Lanzar un warning del tiempo que se puede tomar si es que es una RBM
      4.- Retornar los resultados
     '''
-    try: 
 
-        # 1. Get params
-        form =  request.form
-        cfg = form.to_dict()
-        #print(data)
-        #print(type(data))
+    print('debug 0')
+    # 1. Get params
+    cfg =  request.get_json(force=True)
+    #print(type(cfg))
+    print(cfg)
+    #print(form.items(1))
+    #cfg = form.to_dict()
+    
+    #print(type(data))
+    print('debug 1')
 
+    #print(cfg.items())
 
-        # 2. Build cv19sim object
-        sim = CV19SIM(cfg)
-
-        # 3. Simulate
+    results = {}
+    for key,value in cfg.items():
+        print(key)
+        #print(value)
+        #print(type(value))
+        #print(dict(value))
+        print('debug 2')
+        sim = CV19SIM(dict(value))
+        print('debug 3')
         sim.solve()
+        results.update({key:sim.sims[0].results.to_json()})
 
-        response = {'status': 'OK','result' : sim.results.to_json()}
-
-        return jsonify(response), 200
+    #sim = CV19SIM(cfg)
+    #sim.solve()
+    response = {'status': 'OK','results' : results}
+    return jsonify(response), 200
+    try:
+        print('')
     except:
         response = {"error": "Unkown error"}
         return response, 200    
