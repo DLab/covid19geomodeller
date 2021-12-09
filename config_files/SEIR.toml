@@ -5,8 +5,16 @@ date = '2021-04-20'
 user = 'Samuel'
 
 [model]
-	name = "SEIR"
+	name = "Example simulation"
+	id = ''
+	model = 'SEIR'
 	compartments  = ['S','E','I','R'] 
+	
+	# Differential Equations
+	EDOs = true
+	# Rule based modeling
+	RBM = false
+	RBM_N = 1
 	
 
 [data]
