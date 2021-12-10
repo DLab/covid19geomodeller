@@ -67,41 +67,30 @@ def simulate():
      3.- Simular. Lanzar un warning del tiempo que se puede tomar si es que es una RBM
      4.- Retornar los resultados
     '''
-
-    print('debug 0')
-    # 1. Get params
-    cfg =  request.get_json(force=True)
-    #print(type(cfg))
-    print(cfg)
-    #print(form.items(1))
-    #cfg = form.to_dict()
-    
-    #print(type(data))
-    print('debug 1')
-
-    #print(cfg.items())
-
-    results = {}
-    for key,value in cfg.items():
-        print(key)
-        #print(value)
-        #print(type(value))
-        #print(dict(value))
-        print('debug 2')
-        sim = CV19SIM(dict(value))
-        print('debug 3')
-        sim.solve()
-        results.update({key:sim.sims[0].results.to_json()})
-
-    #sim = CV19SIM(cfg)
-    #sim.solve()
-    response = {'status': 'OK','results' : results}
-    return jsonify(response), 200
     try:
-        print('')
+        cfg =  request.get_json(force=True)
+
+        results = {}
+        for key,value in cfg.items():
+            print(key)
+            #print(value)
+            #print(type(value))
+            #print(dict(value))
+            print('debug 2')
+            sim = CV19SIM(dict(value))
+            print('debug 3')
+            sim.solve()
+            results.update({key:sim.sims[0].results.to_json()})
+
+        #sim = CV19SIM(cfg)
+        #sim.solve()
+        response = {'status': 'OK','results' : results}
+        return jsonify(response), 200
+    
+        
     except:
-        response = {"error": "Unkown error"}
-        return response, 200    
+        response = {"error": "Wrong parameters"}
+        return response, 400    
 
 @app.route('/refineuni', methods=['POST'])
 def datafit():
