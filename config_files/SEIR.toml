@@ -33,9 +33,7 @@ user = 'Samuel'
 
 [parameters]
 	[parameters.static]
-	t_init = 0 # Initial day
-	t_end = 500 # Final day
-	timestep = 0.01 # Timestep for solver
+	t_end = 500 # Final day	
 	
 	# Saturation dynamic
 	k_I = 0
@@ -77,19 +75,13 @@ user = 'Samuel'
 	# Recovered	
 	R = 5000
 
-	# Infected
-	# Note: In case real and detected values are >0, real value will be used
+	# Infected	
 	# Active Infected
-	I = 0	# Real Infected
-	I_det = 6000	# Detected Infected
-
+	I = 6000	
 	# New daily Infected
-	I_d = 0
-	I_d_det = 3000	
-	
+	I_d = 3000	
 	# Accumulated Infected	
-	I_ac = 0
-	I_ac_det = 15000
+	I_ac = 15000
 
 	# Leave E and E_d as false for using mu
 	E = false
