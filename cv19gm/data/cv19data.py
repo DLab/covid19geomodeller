@@ -42,9 +42,16 @@ from cv19gm.utils.cv19timeutils import timeJStoPy
         endpoint,initdate,enddate,update_date,sim_var, complete name, additional info.
 
 
-    CUT Regiones:
-        Names = ['Arica y Parinacota','Tarapacá','Antofagasta','Atacama','Coquimbo','Valparaíso','Metropolitana','O’Higgins','Maule','Ñuble','Biobío','Araucanía','Los Ríos','Los Lagos','Aysén','Magallanes']
-        cut =   ['15',                '01',      '02',         '03',     '04',      '05',        '13',           '06',       '07',   '16',   '08',    '09',       '14',      '10',       '11',   '12'] 
+    #CUT Regiones:
+    
+    Names = ['Arica y Parinacota','Tarapacá','Antofagasta','Atacama','Coquimbo','Valparaíso','Metropolitana','O’Higgins','Maule','Ñuble','Biobío','Araucanía','Los Ríos','Los Lagos','Aysén','Magallanes']
+    cut =   ['15',                '01',      '02',         '03',     '04',      '05',        '13',           '06',       '07',   '16',   '08',    '09',       '14',      '10',       '11',   '12'] 
+
+    nametocut = {}  
+    cuttoname = {} 
+    for i in range(len(Names)): 
+        nametocut.update({Names[i]:cut[i]})  
+        cuttoname.update({cut[i]:Names[i]})         
 
 """
 
@@ -198,6 +205,19 @@ class ImportData():
         #self.importInfectedSubreport()
         #self.importpcrpop()        
         #self.importfallecidosexcesivos()        
+        print('Done')
+
+
+    def import_data_mcyt(self):
+        print('Importing data from MCYT github')
+        self.imp_population_mcyt()
+        
+        self.imp_infected_active_mcyt()
+        self.imp_infected_accumulated_mcyt()
+        self.imp_infected_daily_mcyt()
+        self.imp_deaths_deis_mcyt()
+        self.imp_hosp_icu()
+                
         print('Done')
 
     # --------------------------- #
@@ -1117,7 +1137,8 @@ class ImportData():
         Normal Usage:
             sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot = importSOCHIMI(tstate = '13', initdate = datetime(2020,5,15))
         """
-        print('Importing Sochimi Data 2') 
+
+        print('Importing Sochimi Data 2')
         if self:
             tstate = self.tstate
             initdate = self.initdate
@@ -1283,6 +1304,86 @@ class ImportData():
             return
         else:        
             return UCI_capacity,UCI_use_covid,UCI_use_noncovid,UCI_dates,UCI_tr
+
+
+
+    # ----------------------------- #
+    #    Datos Ocupacion de Camas   #
+    # ----------------------------- #
+    def imp_hosp_icu_mcyt(self=None,tstate = '', initdate = None, endpoint = "https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto58/Camas_UCI_diarias.csv",user=None,password=None, name = ['UCI_capacity','UCI_use_covid','UCI_use_noncovid']):
+        """
+        Import ICU Bed Occupation data per region.
+        Currently it just supports states, but soon I'll add Health Services as the minimum territorial data.
+        input:
+            - tstate: región
+            - initdate: Fecha de inicio
+            - endpoint: Data endpoint
+        output:
+            - sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot, 
+             (data frame, fechas, dias desde inicio sim, Hospitalizados, capacidad hospitalizados, ventilados, capacidad ventilados) 
+        
+        Normal Usage:
+            sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot = importSOCHIMI(tstate = '13', initdate = datetime(2020,5,15))
+        """
+
+        cuttoname = {'15': 'Arica y Parinacota', '01': 'Tarapacá', '02': 'Antofagasta', '03': 'Atacama', '04': 'Coquimbo', '05': 'Valparaíso', '13': 'Metropolitana', '06': 'O’Higgins', '07': 'Maule', '16': 'Ñuble', '08': 'Biobío', '09': 'Araucanía', '14': 'Los Ríos', '10': 'Los Lagos', '11': 'Aysén', '12': 'Magallanes'}
+
+        data = pd.read_csv(endpoint)
+        dates = data.columns[2:]
+        
+        ['Camas UCI habilitadas','Camas UCI ocupadas COVID-19','Camas UCI ocupadas no COVID-19']
+        
+
+        if not type(tstate) == list:
+            tstate = [tstate]
+            
+        counties = [i for i in tstate if len(i)>2 ]
+        if counties:
+            print('This method doesn\'t support comunas for Chile')
+        
+        states = [i for i in tstate if len(i)==2 ]
+        statenames = [cuttoname[i] for i in states]
+
+        capacity = []
+        occupied_covid = []
+        occupied_non_covid = []
+
+        for i in statenames:
+            capacity.append(data.loc[((data['Region']==i) & (data['Serie']=='Camas UCI habilitadas'))].iloc[:,2:])
+            occupied_covid.append(data.loc[((data['Region']==i) & (data['Serie']=='Camas UCI ocupadas COVID-19'))].iloc[:,2:])
+            occupied_non_covid.append(data.loc[((data['Region']==i) & (data['Serie']=='Camas UCI ocupadas no COVID-19'))].iloc[:,2:])
+        
+            
+        capacity =  np.array(capacity).sum(axis=0) 
+        occupied_covid =  np.array(occupied_covid).sum(axis=0) 
+        occupied_non_covid =  np.array(occupied_non_covid).sum(axis=0) 
+
+        dates = [datetime.strptime(dates[i][:10],'%Y-%m-%d') for i in range(len(dates))]        
+        index = np.where(np.array(dates) >= initdate)[0][0] 
+
+        UCI_capacity =list(capacity[index:])
+        UCI_use_covid =list(occupied_covid[index:])
+        UCI_use_noncovid =list(occupied_non_covid[index:])
+
+        UCI_dates = dates[index:]
+        UCI_tr = [(UCI_dates[i]-initdate).days for i in range(len(UCI_dates))]               
+       
+        if self:
+            # Update database
+            print('updating database')
+            self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  
+            self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  
+            self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])              
+            self.UCI_capacity = UCI_capacity
+            self.UCI_use_covid = UCI_use_covid
+            self.UCI_use_noncovid = UCI_use_noncovid                        
+            self.UCI_dates = UCI_dates
+            self.UCI_tr = UCI_tr
+            return
+        else:        
+            return UCI_capacity,UCI_use_covid,UCI_use_noncovid,UCI_dates,UCI_tr
+
+
 
 
     # ---------------------------------------------- #
@@ -2105,6 +2206,202 @@ class ImportData():
             return D_r_confirmed,D_r_suspected,B_r_confirmed,B_r_suspected,D_r_dates,D_r_tr
 
 
+    """
+    # ------------------------------------------- #
+    #    Import Vaccines     #
+    # ------------------------------------------- #
+    def imp_vaccine_mcyt(self=None,tstate = '',initdate = None,endpoint = 'https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto76/vacunacion.csv',user=None,password=None):     
+       
+            Import Vaccines
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - V_1st: First Dose (2 doses vaccine)
+                - V_2nd: Second Dose (2 doses vaccine)
+                - V_unique: Unique Dose (1 dose vaccine)
+                - V_3rd: Boost Dose               
+                
+            Usage:
+                -
+       
+        cuttoname = {'15': 'Arica y Parinacota', '01': 'Tarapacá', '02': 'Antofagasta', '03': 'Atacama', '04': 'Coquimbo', '05': 'Valparaíso', '13': 'Metropolitana', '06': 'O’Higgins', '07': 'Maule', '16': 'Ñuble', '08': 'Biobío', '09': 'Araucanía', '14': 'Los Ríos', '10': 'Los Lagos', '11': 'Aysén', '12': 'Magallanes'}
+
+        print('Importing Vaccines')
+
+        data = pd.read_csv(endpoint)
+        dates = data.columns[2:]
+
+        Vac_RM = data.loc[data['Region']=='Metropolitana']
+        vacunas_ac = Vac_RM.loc[(Vac_RM['Dosis']=='Segunda')|(Vac_RM['Dosis']=='Unica')].iloc[:,2:].sum()
+        vacunas_ac.index = pd.to_datetime(vacunas_ac.index)
+        vacunas_d = vacunas_ac.diff()
+        vacunas_ac = vacunas_ac.iloc[vacunas_ac.index>=initdate]
+        vacunas_d = vacunas_d.iloc[vacunas_d.index>=initdate]
+ 
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+            request = self.request
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")     
+            request = dataretriever(user,password) 
+
+        auxcounty = requests.get(endpointcounty).json()
+        auxstate = requests.get(endpointstates).json()
+
+        if tstate == '0' or tstate == '00':
+            auxnacional = requests.get('http://192.168.2.223:5006/getNationalEffectiveReproduction').json()
+        datacounty = pd.DataFrame(auxcounty['data'])
+        datastate = pd.DataFrame(auxstate['data'])
+                
+        R_eff_dates = [datetime.strptime(auxcounty['dates'][i][:10],'%Y-%m-%d') for i in range(len(auxcounty['dates']))]
+
+
+        if type(tstate) == list:
+            counties = [i for i in tstate if len(i)>2 ]
+            states = [i for i in tstate if len(i)==2 ]            
+            aux = []
+            for i in states:
+                aux.append(data.filter(regex='^'+i,axis=1))
+            
+            aux.append(data[counties])
+            R_eff = np.array(pd.concat(aux, axis=1).sum(axis=1))
+        
+        else:
+            if len(tstate) == 2:
+                R_eff = data.filter(regex='^'+tstate,axis=1).sum(axis=1)
+            elif len(tstate) > 2:
+                R_eff = (data[tstate])
+
+        #R_
+        if type(tstate) == list:
+            if len(tstate[0])>2:
+                aux = pd.DataFrame(request(endpointcom+tstate[0]).json())
+                #aux = pd.read_json(endpointcom+tstate[0])
+                D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+            else:
+                #aux = pd.read_json(endpointreg+tstate[0])
+                aux = pd.DataFrame(request(endpointreg+tstate[0]).json())
+                D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+
+            for i in tstate:
+                if len(i)>2:
+                    #aux = pd.read_json(endpointcom+i)
+                    aux = pd.DataFrame(request(endpointcom+i).json())
+                else:
+                    #aux = pd.read_json(endpointreg+i)
+                    aux = pd.DataFrame(request(endpointreg+i).json())
+                if len(D_r_confirmed)>1:
+                    D_r_confirmed += np.array(aux['confirmed'])
+                    D_r_suspected += np.array(aux['suspected'])
+                else:
+                    D_r_confirmed = np.array(aux['confirmed'])
+                    D_r_suspected = np.array(aux['suspected'])
+        else:        
+            if len(tstate)>2:
+                #aux = pd.read_json(endpointcom+tstate)
+                aux = pd.DataFrame(request(endpointcom+tstate).json())
+            else:
+                #aux = pd.read_json(endpointreg+tstate)
+                aux = pd.DataFrame(request(endpointreg+tstate).json())
+
+            D_r_confirmed = np.array(aux['confirmed'])
+            D_r_suspected = np.array(aux['suspected'])            
+            D_r_dates = [datetime.strptime(aux['dates'][i][:10],'%Y-%m-%d') for i in range(len(aux))]
+        
+
+
+        index = np.where(np.array(D_r_dates) >= initdate)[0][0] 
+        D_r_confirmed = D_r_confirmed[index:]
+        D_r_suspected = D_r_suspected[index:]
+        D_r_dates = D_r_dates[index:]
+        D_r_tr = [(D_r_dates[i]-initdate).days for i in range(len(D_r_dates))]
+
+        B_r_confirmed = D_r_confirmed.cumsum()
+        B_r_suspected = D_r_suspected.cumsum()
+
+        
+        if self:
+            self.Dr = D_r_confirmed
+            self.Dr_suspected = D_r_suspected
+            self.Br = B_r_confirmed
+            self.Br_suspected = B_r_suspected
+            self.Br_dates = D_r_dates
+            self.Br_tr = D_r_tr            
+            return
+        else:        
+            return D_r_confirmed,D_r_suspected,B_r_confirmed,B_r_suspected,D_r_dates,D_r_tr
+
+    """
+
+
+    # ------------------------------------------- #
+    #      National Vaccinated Infected Data      #
+    # ------------------------------------------- #
+    def imp_vacc_infected_mcyt(self=None,tstate = '',initdate = None,endpoint = 'https://github.com/MinCiencia/Datos-COVID19/raw/master/output/producto90/incidencia_en_vacunados.csv',user=None,password=None):     
+        """
+            Product 90 has data of: 
+                * 
+            Import Vaccines
+            input: 
+                - tstate: [string or string list] CUT por comuna o región
+                - initdate: datetime object with the initial date
+                - endpoint (optional): 
+            output: 
+                - V_1st: First Dose (2 doses vaccine)
+                - V_complete: complete (1 or 2 doses vaccine)
+                - V_boost: Boost Dose               
+                
+            Usage:
+                -
+        """
+        
+        print('Importing Vaccines')
+
+        data = pd.read_csv(endpoint)        
+        data['date'] = [datetime(2021,1,3) + timedelta(days=7*(i-1)) for i in data['semana_epidemiologica']]
+        dates = data['date']
+        
+        initweek = int((initdate - datetime(2021,1,3)).days/7)
+
+        
+        # Active vaccinated infected
+        Iv0 = data['dos_dosis_comp_casos'][initweek-1:initweek+1].sum() + data['dosis_unica_comp_casos'][initweek-1:initweek+1].sum() + data['dosis_ref_comp_casos'][initweek-1:initweek+1].sum()
+        Iv_ac = data['dos_dosis_comp_casos'] + data['dosis_unica_comp_casos'] + data['dosis_ref_comp_casos']
+        
+        Iv_ac.index = data['date']
+        Iv_ac = Iv_ac.loc[Iv_ac.index>initdate]
+
+        Iv_d0 = (data['dos_dosis_comp_casos'][initweek] +  data['dos_dosis_comp_casos'][initweek] + data['dosis_ref_comp_casos'][initweek])/7        
+        Iv_ac0 = Iv_ac[0]
+         
+
+ 
+        if self:
+            tstate = self.tstate
+            initdate = self.initdate
+        else:
+            if not tstate:
+                raise Exception("State code missing")
+            if not initdate:
+                raise Exception("Initial date missing")     
+        
+        if self:
+            self.Iv_ac = Iv_ac
+            self.Iv_ac0 = Iv_ac0
+            self.Iv_d0 = Iv_d0
+            self.Iv0 = Iv0
+            return
+        else:        
+            return Iv_ac,Iv_ac0,Iv_d0,Iv0
+
+
+
 
 
     # ---------------------------------------- #
@@ -2275,10 +2572,4 @@ class ImportData():
 #self.importinfectadosactivos()
 #self.importinfectadosdiarios()
 #self.importinfectadosacumulados()        
-##self.importSubreporte()        
-        
-        
-
-
-
-
+##self.importSubreporte()
