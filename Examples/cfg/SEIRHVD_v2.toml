@@ -43,8 +43,8 @@ user = ''
 	beta_v = 0.05
 	
 	# Vaccination
-	Psi = 0 # Vaccines per day
-	v = 0.9 # Vaccine effectivity
+	vac_d = 0 # Vaccines per day
+	vac_eff = 0.9 # Vaccine effectivity
 	
 	# External flux rates over time 
 	S_f = 0
