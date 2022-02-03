@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.special import expit
 import json
 import pandas as pd
-
+import ast
 
 """
 # ------------------------------------------------- #   
@@ -30,7 +30,9 @@ def build(input):
     """
     
     if type(input)==str:
-        input_dict = json.loads(input)
+        #input_dict = json.loads(input)
+        print('input dict')
+        input_dict = ast.literal_eval(input)
     elif type(input)==dict:
         input_dict = input.copy()
     elif callable(input):
@@ -163,17 +165,20 @@ def events(values,days,default=0,*functions):
 
 
 # Periodic square function
-def square(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase='min',duty=0.5):
+def square(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase=0,duty=0.5):
     # phase en fraccion del periodo
     def f(t): 
         return signal.square(t,duty)
     
-    if initphase == 'min':
-        phi = np.pi*(2*t_init/period - 1.1)
-    elif initphase == 'max':
+
+    # Start with max value
+    if initphase:
         phi = 2*np.pi*t_init/period
+    # Start with min value
     else:
-        phi = 2*np.pi*(t_init/period - initphase)
+        phi = np.pi*(2*t_init/period - 1.1)    
+    
+    
     def aux(t):    
         return (expit(10*(t-t_init)) - expit(10*(t-t_end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
         (1-(expit(10*(t-t_init)) - expit(10*(t-t_end))))*default
@@ -181,17 +186,18 @@ def square(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase
     return aux
 
 # Sine function
-def sine(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase='min'):
+def sine(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase=0):
     # phase en fraccion del periodo
     def f(t): 
         return np.cos(t)
     
-    if initphase == 'min':
-        phi = np.pi*(2*t_init/period - 1)
-    elif initphase == 'max':
-        phi = 2*np.pi*t_init/period
+    # Start with max value
+    if initphase:
+        phi = 2*np.pi*t_init/period 
+    # Start with min value   
     else:
-        phi = 2*np.pi*(t_init/period - initphase)
+        phi = np.pi*(2*t_init/period - 1)
+
     def aux(t):    
         return (expit(10*(t-t_init)) - expit(10*(t-t_end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
         (1-(expit(10*(t-t_init)) - expit(10*(t-t_end))))*default
@@ -199,17 +205,18 @@ def sine(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase='
     return aux
 
 # Sawtooth function
-def sawtooth(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase='min',width=1):
+def sawtooth(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase=0,width=1):
     # phase en fraccion del periodo
     def f(t): 
         return signal.sawtooth(t,width)
     
-    if initphase == 'min':
-        phi = np.pi*(2*t_init/period - 0.5/period)
-    elif initphase == 'max':
+    # Start with max value
+    if initphase:
         phi = 2*np.pi*t_init/period
+    # Start with max value
     else:
-        phi = 2*np.pi*(t_init/period - initphase)
+        phi = np.pi*(2*t_init/period - 0.5/period)
+
     def aux(t):    
         return (expit(10*(t-t_init)) - expit(10*(t-t_end)))*((max_val-min_val)/2*(f(2*np.pi / period * t - phi))+(max_val+min_val)/2) + \
         (1-(expit(10*(t-t_init)) - expit(10*(t-t_end))))*default
@@ -284,6 +291,49 @@ def sigmoidal_transition(t_init,t_end,initvalue=0,endvalue = 1,gw=8):
 
     out = lambda t:  initvalue + (endvalue-initvalue)*(expit((t-(t_init+t_end)/2)*gw/(t_end-t_init))) 
     return out 
+
+
+# Value transition functions
+def transition(t_init,t_end,type = 'linear', initvalue=0,endvalue = 1, concavity=0, gw=8):
+    """linearTransition
+    Creates a function which performs a linear transition from initvalue to endvalue between t_init and t_end.
+    Args:
+        t_init (int): Transition beginning
+        t_end (int): Transition end
+        initvalue (int, optional): Initial value. Defaults to 0.
+        endvalue (int, optional): End value. Defaults to 1.
+
+    Returns:
+        function: function that performs the linear transition
+    """
+    if type == 'linear':
+        a = np.polyfit([t_init,t_end],[initvalue,endvalue],1)        
+        f = lambda t: np.poly1d(a)(t)
+        out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
+
+    elif type == 'quadratic':
+        # convex increase or concave decrease
+        if (not concavity and endvalue>=initvalue) or (concavity and initvalue>endvalue):
+            t_aux = 2*t_init - t_end 
+            v_aux = endvalue
+            
+        # concave increase or convex decrease
+        elif (concavity and endvalue>=initvalue) or (not concavity and initvalue>endvalue):
+            t_aux = 2*t_end - t_init 
+            v_aux = initvalue
+            
+        a = np.polyfit([t_init,t_end,t_aux],[initvalue,endvalue,v_aux],2)
+        f = lambda t: np.poly1d(a)(t)
+        
+        out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
+    
+    elif type == 'sigmoidal':
+        out = lambda t:  initvalue + (endvalue-initvalue)*(expit((t-(t_init+t_end)/2)*gw/(t_end-t_init))) 
+    
+    
+    return out
+
+
 
 # Saturation function
 def saturation(upperlimit):
