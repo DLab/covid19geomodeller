@@ -33,6 +33,7 @@ user = 'Samuel'
 
 [parameters]
 	[parameters.static]
+	t_init = 0
 	t_end = 500 # Final day	
 	
 	# Saturation dynamic
