@@ -76,10 +76,10 @@ class SEIRHVD:
 
         #Initial Population
         self.N0 = self.popfraction*self.population
-
            
         # Vaccinated Infected
-        vacprop = (1-self.v(0))*self.Sv/(self.N0 - self.Sv - self.E - self.I - self.H - self.D - self.R )
+        vacprop = (1-self.vac_eff(0))*self.Sv/(self.N0 - self.Sv - self.E - self.I - self.H - self.D - self.R )
+
         if not self.Iv:
             self.Iv = self.I*vacprop
             self.Iv_d = self.I_d*vacprop
@@ -132,10 +132,10 @@ class SEIRHVD:
         # --------------------------- # 
        
         # 0) dS/dt:
-        self.dS=lambda t,S,Im,Icr,Iv,R,Phi: - self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) + self.pR_S(t)/self.tR_S(t)*R - self.Psi(t) + self.S_f(t)
+        self.dS=lambda t,S,Im,Icr,Iv,R,Phi: - self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) + self.pR_S(t)/self.tR_S(t)*R - self.vac_d(t) + self.S_f(t)
         
         # 1) dS_v/dt:
-        self.dSv=lambda t,Sv,Im,Icr,Iv,R,Phi: -(1-self.v(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) + self.Psi(t) + self.Sv_f(t)
+        self.dSv=lambda t,Sv,Im,Icr,Iv,R,Phi: -(1-self.vac_eff(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) + self.vac_d(t) + self.Sv_f(t)
                 
         # --------------------------- #
         #           Exposed           #
@@ -148,10 +148,10 @@ class SEIRHVD:
         self.dE_d = lambda t,S,E_d,Im,Icr,Iv,Phi: self.alpha(t)*S*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - E_d
 
         # 4) dEv/dt
-        self.dEv = lambda t,Sv,Ev,Im,Icr,Iv,Phi: (1-self.v(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - Ev/self.tEv_Iv(t) + self.Ev_f(t) 
+        self.dEv = lambda t,Sv,Ev,Im,Icr,Iv,Phi: (1-self.vac_eff(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - Ev/self.tEv_Iv(t) + self.Ev_f(t) 
 
         # 5) dEv_d/dt
-        self.dEv_d = lambda t,Sv,Ev_d,Im,Icr,Iv,Phi: (1-self.v(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - Ev_d
+        self.dEv_d = lambda t,Sv,Ev_d,Im,Icr,Iv,Phi: (1-self.vac_eff(t))*self.alpha(t)*Sv*(self.beta(t)*(Im+Icr)+self.beta_v(t)*Iv)/(self.N0+Phi) - Ev_d
         
         # --------------------------- #
         #           Infected          #
