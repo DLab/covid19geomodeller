@@ -228,7 +228,7 @@ def linear_transition(t_init,t_end,initvalue=0,endvalue = 1):
     """linearTransition
     Creates a function which performs a linear transition from initvalue to endvalue between t_init and t_end.
     Args:
-        t_init (int): Transition beginning
+        t_init (int): Transition beginningt_init
         t_end (int): Transition end
         initvalue (int, optional): Initial value. Defaults to 0.
         endvalue (int, optional): End value. Defaults to 1.
@@ -294,6 +294,7 @@ def sigmoidal_transition(t_init,t_end,initvalue=0,endvalue = 1,gw=8):
 
 
 # Value transition functions
+# t_init - t_end enviarlo desde el events
 def transition(t_init,t_end,type = 'linear', initvalue=0,endvalue = 1, concavity=0, gw=8):
     """linearTransition
     Creates a function which performs a linear transition from initvalue to endvalue between t_init and t_end.
