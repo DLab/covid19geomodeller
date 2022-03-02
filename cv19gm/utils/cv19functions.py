@@ -295,24 +295,24 @@ def sigmoidal_transition(t_init,t_end,initvalue=0,endvalue = 1,gw=8):
 
 # Value transition functions
 # t_init - t_end enviarlo desde el events
-def transition(t_init,t_end,type = 'linear', initvalue=0,endvalue = 1, concavity=0, gw=8):
-    """linearTransition
-    Creates a function which performs a linear transition from initvalue to endvalue between t_init and t_end.
+def transition(t_init,t_end,ftype = 'linear', initvalue=0,endvalue = 1, concavity=0, gw=8):
+    """Transition
+
     Args:
         t_init (int): Transition beginning
         t_end (int): Transition end
-        initvalue (int, optional): Initial value. Defaults to 0.
-        endvalue (int, optional): End value. Defaults to 1.
-
-    Returns:
-        function: function that performs the linear transition
+        ftype (str or int, optional): Transition function type. Defaults to 'linear'. 0 or "linear", 1 or "quadratic", 2 or "sigmoidal"  
+        initvalue (int, optional): _description_. Defaults to 0.
+        endvalue (int, optional): _description_. Defaults to 1.
+        concavity (int, optional): Quadratic Function's concavity. 0: convex, 1: concave. Defaults to convex.
+        gw (float, optional): Gain weight. Calibrates the "strength" of the sigmoid change. Defaults to 8. 
     """
-    if type == 'linear':
+    if ftype == 'linear' or ftype == 0:
         a = np.polyfit([t_init,t_end],[initvalue,endvalue],1)        
         f = lambda t: np.poly1d(a)(t)
         out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
 
-    elif type == 'quadratic':
+    elif ftype == 'quadratic' or ftype == 1:
         # convex increase or concave decrease
         if (not concavity and endvalue>=initvalue) or (concavity and initvalue>endvalue):
             t_aux = 2*t_init - t_end 
@@ -328,10 +328,13 @@ def transition(t_init,t_end,type = 'linear', initvalue=0,endvalue = 1, concavity
         
         out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
     
-    elif type == 'sigmoidal':
+    elif ftype == 'sigmoidal' or ftype == 1:
         out = lambda t:  initvalue + (endvalue-initvalue)*(expit((t-(t_init+t_end)/2)*gw/(t_end-t_init))) 
     
-    
+    else: 
+        # raise error here
+        print('Wrong function type input')
+        out = None
     return out
 
 
