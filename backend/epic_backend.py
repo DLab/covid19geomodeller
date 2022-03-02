@@ -5,8 +5,9 @@ import pandas as pd
 import json
 
 import logging
-
+import numpy as np
 from cv19gm.cv19sim import CV19SIM
+import cv19gm.utils.cv19functions as cv19functions
 
 from flask import Flask
 from flask import jsonify
@@ -85,6 +86,29 @@ def simulate():
         response = {"error": "Wrong parameters"}
         return response, 400    
 
+@app.route('/function', methods=['POST'])
+def function():
+    '''
+    http://192.168.2.223:5003/function?campo=1
+
+    Estructura del código
+     1.- leer parámetros
+     2.- Crear objetdo de simulación
+     3.- Simular. Lanzar un warning del tiempo que se puede tomar si es que es una RBM
+     4.- Retornar los resultados
+    '''
+    try:
+        cfgfunction =  request.get_json(force=True)
+        function = cv19functions.build(cfgfunction['function'])
+        t = np.linspace(cfgfunction['t_init'],cfgfunction['t_end'],(cfgfunction['t_end']-cfgfunction['t_init'])*10+1)
+        functionarray = function(t)
+        response = {'status': 'OK','results' : {'t':list(t),'function':list(functionarray)}}
+        return jsonify(response), 200
+    
+    except Exception as e: 
+        print(e)        
+        response = {"error": "Wrong parameters"}
+        return response, 400    
 
 
 if __name__ == '__main__':
