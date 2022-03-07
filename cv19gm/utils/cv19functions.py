@@ -328,7 +328,7 @@ def transition(t_init,t_end,ftype = 'linear', initvalue=0,endvalue = 1, concavit
         
         out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
     
-    elif ftype == 'sigmoidal' or ftype == 1:
+    elif ftype == 'sigmoidal' or ftype == 2:
         out = lambda t:  initvalue + (endvalue-initvalue)*(expit((t-(t_init+t_end)/2)*gw/(t_end-t_init))) 
     
     else: 
