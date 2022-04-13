@@ -163,6 +163,51 @@ def events(values,days,default=0,*functions):
     return out
 
 
+def piecewise(values,limits = [-np.infty]):
+    """Piecewise creator function. Create a smooth time dependent function that returns the values (or functions) given in the 
+    values vector for the intervals specified through the limits vector. In order to make this function differentiable, we use a sigmoid to have a smooth change between values. This produces that the 
+    value at the limit is equal to the mean between both sides.
+
+    f(x) = {v0 for t in ]-inf,limits[0][
+            v1 for t in ]limits[0],limits[1][
+            ...
+            vn for t in  ]limits[n-1], inf[
+    }
+    f(limit[0]) = (v0+v1)/2  
+
+    Args:
+        values (list): list with the values for the different intervals
+        limits (list): list of days where the function takes the next value. len(limits)=len(values)-1
+
+    Returns:
+        out (function): function created
+    """
+    # This make it work for constant values
+    if not type(values) == list:
+        return build(values)
+
+    gw = 20
+    aux_f = []
+
+    # Array with all the values/functions    
+    fvalues = []
+    for i in values:
+        fvalues.append(build(i))
+        
+    # Initial value
+    aux_f.append(lambda t: (fvalues[0])(t)*expit(gw*(limits[0]-t)))
+
+    for i in range(len(limits)-1):
+        def auxf(t,j=i): #j=i is needed for building functions through an iteration
+            return fvalues[j+1](t)*(expit(gw*(t-limits[j])) - expit(gw*(t-limits[j+1])))
+        aux_f.append(auxf)
+
+    # Final value
+    aux_f.append(lambda t: (fvalues[-1])(t)*(expit(gw*(t-limits[-1]))))
+    
+    # Create final function adding them all
+    out = func_add(*aux_f)    
+    return out
 
 # Periodic square function
 def square(min_val=0,max_val=1,period=14,t_init=0,t_end=1000,default=0,initphase=0,duty=0.5):
@@ -429,3 +474,12 @@ def interpolate_data(data):
     # Work in progress
     aux = data
     return aux
+
+
+# Creo que no es necesaria
+def events_append(values,days,new_val,new_days=None,default=0):
+    values = values + [new_val]
+    if new_days:
+        days = days + [new_days]
+    out = events(values=values,days = days,default = default)
+    return out

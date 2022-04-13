@@ -99,7 +99,8 @@ def loadconfig(sim,config,inputdata,**kwargs):
             sim.cfg['data'][key] = value        
         sim.__dict__.update({key:value})
 
-    if sim.initdate:
+    # Convert to datetime format if it's a string
+    if sim.initdate and type(sim.initdate) == str:
         sim.initdate = cv19timeutils.txt2Datetime(sim.initdate) 
 
     # cv19data object
@@ -138,10 +139,8 @@ def loadconfig(sim,config,inputdata,**kwargs):
     # ------------------------------- #
     sim.initialconditions = sim.cfg['initialconditions']
     for key,value in sim.initialconditions.items():
-        if key in kwargs:
-            value = kwargs[key]
-            sim.initialconditions[key] = value
-            sim.cfg['initialconditions'][key] = value
+
+        # Initializing variables with external data if available 
         if type(value) == str:
             # Crear error cuando no haya archivo de datos y fecha inicial
             try:
@@ -149,7 +148,14 @@ def loadconfig(sim,config,inputdata,**kwargs):
             except:
                 sim.__dict__.update({key:sim.inputdata.__dict__[value]})
         else:
+            # Using the values expressed in the configuration file
             sim.__dict__.update({key:value})
+        
+        # Overwrite by kwargs values. kwargs values overwrite everything
+        if key in kwargs:
+            value = kwargs[key]
+            sim.initialconditions[key] = value
+            sim.cfg['initialconditions'][key] = value
     
     # Update copies
     for key,value in copies.items():
