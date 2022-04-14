@@ -15,7 +15,6 @@ user = 'Samuel'
 	# Rule based modeling
 	RBM = false
 	RBM_N = 1
-	
 
 [data]
 	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
@@ -30,7 +29,6 @@ user = 'Samuel'
 	healthservice = ''
 	loc_name= '' # optional 
 
-
 [parameters]
 	[parameters.static]
 	t_init = 0
@@ -40,8 +38,7 @@ user = 'Samuel'
 	k_I = 0
 	k_R = 0
 
-	seroprevfactor = 1 # Fraction of the total population that take part on the dynamic at the beginning
-	expinfection = 0 # Factor in which exposed infect, default is 0
+	popfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
 
 	mu = 0.298 # E(0) = mu*I(0)
 	
@@ -87,7 +84,5 @@ user = 'Samuel'
 	# Leave E and E_d as false for using mu
 	E = false
 	E_d = false
-	
-
 	
 
