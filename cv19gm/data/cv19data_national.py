@@ -124,7 +124,6 @@ class ImportData():
         self.imp_vaccinated_mcyt()
         print('Done')
 
-
     def calculateIC(self,pIv_det=1,pV2=1,infected='InformeEPI',pOmicron=1):
         print('Creating Initial conditions')
 

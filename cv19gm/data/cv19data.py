@@ -129,7 +129,7 @@ class ImportData():
         data = ImportData(state,initdate, user, password)
 
 
-        Todo: Agregar credenciales desde importDeathDEIS hacia abajo
+        Todo: Add enddate
         Todo: Opción de guardar data en un archivo csv
         Todo: Opción de cargar data desde un archivo csv
 
@@ -220,30 +220,32 @@ class ImportData():
                 
         print('Done')
 
-    # --------------------------- #
-    #    Importar data para SEIR    #
-    # --------------------------- #
+    # ---------------------------- #
+    #    Importar data para SEIR   #
+    # ---------------------------- #
 
-    def import_data_lite(self):
-        print('Importing basic data')
+    def import_data_seir(self):
+        print('Importing data for SEIR model')
         try:
-            self.importPopulation()
+            self.imp_population()
         except:
             print('Dlab Endpoint Error')
-            self.importPopulationMinCiencia()
+            self.imp_population_mcyt()
         try:
-            self.importActiveInfected()
+            self.imp_infected_active()
         except:
             print('Dlab Endpoint Error')
-            self.importActiveInfectedMinciencia()
+            self.imp_infected_active_mcyt()
         try:
-            self.importAccumulatedInfected()
+            self.imp_infected_accumulated()
         except:
             print('Dlab Endpoint Error')            
-            self.importAccumulatedInfectedMinCiencia()
-
-        self.importDailyInfected()
-        
+            self.imp_infected_accumulated_mcyt()
+        try:
+            self.imp_infected_daily()
+        except:
+            print('Dlab Endpoint Error')            
+            self.imp_infected_daily_mcyt()
         print('Done')
 
 
@@ -749,7 +751,7 @@ class ImportData():
         endpoint_regions = 'getNewCasesAllStates'
         endpoint_national = 'getNationalNewCases'
 
-        print('Importing Daily Infected')
+        #print('Importing Daily Infected')
 
         if self:
             tstate = self.tstate
@@ -842,7 +844,7 @@ class ImportData():
             usage 
                 I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = '13101',initdate = datetime(2020,5,15))      
         """
-        print('Importing Daily Infected')
+        #print('Importing Daily Infected')
 
         if self:
             tstate = self.tstate
@@ -919,7 +921,7 @@ class ImportData():
             usage 
                 I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = '13101',initdate = datetime(2020,5,15))      
         """
-        print('Importing Daily Infected')
+        #print('Importing Daily Infected')
 
 
         if self:
@@ -978,7 +980,7 @@ class ImportData():
                 - I_d_r_tr: days from simulation first day
                 - I_d_r_dates: data dates
         """
-        print('Importing Daily infected with backpropagated correction')
+        #print('Importing Daily infected with backpropagated correction')
         if self:
             tstate = self.tstate
             initdate = self.initdate
