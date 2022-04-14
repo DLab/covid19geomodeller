@@ -28,7 +28,7 @@ Todo: [ ] Sacar variables para hacerlas accesibles desde el objeto principal
 Todo: [ ] simplificar la vectorización de la función de integración
 Todo: [ ] Paralelizar la integración de las EDOs dentro de lo posible
 Todo: [x] Agregar SEIRHVD
-Todo: [ ]  
+Todo: [ ] Solve está siendo aplicado más de una vez. Ver donde ocurre eso! 
 
 """
 
@@ -45,6 +45,18 @@ class CV19SIM():
             self.modelname = model
             from cv19gm.models.seirhvd import SEIRHVD
             model = SEIRHVD
+
+        elif model == 'SIR':
+            self.modelname = model
+            from cv19gm.models.sir import SIR
+            model = SIR
+
+        elif model == 'SEIRTQ':
+            self.modelname = model
+            from cv19gm.models.seirtq import SEIRTQ
+            model = SEIRTQ
+        else:
+            raise('Incorrect model')
 
         # Leer el archivo de configuracion
         if not type(config) == dict:
