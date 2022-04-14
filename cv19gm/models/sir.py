@@ -1,150 +1,269 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-SEIRHVD Model
+SIR Model
 """
 
 import numpy as np
 from scipy.integrate import solve_ivp
-from scipy.special import expit
-
-from scipy import signal
 import pandas as pd
+from datetime import timedelta
 
+# cv19gm libraries 
+import utils.cv19files as cv19files
 
-"""
-SIR Model Implementation
-
-"""
 
 class SIR:  
-    def __init__(self,tsim,beta,gamma = 0.1, I0=100,I_ac0=0,I_d0=0,R0=0,population=1000000, initdate = None):        
-        self.tsim = tsim
-        
-        self.beta = beta
+    """
+        SEIR model object:
+        Construction:
+            SEIR(self, config = None, inputdata=None)
 
-        self.gamma = gamma # Recovery rate
+    """
+    def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
+    
+        if not config:
+            raise('Missing configuration file')
+            #print('Missing configuration file ')
+            #return None
         
-        self.I = I0
-        self.I_ac = I_ac0
-        self.I_d = I_d0
+        # ------------------------------- #
+        #         Parameters Load         #
+        # ------------------------------- #
+        self.verbose = verbose
+        self.config = config
+        if verbose:
+            print('Loading configuration file')          
+        cv19files.loadconfig(self,config,inputdata,**kwargs)
+        if verbose:
+            print('Initializing parameters and variables')
+        self.set_relational_values()
+        if verbose:
+            print('Building equations')          
+        self.set_equations()
 
-        self.R = R0
- 
-        self.population = population        
-        
-        self.t=0
+        self.solved = False
+        if verbose:
+            print('SIR object created')
+
+    # ------------------- #
+    #  Valores Iniciales  #
+    # ------------------- #
+   
+    def set_relational_values(self):
+        # Active infected
+        if hasattr(self,'I_det'):
+            self.I = self.I_det/self.pI_det
+        else:
+            self.I_det = self.I*self.pI_det
+
+
+        # New daily Infected
+        if hasattr(self,'I_d_det'):
+            self.I_d = self.I_d_det/self.pI_det
+        else:
+            self.I_d_det = self.I_d*self.pI_det
+
+
+        # Accumulated Infected
+        if hasattr(self,'I_ac_det'):
+            self.I_ac = self.I_ac_det/self.pI_det
+        else:
+            self.I_ac_det = self.I_ac*self.pI_det
+
        
         # Valores globales
-        self.N = self.population
-        self.S = self.N- self.I - self.R   
+        if not hasattr(self,'popfraction'):
+            self.popfraction = 1
+        
+        self.N = self.popfraction*self.population
+        self.S = self.N-self.I-self.R
 
-        self.initdate = None 
+        if not hasattr(self,'S_f'):
+            self.S_f = lambda t:0
+        
+        if not hasattr(self,'I_f'):
+            self.I_f = lambda t:0
+        
+        if not hasattr(self,'R_f'):
+            self.R_f = lambda t:0
+
+        if not hasattr(self,'k_I'):
+            self.k_I=0
+
+        if not hasattr(self,'k_R'):
+            self.k_R=0            
+
+    def set_equations(self):
+        """        
+        Sets Diferential Equations
+        """
+        # --------------------------- #
+        #        Susceptibles         #
+        # --------------------------- #
+       
+        # 0) dS/dt:
+        self.dS=lambda t,S,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
+        
+        # --------------------------- #
+        #           Infected          #
+        # --------------------------- #     
+        
+        # 1) dI/dt
+        self.dI = lambda t,S,I,R: self.I_f(t) + self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) - I/self.tI_R(t)
+ 
+        # 2) Daily dI/dt
+        self.dI_d = lambda t,S,I,I_d,R: self.I_f(t) + self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) - I_d
 
         # --------------------------- #
-        #    Diferential Ecuations    #
-        # --------------------------- #        
-        # dVariable/dt = sum(prob_i/in_time_i*in_State_i,i in in states) - sum(prob_i/out_time_i*out_State_i,i in in states) 
+        #         Recovered           #
+        # --------------------------- #  
         
-        # Susceptibles
-        # dS/dt:
-        self.dS=lambda t,S,I: -self.beta*S*I/self.N
-    
-        # Infected
-        # dI_as/dt
-        self.dI=lambda t,S,I: -self.beta*S*I/self.N - self.gamma*I 
+        # 3) Total recovered
+        self.dR=lambda t,I,R: self.R_f(t) + I/self.tI_R(t) - self.rR_S(t)*R
 
-        # Recovered
-        # dR/dt
-        self.dR=lambda t,I: self.gamma*I
+        # 4) Recovered per day
+        self.dR_d=lambda t,I,R_d: self.R_f(t) + I/self.tI_R(t) - R_d
 
-        # Acummulated Infected
-        self.dI_ac=lambda t,S,I: self.beta*S*I/self.N
+        # 5) External Flux:
+        self.dFlux = lambda t: self.S_f(t) + self.I_f(t) + self.R_f(t) 
 
-        # Daily Infected
-        self.dI_d = lambda t,S,I,I_d: self.beta*S*I/self.N - I_d 
-    
-    def integrate(self,t0,T=None,h=0.01):
+    def integrate(self,t0=0,T=None,h=0.01):
         print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h)
 
-    def solve(self,t0,T,h,E0init=False):
-        #integrator function that star form t0 and finish with T with h as
-        #timestep. If there aren't inital values in [t0,T] function doesn't
-        #start. Or it's start if class object is initialze.
-       
-        if(not isinstance(self.S, np.ndarray)):
+    def run(self,t0=0,T=None,h=0.01):
+        #print('The use of integrate() is now deprecated. Use solve() instead.')
+        self.solve(t0=t0,T=T,h=h)
 
-            S0=self.S
-            I0=self.I
-            R0=self.R            
-            
-            I_ac0=self.I_ac
-            I_d0=self.I_d
+    # Scipy
+    def solve(self,t0=0,T=None,h=0.01):
+        """
+        Solves ODEs using scipy.integrate
+        Args:
+            t0 (int, optional): Initial time. Defaults to 0.
+            T ([type], optional): Endtime. Defaults to time given when building the object
+            h (float, optional): Time step. Defaults to 0.01.            
+        """
 
-            self.t=np.arange(t0,T+h,h)
-            
-        #elif((min(self.t)<=t0) & (t0<=max(self.t))):
-        #    #Condition over exiting time in already initialized object
+        if T is None:
+            T = self.tsim
 
-        #    #Search fot initial time
-        #    idx=np.searchsorted(self.t,t0)
-
-        #    #set initial condition
-
-        #    S0=self.S[idx]
-        #    E0=self.E
-        #    
-        #    I0=self.I[idx]
-        #    R0=self.R[idx]                        
-        #    I_ac0=self.I_ac[idx]
-        #    I_d0=self.I_d[idx]                       
-
-        #    e0 = self.e[idx]
-        #    e_I0 = self.e_I[idx]
-
-        #    self.t=np.arange(t0,T+h,h)
-
-        else:
+        # Check if we already simulated the array
+        if self.solved:
+            if self.verbose:
+                print('Already solved')
             return()
-            
-
         
-        def model_SEIR_graph(t,y):
-            ydot=np.zeros(len(y))
-            ydot[0]=self.dS(t,y[0],y[1])
-            ydot[1]=self.dI(t,y[0],y[1])
-            ydot[2]=self.dR(t,y[1])            
-            ydot[3]=self.dI_ac(t,y[0],y[1])
-            ydot[4]=self.dI_d(t,y[0],y[1],y[4])
-
-            return(ydot)
-        initcond = np.array([S0,I0,R0,I_ac0,I_d0])  
-
-        sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA')
+        self.t=np.arange(t0,T+h,h)
+        initcond = np.array([self.S,self.I,self.I_d,self.R,0,0]) # [S0,I0,I_d0,R0,R_d0,Flux0]
         
+        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
+        
+        self.sol = sol
         self.t=sol.t 
-
-         
+        
         self.S=sol.y[0,:]
         self.I=sol.y[1,:]
-        self.R=sol.y[2,:]
-        self.I_ac=sol.y[3,:]
-        self.I_d=sol.y[4,:]
+        self.I_d=sol.y[2,:]
+        self.R=sol.y[3,:]
+        self.R_d=sol.y[4,:]
+        self.Flux=sol.y[5,:]
 
+        self.I_ac = np.cumsum(self.I_d) + self.I_ac # second term is the initial condition
+        self.R_ac = np.cumsum(self.R_d)
+
+        self.I_det = self.I*self.pI_det
+        self.I_d_det = self.I_d*self.pI_det
+        self.I_ac_det = self.I_ac*self.pI_det
+
+        self.analytics()
+        self.df_build()
+        self.solved = True
+
+        return 
+
+    def model_SEIR_graph(self,t,y):
+        ydot=np.zeros(len(y))
+        ydot[0]=self.dS(t,y[0],y[1],y[3])
+        ydot[1]=self.dI(t,y[0],y[1],y[3])
+        ydot[2]=self.dI_d(t,y[0],y[1],y[2],y[3])
+        ydot[3]=self.dR(t,y[1],y[3])
+        ydot[4]=self.dR_d(t,y[1],y[4])
+        ydot[5]=self.dFlux(t)
+        return(ydot)
+
+    def analytics(self):
+        """
+        Perform simulation analytics after running it.
+        It calculates peaks, prevalence, and will include R(t). 
+        """
         #Cálculo de la fecha del Peak  
         self.peakindex = np.where(self.I==max(self.I))[0][0]
         self.peak = max(self.I)
         self.peak_t = self.t[self.peakindex]
+        if self.initdate:
+            self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
+            self.peak_date = self.initdate+timedelta(days=round(self.peak_t)) 
+        else:
+            self.dates = [None for i in range(len(self.t))]
+            self.peak_date = None            
 
         # Prevalence: 
         self.prevalence_total = self.I_ac/self.population
-        return(sol)
+        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
+        self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
+        return
+       
+    def df_build(self):
+        """
+        Builds a dataframe with the simulation results
+        """
+        self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
+        names = ['S','I','I_d','R','R_d','Flux']
+        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names)       
 
+        names2 = ['I_ac','R_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
+        vars2 = [self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
+        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
 
+        self.results = pd.concat([self.results,aux,aux2],axis=1)
+        self.results = self.results.astype({'S': int,'I': int,'I_d': int,'R': int,'R_d': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
 
+        self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
+        return
 
+    
 
+    """
+ 
+    def calculateindicators(self):
+        self.R_ef
+        self.SHFR
 
+        # SeroPrevalence Calculation
 
+        # Errors (if real data)
 
+        # Active infected
+        print('wip')
+
+    def resume(self):        
+        print("Resumen de resultados:")
+        qtype = ""
+        for i in range(self.numescenarios):
+            if self.inputarray[i][-1]==0:
+                qtype = "Cuarentena total"
+            if self.inputarray[i][-1]>0:
+                qtype ="Cuarentena Dinámica"            
+
+            print("Escenario "+str(i))
+            print("Tipo de Cuarentena: "+qtype+'\nmov_rem: '+str(self.inputarray[i][2])+'\nmov_max: '+str(self.inputarray[i][2])+
+            "\nInicio cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime('%Y/%m/%d')+"\nFin cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime('%Y/%m/%d'))
+            print("Peak infetados \n"+"Peak value: "+str(self.peak[i])+"\nPeak date: "+str(self.peak_date[i]))
+            print("Fallecidos totales:"+str(max(self.B[i])))
+            print("Fecha de colapso hospitalario \n"+"Camas: "+self.H_colapsedate[i]+"\nVentiladores: "+self.V_colapsedate[i])
+            print("\n")
+    """
+
+        
