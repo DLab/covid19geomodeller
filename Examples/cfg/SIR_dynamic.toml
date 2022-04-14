@@ -5,16 +5,8 @@ date = '2021-04-20'
 user = 'Samuel'
 
 [model]
-	name = "Example simulation"
-	id = ''
-	model = 'SEIR'
-	compartments  = ['S','E','I','R'] 
-	
-	# Differential Equations
-	EDOs = true
-	# Rule based modeling
-	RBM = false
-	RBM_N = 1
+	name = "SIR"
+	compartments  = ['S','I','R'] 
 	
 
 [data]
@@ -33,36 +25,31 @@ user = 'Samuel'
 
 [parameters]
 	[parameters.static]
-	t_init = 0
-	t_end = 500 # Final day	
+	t_init = 0 # Initial day
+	t_end = 500 # Final day
+	timestep = 0.01 # Timestep for solver
 	
 	# Saturation dynamic
 	k_I = 0
 	k_R = 0
 
 	seroprevfactor = 1 # Fraction of the total population that take part on the dynamic at the beginning
-	expinfection = 0 # Factor in which exposed infect, default is 0
 
-	mu = 0.298 # E(0) = mu*I(0)
-	
 	# Subreport
 	pI_det = 1		
 	
 	[parameters.dynamic]
-	beta = 0.2
+	beta = '{"function":"piecewise","values":[0.15,0.2,0.3,0.1],"limits":[20,40,70]}'
 	alpha = 1
 	
 	# External flux rates over time 
-	S_f = 0#'{"function":"Events","values":[10000,-10000],"days":[[190,200],[210,220]]}'
-	E_f = 0
+	S_f = 0#'{"function":"events","values":[10000,-10000],"days":[[190,200],[210,220]]}'
 	I_f = 0
 	R_f = 0	
 	
 	# -------------------------- #
 	#   Transition Parameters    # 
 	# -------------------------- #	
-	# Transition time between exposed and infectious
-        tE_I = 5.0 # 1/sigma
 	# Transition time between infectious and removed
         tI_R = 10.0 # 1/gamma
 	
@@ -76,18 +63,18 @@ user = 'Samuel'
 	# Recovered	
 	R = 5000
 
-	# Infected	
+	# Infected
+	# Note: In case real and detected values are >0, real value will be used
 	# Active Infected
-	I = 'I'	
+	I = 0	# Real Infected
+	I_det = 6000	# Detected Infected
+
 	# New daily Infected
-	I_d = 'I_d'	
+	I_d = 0
+	I_d_det = 3000	
+	
 	# Accumulated Infected	
-	I_ac = 'I_ac'
+	I_ac = 0
+	I_ac_det = 15000	
 
-	# Leave E and E_d as false for using mu
-	E = false
-	E_d = false
-	
-
-	
 

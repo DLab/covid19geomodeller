@@ -7,15 +7,14 @@ user = 'Samuel'
 [model]
 	name = "Example simulation"
 	id = ''
-	model = 'SEIR'
-	compartments  = ['S','E','I','R'] 
+	model = 'SEIRTQ'
+	compartments  = ['S','E','I','R','T','Q'] 
 	
 	# Differential Equations
 	EDOs = true
 	# Rule based modeling
 	RBM = false
 	RBM_N = 1
-	
 
 [data]
 	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
@@ -30,7 +29,6 @@ user = 'Samuel'
 	healthservice = ''
 	loc_name= '' # optional 
 
-
 [parameters]
 	[parameters.static]
 	t_init = 0
@@ -40,8 +38,7 @@ user = 'Samuel'
 	k_I = 0
 	k_R = 0
 
-	seroprevfactor = 1 # Fraction of the total population that take part on the dynamic at the beginning
-	expinfection = 0 # Factor in which exposed infect, default is 0
+	popfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
 
 	mu = 0.298 # E(0) = mu*I(0)
 	
@@ -57,6 +54,7 @@ user = 'Samuel'
 	E_f = 0
 	I_f = 0
 	R_f = 0	
+	T_f = 0	
 	
 	# -------------------------- #
 	#   Transition Parameters    # 
@@ -66,8 +64,18 @@ user = 'Samuel'
 	# Transition time between infectious and removed
         tI_R = 10.0 # 1/gamma
 	
-	# Average Immunity loss rate (1/time)
-	rR_S = 0 
+	# Immunity loss 
+	rR_S = 0 # 0 or 1
+	tR_S = 0 # Immunity loss time in days
+	
+	# Tracing and quarantines
+	k_Ex = 20000 # Exams performed per day
+	k_Eacc = 0.9 # Exams accuracy (0-1)
+	k_Q = 1 # Effective quarantine adoption (0-1)
+	k_Tr = 2 # Detection effecectivity increase due to tracing. How many extra persons do we detect by each random detected
+	
+	tQ_R = 14 # Quarantine time
+	tT_Q = 3 # Test results delivery time
 	
 [initialconditions]
 	# total population in area
@@ -78,16 +86,14 @@ user = 'Samuel'
 
 	# Infected	
 	# Active Infected
-	I = 'I'	
+	I = 6000	
 	# New daily Infected
-	I_d = 'I_d'	
+	I_d = 3000	
 	# Accumulated Infected	
-	I_ac = 'I_ac'
+	I_ac = 15000
 
 	# Leave E and E_d as false for using mu
 	E = false
 	E_d = false
-	
-
 	
 
