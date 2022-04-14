@@ -22,7 +22,6 @@ import utils.cv19functions as cv19functions
 import utils.cv19files as cv19files
 
 
-
 class SEIR:  
     """
         SEIR model object:
@@ -33,8 +32,9 @@ class SEIR:
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
     
         if not config:
-            print('Missing configuration file ')
-            return None
+            #print('Missing configuration file ')
+            raise('Missing configuration file')
+            #return None
         
         # ------------------------------- #
         #         Parameters Load         #
@@ -84,18 +84,27 @@ class SEIR:
         #if not self.Einit:
         if not hasattr(self,'E'):
             self.E = self.mu*self.I
+        elif not self.E:
+            self.E = self.mu*self.I
+
         if not hasattr(self,'E_d'):
-            self.E_d=self.mu*self.I_d                
+            self.E_d=self.mu*self.I_d
+        elif not self.E_d:
+            self.E_d=self.mu*self.I_d
+
         if not hasattr(self,'E_ac'):    
+            self.E_ac=self.mu*self.I_ac
+        elif not self.E_ac:
             self.E_ac=self.mu*self.I_ac
        
         # Valores globales
-        if not hasattr(self,'seroprevfactor'):
-            self.seroprevfactor = 1
+        if not hasattr(self,'popfraction'):
+            self.popfraction = 1
         
-        self.N = self.seroprevfactor*self.population
+        self.N = self.popfraction*self.population
         self.S = self.N-self.E-self.I-self.R
 
+        # External flux functions: 
         if not hasattr(self,'S_f'):
             self.S_f = lambda t:0
         
@@ -108,9 +117,7 @@ class SEIR:
         if not hasattr(self,'R_f'):
             self.R_f = lambda t:0
 
-        if not hasattr(self,'expinfection'):
-            self.expinfection=0
-
+        # Saturation kinetics
         if not hasattr(self,'k_I'):
             self.k_I=0
 
@@ -123,24 +130,23 @@ class SEIR:
         """
         # --------------------------- #
         #        Susceptibles         #
-        # --------------------------- # 
+        # --------------------------- #
        
         # 0) dS/dt:
-        self.dS=lambda t,S,E,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*(self.expinfection*E+I)/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
+        self.dS=lambda t,S,E,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
         
         # --------------------------- #
         #           Exposed           #
-        # --------------------------- #        
+        # --------------------------- #     
         
         # 1) dE/dt
-        self.dE = lambda t,S,E,I,R: self.E_f(t) + self.alpha(t)*self.beta(t)*S*(self.expinfection*E+I)/(self.N+self.k_I*I + self.k_R*R) - E/self.tE_I(t)
+        self.dE = lambda t,S,E,I,R: self.E_f(t) + self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) - E/self.tE_I(t)
  
         # 2) Daily dE/dt
-        self.dE_d = lambda t,S,E,E_d,I,R: self.E_f(t) + self.alpha(t)*self.beta(t)*S*(self.expinfection*E+I)/(self.N+self.k_I*I + self.k_R*R) - E_d
+        self.dE_d = lambda t,S,E,E_d,I,R: self.E_f(t) + self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) - E_d
         
         # Accumulated dE/dt
-        #self.dE_ac = lambda t,S,E,I,R: self.alpha(t)*self.beta(t)*S*(self.expinfection*E+I)/(self.N+self.k_I*I + self.k_R*R)
-
+        #self.dE_ac = lambda t,S,E,I,R: self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R)
 
         # --------------------------- #
         #           Infected          #
@@ -175,6 +181,10 @@ class SEIR:
         print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h)
 
+    def run(self,t0=0,T=None,h=0.01):
+        #print('The use of integrate() is now deprecated. Use solve() instead.')
+        self.solve(t0=t0,T=T,h=h)
+
     # Scipy
     def solve(self,t0=0,T=None,h=0.01):
         """
@@ -189,52 +199,14 @@ class SEIR:
             T = self.tsim
 
         # Check if we already simulated the array
-        if not self.solved:
-
-            S0=self.S
-            if self.E:
-                E0 = self.E
-                E_d0 = self.E_d
-            else:
-                E0 = self.mu*(self.I)
-                E_d0 = self.mu*(self.I_d)
-            I0=self.I
-            I_d0=self.I_d
-            R0=self.R
-            R_d0=0
-
-            Flux0=0            
-
-            self.t=np.arange(t0,T+h,h)
-            
-
-        else:
+        if self.solved:
             #print('Already solved')
             return()
-            
-
-        initcond = np.array([S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0])
-
-        def model_SEIR_graph(t,y):
-            ydot=np.zeros(len(y))
-            ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
-
-            ydot[1]=self.dE(t,y[0],y[1],y[3],y[5])
-            ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[3],y[5])
-
-            ydot[3]=self.dI(t,y[1],y[3])
-            ydot[4]=self.dI_d(t,y[1],y[4])
-
-            ydot[5]=self.dR(t,y[3],y[5])
-            ydot[6]=self.dR_d(t,y[3],y[6])
-
-            ydot[7]=self.dFlux(t)      
-                                          
-            return(ydot)
-
-         
         
-        sol = solve_ivp(model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
+        self.t=np.arange(t0,T+h,h)
+        initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,0,0]) # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
+        
+        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -249,7 +221,7 @@ class SEIR:
         self.Flux=sol.y[7,:]
 
         self.E_ac = np.cumsum(self.E_d)
-        self.I_ac = np.cumsum(self.I_d) + self.I_ac
+        self.I_ac = np.cumsum(self.I_d) + self.I_ac # second term is the initial condition
         self.R_ac = np.cumsum(self.R_d)
 
         self.I_det = self.I*self.pI_det
@@ -262,6 +234,22 @@ class SEIR:
 
         return 
 
+    def model_SEIR_graph(self,t,y):
+        ydot=np.zeros(len(y))
+        ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
+
+        ydot[1]=self.dE(t,y[0],y[1],y[3],y[5])
+        ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[3],y[5])
+
+        ydot[3]=self.dI(t,y[1],y[3])
+        ydot[4]=self.dI_d(t,y[1],y[4])
+
+        ydot[5]=self.dR(t,y[3],y[5])
+        ydot[6]=self.dR_d(t,y[3],y[6])
+
+        ydot[7]=self.dFlux(t)      
+                                        
+        return(ydot)
 
     def analytics(self):
         """
