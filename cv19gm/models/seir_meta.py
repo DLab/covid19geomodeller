@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-SEIR Model
+SEIR Meta-population Model
 """
 
 import numpy as np
@@ -11,30 +11,30 @@ import pandas as pd
 from datetime import timedelta
 
 # cv19gm libraries 
-#import os
-#import sys
-#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-#sys.path.insert(1, path)
+import os
+import sys
+path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(1, path)
 
-#import cv19gm.data.cv19data as cv19data
-#import cv19gm.utils.cv19timeutils as cv19timeutils
-#import cv19gm.utils.cv19functions as cv19functions
-import cv19gm.utils.cv19files as cv19files
+#import data.cv19data as cv19data
+#import utils.cv19timeutils as cv19timeutils
+#import utils.cv19functions as cv19functions
+import utils.cv19files as cv19files
 
 
-class SEIR:  
-    """
+class SEIRMETA:  
+    """|
         SEIR model object:
         Construction:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
-    
+    def __init__(self, config = None, inputdata=None,verbose = False,**kwargs):    
         if not config:
             #print('Missing configuration file ')
             raise('Missing configuration file')
             #return None
+        self.kwargs = kwargs
         
         # ------------------------------- #
         #         Parameters Load         #
@@ -43,9 +43,12 @@ class SEIR:
         if verbose:
             print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
+        
+        if not self.Phi:
+            raise('Missing flux dynamics')
         if verbose:
             print('Initializing parameters and variables')
-        self.set_relational_values()
+        self.set_initial_values()
         if verbose:
             print('Building equations')          
         self.set_equations()
@@ -58,71 +61,25 @@ class SEIR:
     #  Valores Iniciales  #
     # ------------------- #
    
-    def set_relational_values(self):
-        # Active infected
-        if hasattr(self,'I_det'):
-            self.I = self.I_det/self.pI_det
-        else:
-            self.I_det = self.I*self.pI_det
-
-
-        # New daily Infected
-        if hasattr(self,'I_d_det'):
-            self.I_d = self.I_d_det/self.pI_det
-        else:
-            self.I_d_det = self.I_d*self.pI_det
-
-
-        # Accumulated Infected
-        if hasattr(self,'I_ac_det'):
-            self.I_ac = self.I_ac_det/self.pI_det
-        else:
-            self.I_ac_det = self.I_ac*self.pI_det
-
-        
+    def set_initial_values(self):
         # Exposed
         #if not self.Einit:
         if not hasattr(self,'E'):
             self.E = self.mu*self.I
-        elif not self.E:
-            self.E = self.mu*self.I
-
-        if not hasattr(self,'E_d'):
-            self.E_d=self.mu*self.I_d
-        elif not self.E_d:
             self.E_d=self.mu*self.I_d
 
         if not hasattr(self,'E_ac'):    
-            self.E_ac=self.mu*self.I_ac
-        elif not self.E_ac:
-            self.E_ac=self.mu*self.I_ac
+            self.E_ac= 0 
        
         # Valores globales
         if not hasattr(self,'popfraction'):
             self.popfraction = 1
         
+        self.nregions = len(self.population)
+        
         self.N = self.popfraction*self.population
         self.S = self.N-self.E-self.I-self.R
-
-        # External flux functions: 
-        if not hasattr(self,'S_f'):
-            self.S_f = lambda t:0
-        
-        if not hasattr(self,'E_f'):
-            self.E_f = lambda t:0
-
-        if not hasattr(self,'I_f'):
-            self.I_f = lambda t:0
-        
-        if not hasattr(self,'R_f'):
-            self.R_f = lambda t:0
-
-        # Saturation kinetics
-        if not hasattr(self,'k_I'):
-            self.k_I=0
-
-        if not hasattr(self,'k_R'):
-            self.k_R=0            
+    
 
     def set_equations(self):
         """        
@@ -133,40 +90,49 @@ class SEIR:
         # --------------------------- #
        
         # 0) dS/dt:
-        self.dS=lambda t,S,E,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
+        self.dS=lambda t,S,I,R,N: - np.diag(S*I/N)@self.beta(t) + self.rR_S(t)*R  + self.phi_S(t,S,N)
         
         # --------------------------- #
         #           Exposed           #
         # --------------------------- #     
         
         # 1) dE/dt
-        self.dE = lambda t,S,E,I,R: self.E_f(t) + self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) - E/self.tE_I(t)
+        self.dE = lambda t,S,E,I,N: np.diag(S*I/N)@self.beta(t) - E/self.tE_I(t) + self.phi_E(t,E,N)
  
         # 2) Daily dE/dt
-        self.dE_d = lambda t,S,E,E_d,I,R: self.E_f(t) + self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) - E_d
+        self.dE_d = lambda t,S,E,E_d,I,N: np.diag(S*I/N)@self.beta(t) + self.phi_E(t,E,N) - E_d
 
         # --------------------------- #
         #           Infected          #
         # --------------------------- #                
         
         # 3) Active
-        self.dI=lambda t,E,I: self.I_f(t) + E/self.tE_I(t) - I/self.tI_R(t)
+        self.dI=lambda t,E,I,N: E/self.tE_I(t) - I/self.tI_R(t) + self.phi_I(t,I,N)
         
         # 4) New Daily
-        self.dI_d = lambda t,E,I_d: self.I_f(t) + E/self.tE_I(t) - I_d 
+        self.dI_d = lambda t,E,I,I_d,N: E/self.tE_I(t) + self.phi_I(t,I,N) - I_d 
 
         # --------------------------- #
         #         Recovered           #
         # --------------------------- #  
         
         # 5) Total recovered
-        self.dR=lambda t,I,R: self.R_f(t) + I/self.tI_R(t) - self.rR_S(t)*R
+        self.dR=lambda t,I,R,N: I/self.tI_R(t) - self.rR_S(t)*R + self.phi_R(t,R,N)
 
         # 6) Recovered per day
-        self.dR_d=lambda t,I,R_d: self.R_f(t) + I/self.tI_R(t) - R_d
+        self.dR_d=lambda t,I,R,R_d,N: I/self.tI_R(t) + self.phi_R(t,R,N) - R_d
 
-        # 7) External Flux:
-        self.dFlux = lambda t: self.S_f(t) + self.E_f(t) + self.I_f(t) + self.R_f(t) 
+        # 7) Population Flux:
+        self.dN = lambda t,S,E,I,R,N: self.phi_S(t,S,N) + self.phi_E(t,E,N) + self.phi_I(t,I,N) + self.phi_R(t,R,N)
+        
+        # --------------------------- #
+        #         People Flux         #
+        # --------------------------- #         
+        self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np.ones(self.nregions)
+        self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np.ones(self.nregions)
+        self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np.ones(self.nregions)
+        self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np.ones(self.nregions)
+        
 
     def integrate(self,t0=0,T=None,h=0.01):
         print('The use of integrate() is now deprecated. Use solve() instead.')
@@ -195,52 +161,47 @@ class SEIR:
             return()
         
         self.t=np.arange(t0,T+h,h)
-        initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,0,0]) # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
+        self.R_d = np.zeros(self.nregions)
+        initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,self.R_d,self.N]).flatten() # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
         
         sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
         
         self.sol = sol
-        self.t=sol.t 
-        
-        self.S=sol.y[0,:]
-        self.E=sol.y[1,:]
-        self.E_d=sol.y[2,:]
-        self.I=sol.y[3,:]
-        self.I_d=sol.y[4,:]
-        self.R=sol.y[5,:]
-        self.R_d=sol.y[6,:]
-        self.Flux=sol.y[7,:]
+        self.t=sol.t         
+        sol.y = sol.y.reshape([8,self.nregions,len(self.t)])
 
-        self.E_ac = np.cumsum(self.E_d)
-        self.I_ac = np.cumsum(self.I_d) + self.I_ac # second term is the initial condition
-        self.R_ac = np.cumsum(self.R_d)
+        self.S=sol.y[0]
+        self.E=sol.y[1]
+        self.E_d=sol.y[2]
+        self.I=sol.y[3]
+        self.I_d=sol.y[4]
+        self.R=sol.y[5]
+        self.R_d=sol.y[6]
+        self.N=sol.y[7]
 
-        self.I_det = self.I*self.pI_det
-        self.I_d_det = self.I_d*self.pI_det
-        self.I_ac_det = self.I_ac*self.pI_det
+        #self.E_ac = np.cumsum(self.E_d)
+        #self.I_ac = np.cumsum(self.I_d) + self.I_ac # second term is the initial condition
+        #self.R_ac = np.cumsum(self.R_d)
 
-        self.analytics()
-        self.df_build()
+        #self.analytics()
+        #self.df_build()
+        #self.underreport()
         self.solved = True
 
         return 
 
     def model_SEIR_graph(self,t,y):
-        ydot=np.zeros(len(y))
-        ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
-
-        ydot[1]=self.dE(t,y[0],y[1],y[3],y[5])
-        ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[3],y[5])
-
-        ydot[3]=self.dI(t,y[1],y[3])
-        ydot[4]=self.dI_d(t,y[1],y[4])
-
-        ydot[5]=self.dR(t,y[3],y[5])
-        ydot[6]=self.dR_d(t,y[3],y[6])
-
-        ydot[7]=self.dFlux(t)      
-                                        
-        return(ydot)
+        y = y.reshape(8, self.nregions) #8 is the number of equations
+        ydot=np.zeros(np.shape(y))
+        ydot[0]=self.dS(t,y[0],y[3],y[5],y[7])
+        ydot[1]=self.dE(t,y[0],y[1],y[3],y[7])
+        ydot[2]=self.dE_d(t,y[0],y[1],y[2],y[3],y[7])        
+        ydot[3]=self.dI(t,y[1],y[3],y[7])
+        ydot[4]=self.dI_d(t,y[1],y[3],y[4],y[7])        
+        ydot[5]=self.dR(t,y[3],y[5],y[7])
+        ydot[6]=self.dR_d(t,y[3],y[5],y[6],y[7])        
+        ydot[7]=self.dN(t,y[0],y[1],y[3],y[5],y[7])                                        
+        return(ydot.flatten())
 
     def analytics(self):
         """

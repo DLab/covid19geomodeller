@@ -1,12 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
-
 """
 # -------------------------------- #
 #     Error measuring functions    #
 # -------------------------------- #
 """
+def cv19errorbuild(input):
+    """
+    Function builder
+    # crear un iterador que recorra el input y cree la función a partir de un comando exec:
+    # Acepta diccionarios o strings con forma de diccionario
+    """
+    if callable(input):        
+        return input
+    
+    elif type(input)==str:        
+        print('input dict')
+        return locals()[input]
+
+
 # -------------------------------- #
 #          Global Errors           #
 # -------------------------------- #
@@ -52,7 +65,7 @@ def RRMSE(sim, data, t_data=None):
 
 
 # -------------------------------- #
-#          Local Errors            #
+#        Residual Metrics          #
 # -------------------------------- #
 
 def LAE(sim, data, t_data=None):

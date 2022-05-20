@@ -428,9 +428,9 @@ class INTERVAL_FIT:
         return self.bounds
 
 
-class PROGRESSIVE_FIT:
+class SEQUENTIAL_FIT:
     """
-    Progressive fit optimization method
+    Sequential fit optimization method
     1. We aply betamu_fit for fiting the initial parameters using a truncated part of the data
     2. We calculate a global error function and check if we are under the error tolerance. If not we continue with the following points
     3. Using tendency_change we look for the tendency change day.
@@ -439,8 +439,8 @@ class PROGRESSIVE_FIT:
 
     """
     def __init__(self, cfg, I_d_data=None, t_data=None, dates_data=None, tstate=None,
-        initdate=None, cv19gmdata=None, global_errortol=100, local_errortol=100, global_errfunct="RMSE",local_errfunct="LAE", 
-        intervalsize=10, maxintervals=5, bounds_beta=[0,1], bounds_mu=[0,4], inputdata = None, **kwargs):
+        initdate=None, cv19gmdata=None, global_errortol=100, local_errortol=100, global_errfunct=RMSE,local_errfunct=LAE, 
+        intervalsize=10, maxintervals=5, bounds_beta=[0,1], bounds_mu=[0,4], inputdata = None, paramtol=0.05, **kwargs):
 
         self.cfg = cfg
         self.I_d_data = I_d_data
@@ -468,12 +468,15 @@ class PROGRESSIVE_FIT:
         
         self.stop = False
 
+        self.actualidx = intervalsize
+        self.paramtol = paramtol
+        
         # Data management: data source
         data_management(self, I_d_data, t_data, dates_data, tstate, initdate, cv19gmdata)
 
         # Choose error functions (later will add the capability of choosing)
-        self.global_errfunct = RMSE
-        self.local_errfunct = LAE
+        self.global_errfunct = cv19errorbuild(global_errfunct)
+        self.local_errfunct = cv19errorbuild(local_errfunct)
         
         self.betaiter = 0
         self.global_error_hist = []
@@ -481,7 +484,9 @@ class PROGRESSIVE_FIT:
     # ------------------------- #
     # First step: betamu_fit    #
     # ------------------------- #
-    def betamu_fit(self, debug = True):
+    def betamu_fit(self,actualidx=False, debug = True):
+        if not actualidx:
+            actualidx = self.intervalsize
         start = time.time()
         # Set bounds
         lb = [self.bounds_beta[0], self.bounds_mu[0]]  # lower bound
@@ -489,7 +494,7 @@ class PROGRESSIVE_FIT:
         bounds = [lb, ub]
 
         # Build beta_mu optimization Problem
-        opti_mu = BETAMU_FIT(cfg = self.cfg, bounds = bounds, I_d_data = self.I_d_data[:self.intervalsize], t_data = self.t_data[:self.intervalsize], error="RMSE", inputdata = self.inputdata, **self.kwargs)
+        opti_mu = BETAMU_FIT(cfg = self.cfg, bounds = bounds, I_d_data = self.I_d_data[:actualidx], t_data = self.t_data[:actualidx], error="RMSE", inputdata = self.inputdata, **self.kwargs)
         # Choose algorithm
         algo = pg.algorithm(pg.nlopt(solver="bobyqa"))
         algo.set_verbosity(10)
@@ -522,30 +527,12 @@ class PROGRESSIVE_FIT:
     # ----------------------------------------------------- #
     # Second step: recursing beta fit for short intervals    #
     # ----------------------------------------------------- #
-    def beta_fit(self,debug=True):
-        start = time.time()
-        #while self.global_error > self.global_errortol and not self.stop:
-        # 1. Find divergence point (I_d_data, t_data=None, dates_data=None,cfg=None, sim = None, l_err_tol=100, errorfunction="LAE",**kwargs):
-        idx = tendency_change(self.I_d_data,  t_data=self.t_data, sim = self.sim, l_err_tol=self.local_errortol) - 1
-        self.beta_days.append(idx)
-
-        # 2. Find right beta for the divergence point
-        if idx+self.intervalsize > len(self.I_d_data):
-            if debug:
-                print('Reached the end of data')
-            interval = len(self.I_d_data)
-            self.stop = True
-        else:
-            interval = idx+self.intervalsize
-
-        if idx > len(self.I_d_data) - 10:
-            print('Reached the end of the data')
-            print('Global Error: '+str(self.global_error))
-            return
-        
+    def beta_fit(self,actualidx=-1,debug=True):
+        starttime = time.time()
+        # Find right beta for the divergence point
         bounds = [[self.bounds_beta[0]],[self.bounds_beta[1]]]
-        opti = BETA_PIECEWISE_FIT(cfg = self.cfg, bounds = bounds, I_d_data = self.I_d_data[:interval], 
-        t_data = self.t_data[:interval],  beta_values=self.beta_values,beta_days=self.beta_days, inputdata = self.inputdata, mu = self.mu,  **self.kwargs)
+        opti = BETA_PIECEWISE_FIT(cfg = self.cfg, bounds = bounds, I_d_data = self.I_d_data[:actualidx], 
+        t_data = self.t_data[:actualidx],  beta_values=self.beta_values,beta_days=self.beta_days, inputdata = self.inputdata, mu = self.mu,  **self.kwargs)
 
         # Choose algorithm
         algo = pg.algorithm(pg.nlopt(solver="bobyqa"))
@@ -559,7 +546,7 @@ class PROGRESSIVE_FIT:
 
         self.beta_values.append(np.around(pop.champion_x[0],4))
 
-        # 3. Calculate Global error, if > error tol go back to point 1. 
+        # Calculate Global error
         self.beta = cv19functions.piecewise(values=self.beta_values,limits=self.beta_days)
         self.sim = CV19SIM(self.cfg,I_d = self.I_d_data[0],beta=self.beta,mu=self.mu,inputdata=self.inputdata,**self.kwargs)
         self.sim.solve()
@@ -567,31 +554,60 @@ class PROGRESSIVE_FIT:
         self.global_error = self.global_errfunct(self.sim.sims[0].I_d, self.I_d_data, t_data=self.t_data)
         self.global_error_hist.append(self.global_error)
         
-        end = time.time()
+        endtime = time.time()
         
         if debug:
             print('Optimization process Finished')
-            print('Elapsed time:'+str(np.around(end - start,2))+' s')
+            print('Elapsed time:'+str(np.around(endtime - starttime,2))+' s')
             print('beta: '+str(self.beta_values))
             print('days: '+str(self.beta_days))
             print('Global Error: '+str(self.global_error))            
-            
         
         self.betaiter+=1
 
-    def optimize(self):
+    def optimize(self,debug=False):
         # Finding initial values
         start = time.time()
         self.betamu_fit(debug=False)
-
+        
+        # Stop condition: global error under a tolerance or reaching the end of the data
         while self.global_error > self.global_errortol and not self.stop:
-            self.beta_fit(debug=False)
+            
+            # 1. Find divergence point 
+            idx = tendency_change(self.I_d_data,  t_data=self.t_data, sim = self.sim, errorfunction = self.local_errfunct, l_err_tol=self.local_errortol,startingday=self.actualidx) - 1
+            
+            # Choose the last data point to fit in this iteration. Check if we reached the end of the data
+            if idx+self.intervalsize > len(self.I_d_data):
+                if debug:
+                    print('Reached the end of data')
+                self.actualidx = len(self.I_d_data) 
+                self.stop = True
+            else:
+                self.actualidx = idx+self.intervalsize
+
+            # 2. Find the best fit for this interval
+            self.beta_days.append(idx)
+            self.beta_fit(debug=False,actualidx=self.actualidx)
+            
+            # 3. Check if the solution represents a transition or it is due to noise.
+            #    If the betas are too similar we find one that fits this extended range altogether
+            if np.abs(self.beta_values[-1] - self.beta_values[-2])<self.paramtol:
+                # Delete last idx and 2 last betas
+                del self.beta_days[-1]
+                del self.beta_values[-2:]
+                # Find beta for the extended range
+                if len(self.beta_days)>0:
+                    self.beta_fit(debug=False,actualidx=self.actualidx)
+                else:
+                    self.betamu_fit(debug=False,actualidx=self.actualidx)
+
         end = time.time()
 
         print('Optimization process Finished')
         print('Elapsed time:'+str(np.around(end - start,2))+' s')
         print('beta: '+str(self.beta_values))
         print('days: '+str(self.beta_days))
+        print('mu: '+str(self.mu))
         print('Global Error: '+str(self.global_error))
         print('Number of iterations: '+str(self.betaiter))
 
@@ -604,6 +620,7 @@ class PROGRESSIVE_FIT:
                 plt.axvline(i, linestyle="dashed", color="grey")
         
         elif xaxis == "dates":
+            import matplotlib.dates as mdates
             plt.plot(self.sim.sims[0].dates, self.sim.sims[0].I_d, label="Simulation")
             plt.scatter(self.dates_data, self.I_d_data, label="Data",color='tab:red')
             plt.xlabel("Dates")
@@ -611,11 +628,13 @@ class PROGRESSIVE_FIT:
                 plt.axvline(
                     self.sim.sims[0].dates[int(i)], linestyle="dashed", color="grey"
                 )
+            plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
+            plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=10))
+            plt.gcf().autofmt_xdate()
+            plt.xticks(rotation=45)
 
         plt.ylabel("New cases")
         plt.title("Optimization results")
-
-        # plot vertical lines, where days intervals start
 
     def plot_step(self,step=False):
         """Plots optimization history
@@ -680,18 +699,22 @@ class PROGRESSIVE_FIT:
         return
 
 
-
 # Tendency Change
-def tendency_change(I_d_data, t_data=None, dates_data=None,cfg=None, sim = None, l_err_tol=100, errorfunction="LAE",**kwargs):
+def tendency_change(I_d_data, t_data=None, cfg=None, sim = None, l_err_tol=100, errorfunction=LAE, startingday = 0,**kwargs):
     if not sim:
         sim = CV19SIM(config=cfg,I_d = I_d_data[0],**kwargs)
         sim.solve()
-
+    
     # Add options for calculating local error
-    l_err = LAE(sim.sims[0].I_d,I_d_data,t_data) # Local Absolute error
+    l_err = errorfunction(sim.sims[0].I_d,I_d_data,t_data) # Local Absolute error
     aux = np.where(np.array(l_err)>l_err_tol)[0] # first index over error tolerance
-    idx = aux[0] if len(aux)>0 else len(I_d_data)-1
-    return idx
+    changeindex = aux[0] if len(aux)>0 else len(I_d_data)-1
+
+    idx = np.where(t_data>startingday)[0]
+    idx = idx[0] if len(idx)>0 else len(I_d_data)-1
+    return max(changeindex,idx)
+
+
 
 # Data Management
 def data_management(self, I_d_data, t_data, dates_data, tstate, initdate, cv19gmdata):
@@ -729,7 +752,43 @@ def data_management(self, I_d_data, t_data, dates_data, tstate, initdate, cv19gm
             raise Exception("Missing data to fit")
 
             
+def beta_fit(bounds,cfg,I_d_data,t_data,beta_values=[], beta_days = [-np.infty],actualidx=-1,debug=True,global_errfunct=RMSE,**kwargs):
+    starttime = time.time()
+    # Find right beta for the divergence point
+    bounds = [[bounds[0]],[bounds[1]]]
+    opti = BETA_PIECEWISE_FIT(cfg = cfg, bounds = bounds, I_d_data = I_d_data[:actualidx],
+    t_data = t_data[:actualidx],  beta_values=beta_values,beta_days=beta_days, **kwargs) # mu and inputdata are given through the kwargs
 
+    # Choose algorithm
+    algo = pg.algorithm(pg.nlopt(solver="bobyqa"))
+    algo.set_verbosity(10)
+
+    # Find parameters
+    if debug:
+        print("Solving for beta")
+    pop = pg.population(opti, size=20)
+    pop = algo.evolve(pop)
+
+    beta_values.append(np.around(pop.champion_x[0],4))
+
+    # Calculate Global error
+    beta = cv19functions.piecewise(values=beta_values,limits=beta_days)
+    
+    sim = CV19SIM(cfg,I_d = I_d_data[0],beta=beta,**kwargs)
+    sim.solve()
+
+    global_errfunct = cv19errorbuild(global_errfunct)
+    global_error = global_errfunct(sim.sims[0].I_d, I_d_data, t_data=t_data)
+    endtime = time.time()
+    
+    if debug:
+        print('Optimization process Finished')
+        print('Elapsed time:'+str(np.around(endtime - starttime,2))+' s')
+        print('beta: '+str(beta_values))
+        print('days: '+str(beta_days))
+        print('Global Error: '+str(global_error))            
+    
+    return beta_values, beta_days, beta, global_error
 
 
 

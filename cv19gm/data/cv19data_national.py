@@ -116,12 +116,12 @@ class ImportData():
         self.imp_population_mcyt()        
         self.imp_infected_active_mcyt()                 
         self.imp_infected_accumulated_mcyt()
-        self.imp_infected_daily_mcyt()
-        self.imp_infected_mcyt_infdiario()
-        self.imp_hosp_icu_mcyt()
-        self.imp_deaths_deis_mcyt()
-        self.imp_vacc_infected_mcyt()
-        self.imp_vaccinated_mcyt()
+        self.imp_infected_daily_mcyt() 
+        self.imp_infected_mcyt_infdiario() 
+        self.imp_hosp_icu_mcyt() 
+        self.imp_deaths_deis_mcyt() 
+        self.imp_vacc_infected_mcyt() 
+        self.imp_vaccinated_mcyt() 
         print('Done')
 
     def calculateIC(self,pIv_det=1,pV2=1,infected='InformeEPI',pOmicron=1):

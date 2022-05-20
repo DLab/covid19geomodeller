@@ -26,6 +26,7 @@ import utils.cv19timeutils as cv19timeutils
 # ------------------------------------------------- #
 Todo:
     [] Capacidad de guardar un archivo de configuración de un objeto de simulación en un archivo toml
+    [] Change the isdict() function for something more elegant
 Functions:
     loadconfig: Load parameters from a configuration file or object
     saveconfig: Save parameters into a configuration file
@@ -127,7 +128,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
         elif sim.importdata:                	            
             #sim.inputdata = cv19data.ImportData(country=sim.country,state=sim.state,county=sim.county,healthservice=sim.healthservice,initdate=sim.initdate,user = None,password = None)
             sim.inputdata = cv19data.ImportData(tstate=sim.state,initdate=sim.initdate,user = None,password = None)
-            sim.inputdata.importdata()
+            sim.inputdata.import_data()
             sim.data = sim.inputdata.data
         else: 
             #print('No external data added')
@@ -139,6 +140,13 @@ def loadconfig(sim,config,inputdata,**kwargs):
     # ------------------------------- #
     sim.initialconditions = sim.cfg['initialconditions']
     for key,value in sim.initialconditions.items():
+        # Overwrite by kwargs values. kwargs values overwrite everything
+        if key in kwargs:
+            value = kwargs[key]
+            if type (value) == tuple:
+                value = np.array(value)            
+            sim.initialconditions[key] = value
+            sim.cfg['initialconditions'][key] = value       
 
         # Initializing variables with external data if available 
         if type(value) == str:
@@ -149,13 +157,10 @@ def loadconfig(sim,config,inputdata,**kwargs):
                 sim.__dict__.update({key:sim.inputdata.__dict__[value]})
         else:
             # Using the values expressed in the configuration file
+            if type (value) == tuple:
+                value = np.array(value)
             sim.__dict__.update({key:value})
         
-        # Overwrite by kwargs values. kwargs values overwrite everything
-        if key in kwargs:
-            value = kwargs[key]
-            sim.initialconditions[key] = value
-            sim.cfg['initialconditions'][key] = value
     
     # Update copies
     for key,value in copies.items():
