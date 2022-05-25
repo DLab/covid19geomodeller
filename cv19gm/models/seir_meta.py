@@ -7,19 +7,18 @@ SEIR Meta-population Model
 import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
-#from datetime import datetime
 from datetime import timedelta
 
 # cv19gm libraries 
-import os
-import sys
-path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(1, path)
+#import os
+#import sys
+#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+#sys.path.insert(1, path)
 
 #import data.cv19data as cv19data
 #import utils.cv19timeutils as cv19timeutils
 #import utils.cv19functions as cv19functions
-import utils.cv19files as cv19files
+import cv19gm.utils.cv19files as cv19files
 
 
 class SEIRMETA:  

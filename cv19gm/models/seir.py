@@ -211,9 +211,9 @@ class SEIR:
         self.R_d=sol.y[6,:]
         self.Flux=sol.y[7,:]
 
-        self.E_ac = np.cumsum(self.E_d)
-        self.I_ac = np.cumsum(self.I_d) + self.I_ac # second term is the initial condition
-        self.R_ac = np.cumsum(self.R_d)
+        self.E_ac = np.cumsum(np.concatenate([np.array([self.E_ac]),self.E_d[:-1]]))
+        self.I_ac = np.cumsum(np.concatenate([np.array([self.I_ac]),self.I_d[:-1]]))  
+        self.R_ac = np.cumsum(np.concatenate([np.array([self.R[0]]),self.R_d[:-1]]))
 
         self.I_det = self.I*self.pI_det
         self.I_d_det = self.I_d*self.pI_det
