@@ -478,6 +478,20 @@ def interpolate_data(data):
 
 # Creo que no es necesaria
 def events_append(values,days,new_val,new_days=None,default=0):
+    #TODO
+    # hola
+    """_summary_
+
+    Args:
+        values (_type_): _description_
+        days (_type_): _description_
+        new_val (_type_): _description_
+        new_days (_type_, optional): _description_. Defaults to None.
+        default (int, optional): _description_. Defaults to 0.
+
+    Returns:
+        _type_: _description_
+    """
     values = values + [new_val]
     if new_days:
         days = days + [new_days]
