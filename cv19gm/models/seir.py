@@ -22,7 +22,7 @@ from datetime import timedelta
 import cv19gm.utils.cv19files as cv19files
 
 
-class SEIR:  
+class SEIR:
     """
         SEIR model object:
         Construction:
