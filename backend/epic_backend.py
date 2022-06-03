@@ -8,6 +8,7 @@ import logging
 import numpy as np
 from cv19gm.cv19sim import CV19SIM
 import cv19gm.utils.cv19functions as cv19functions
+import cv19gm.utils.cv19paramfit as cv19paramfit
 
 from flask import Flask
 from flask import jsonify
@@ -109,6 +110,40 @@ def function():
         print(e)        
         response = {"error": "Wrong parameters"}
         return response, 400    
+
+
+@app.route('/datafit', methods=['POST'])
+def datafit():
+    """Optimal parameters for fitting data
+
+    Returns:
+        _type_: _description_
+    """
+    
+    input =  request.get_json(force=True)
+
+    results = {}
+    
+    fit = cv19paramfit.SEQUENTIAL_FIT(cfg = 'SEIR.toml', I_d_data=np.array(list(json.loads(input['I_d_data']).values())),t_data = np.array(list(json.loads(input['t_data']).values())),global_errortol=200, local_errortol=250, 
+        intervalsize=10, maxintervals=5, bounds_beta=[0,1], bounds_mu=[0,4],tE_I = input['tE_I'],tI_R = input['tI_R'])
+    
+    fit.optimize()
+        
+    
+    results['beta_values'] = str(fit.beta_values)
+    results['beta_days'] = str(fit.beta_days)
+    results['mu'] = fit.mu
+    results['simulation'] =  fit.sim.sims[0].results.to_json()
+    
+    response = {'status': 'OK','results' : results}
+    try:  
+        return jsonify(response), 200
+    
+    except Exception as e: 
+        print(e)        
+        response = {"error": "Wrong parameters"}
+        return response, 400    
+
 
 
 if __name__ == '__main__':
