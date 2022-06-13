@@ -73,16 +73,22 @@ class SEIRHVD:
     # ------------------- #
     def set_relational_values(self):
         #Initial Population
-        self.N0 = self.popfraction*self.population
+        # Valores globales  
+        if hasattr(self, 'popfraction'):
+            self.populationfraction = self.popfraction
+        if not hasattr(self,'populationfraction'):
+            self.populationfraction = 1      
+                        
+        self.N0 = self.populationfraction*self.population
 
         # Exposed
-        if not self.E:
+        if not hasattr(self, 'E'):
             self.E = self.mu*self.I
             self.E_d=self.mu*self.I_d                
             self.E_ac=self.mu*self.I_ac
        
         # Exposed vaccinated
-        if not self.Ev:
+        if not hasattr(self, 'Ev'):
             self.Ev = self.mu*self.Iv
             self.Ev_d=self.mu*self.Iv_d                
             self.Ev_ac=self.mu*self.Iv_ac
@@ -105,7 +111,28 @@ class SEIRHVD:
             
         # Initial susceptible population
         self.S = self.N0 - self.Sv - self.E - self.Ev - self.I - self.Iv - self.H - self.D - self.R
-
+        
+        # External flux functions: 
+        if not hasattr(self,'S_f'):
+            self.S_f = lambda t:0        
+        if not hasattr(self,'Sv_f'):
+            self.Sv_f = lambda t:0                    
+        if not hasattr(self,'E_f'):
+            self.E_f = lambda t:0
+        if not hasattr(self,'Ev_f'):
+            self.Ev_f = lambda t:0            
+        if not hasattr(self,'Im_f'):
+            self.Im_f = lambda t:0
+        if not hasattr(self,'Icr_f'):
+            self.Icr_f = lambda t:0
+        if not hasattr(self,'Iv_f'):
+            self.Iv_f = lambda t:0            
+        if not hasattr(self,'R_f'):
+            self.R_f = lambda t:0
+        if not hasattr(self,'H_f'):
+            self.H_f = lambda t:0               
+        if not hasattr(self,'D_f'):
+            self.D_f = lambda t:0               
                     
 
     def set_equations(self):
@@ -227,12 +254,12 @@ class SEIRHVD:
         Phi0=0
 
         self.t=np.arange(t0,T+h,h)
-        initcond = np.array([self.S,self.Sv,self.E,self.E_d,self.Ev,self.Ev_d,self.Im,self.Im_d,self.Icr,self.Icr_d,self.Iv,self.Iv_d,self.H,self.H_d,self.D,self.D_d,self.R,self.R_d,Phi0])
+        self.initcond = np.array([self.S,self.Sv,self.E,self.E_d,self.Ev,self.Ev_d,self.Im,self.Im_d,self.Icr,self.Icr_d,self.Iv,self.Iv_d,self.H,self.H_d,self.D,self.D_d,self.R,self.R_d,Phi0])
 
         if self.verbose:
             print('Solving EDOs')
 
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.model_SEIR_graph,(t0,T), self.initcond,method='LSODA',t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -274,6 +301,7 @@ class SEIRHVD:
         self.underreport()
         self.analytics()
         self.df_build()
+        self.solved = True
         return
 
 
@@ -319,7 +347,7 @@ class SEIRHVD:
         self.peak_t = self.t[self.peakindex]
         if self.initdate:
             self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
-            self.peak_date = self.initdate+timedelta(days=round(self.peak_t)) 
+            self.peak_date = self.initdate+timedelta(days=int(round(self.peak_t)))
         else:
             self.dates = [None for i in range(len(self.t))]
             self.peak_date = None
