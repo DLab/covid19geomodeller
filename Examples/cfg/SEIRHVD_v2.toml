@@ -30,7 +30,7 @@ user = ''
 	k_I = 0
 	k_R = 0
 
-	popfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
+	populationfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
 
 	mu = 0.298 # E(0) = mu*I(0)
 	

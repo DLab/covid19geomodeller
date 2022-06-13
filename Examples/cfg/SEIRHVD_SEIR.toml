@@ -5,7 +5,8 @@ date = '2021-06-01'
 user = ''
 
 [model]
-	name = "SEIRHVD"
+	name = "SEIR-SEIRHVD comparison"
+	model = "SEIRHVD"	
 	compartments  = ['S','S_v','E','E_v','Im','Icr','Iv','R','H','D'] # Nombres de los estados
 	
 [data]
@@ -24,13 +25,13 @@ user = ''
 	[parameters.static]
 	t_init = 0 # Initial day
 	t_end = 500 # Final day
-	timestep = 0.01 # Timestep for solver
 	
 	# Saturation dynamic
 	k_I = 0
 	k_R = 0
 
 	popfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
+	populationfraction = 1
 
 	mu = 0.5 # E(0) = mu*I(0)
 	
@@ -130,11 +131,11 @@ user = ''
 	# Recovered
 	R = 5000
 
-	# Leave E and E_d as false for using mu
-	E = false
-	E_d = false
-	Ev = false
-	Ev_d = false	
+	# Comment E and E_d for using mu
+	#E = 500
+	#E_d = 0
+	#Ev = 0
+	#Ev_d = 0	
 
 
 
