@@ -33,9 +33,16 @@ Todo: [ ] Solve está siendo aplicado más de una vez. Ver donde ocurre eso!
 """
 
 class CV19SIM():
-    def __init__(self,config,model='SEIR', inputdata = None, verbose=False,**kwargs):
-
-        config = deepcopy(config)            
+    def __init__(self,config, inputdata = None, model=None, verbose=False,**kwargs):
+        config = deepcopy(config)
+        # Leer el archivo de configuracion
+        if not type(config) == dict:
+            config = toml.load(config)
+            
+        aux = cv19files.unwrapconfig(config,**kwargs)        
+        if not model:
+            model = aux['model']['model']
+        
         if model == 'SEIR':
             self.modelname = model
             from cv19gm.models.seir import SEIR
@@ -58,15 +65,9 @@ class CV19SIM():
         else:
             raise('Incorrect model')
 
-        # Leer el archivo de configuracion
-        if not type(config) == dict:
-            config = toml.load(config)
-
 
         sims = []
         self.iterables = {}
-        # create auxiliar object         
-        aux = cv19files.unwrapconfig(config,**kwargs)        
         
         # Find iterable parameters:
         for key,value in aux.items():
@@ -76,7 +77,6 @@ class CV19SIM():
                 self.iterables.update({key:value})
 
         #print('There are '+ str(len(iterables))+' iterable parameters')
-               
 
         if self.iterables:
             # Pop iterables from kwargs

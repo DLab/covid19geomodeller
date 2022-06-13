@@ -230,7 +230,6 @@ def unwrapconfig(config,**kwargs):
             cfg['data'][key] = value        
         out.update({key:value})
 
-    
 
     # ------------------------------- #
     #       Initial conditions        #
