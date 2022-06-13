@@ -25,7 +25,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 #     GUI communication     #
 # ------------------------- #
 """
-
 @app.route('/health_check', methods=['GET'])
 def health_check():
     '''
