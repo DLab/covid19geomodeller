@@ -4,6 +4,7 @@
 SEIR Meta-population Model
 """
 
+from unittest import result
 import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
@@ -78,6 +79,7 @@ class SEIRMETA:
         
         self.N = self.popfraction*self.population
         self.S = self.N-self.E-self.I-self.R
+        self.nodes = len(self.population) # Amount of nodes /meta-populations
     
 
     def set_equations(self):
@@ -183,7 +185,8 @@ class SEIRMETA:
         #self.R_ac = np.cumsum(self.R_d)
 
         #self.analytics()
-        #self.df_build()
+        self.df_build()
+        self.params_df_build()
         #self.underreport()
         self.solved = True
 
@@ -201,6 +204,45 @@ class SEIRMETA:
         ydot[6]=self.dR_d(t,y[3],y[5],y[6],y[7])        
         ydot[7]=self.dN(t,y[0],y[1],y[3],y[5],y[7])                                        
         return(ydot.flatten())
+
+
+    def df_build(self):
+        """
+        Builds a dataframe with the simulation results
+        Output structure: 
+        't','S','E','E_d','I','I_d','R','R_d','node'
+         0, ...
+         1, ...
+         
+          
+        """
+        names = ['t','S','E','E_d','I','I_d','R','R_d','node']
+        self.results = []
+        for i in range(self.nodes):
+            node = [i]*len(self.t)
+            self.results.append(pd.DataFrame(dict(zip(names,[self.t,self.S[i],self.E[i],self.E_d[i],self.I[i],self.I_d[i],self.R[i],self.R_d[i],node]))))        
+        self.results = pd.concat(self.results,ignore_index=True).astype(int)
+        return
+
+    def params_df_build(self):
+        """
+        Builds a dataframe with the simulation parameters over time
+        """                
+        
+        names = ['t','beta','tE_I','tI_R','rR_S','node']                 
+        beta_val = [[self.beta(t)[j] for t in self.t] for j in range(self.nodes)]
+        
+        tE_I_val = [self.tE_I(t) for t in self.t]
+        tI_R_val = [self.tI_R(t) for t in self.t]
+        rR_S_val = [self.rR_S(t) for t in self.t]
+
+        self.params = []
+        for i in range(self.nodes):
+            node = [i]*len(self.t)
+            self.params.append(pd.DataFrame(dict(zip(names,[self.t,beta_val[i],tE_I_val,tI_R_val,rR_S_val,node]))))
+        
+        self.params = pd.concat(self.params,ignore_index=True)
+        return
 
     def analytics(self):
         """
@@ -223,27 +265,7 @@ class SEIRMETA:
         self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
         self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
         return
-       
-    def df_build(self):
-        """
-        Builds a dataframe with the simulation results
-        """
-        self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
-        names = ['S','E','E_d','I','I_d','R','R_d','Flux']
-        
-        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names)       
-
-        names2 = ['E_ac','I_ac','R_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
-        vars2 = [self.E_ac,self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
-        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
-
-        self.results = pd.concat([self.results,aux,aux2],axis=1)
-        self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
-
-        self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
-        return
-
-    
+           
 
     """
  
