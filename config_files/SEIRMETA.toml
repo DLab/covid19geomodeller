@@ -50,7 +50,7 @@ user = 'Samuel'
 	beta = [0.2,0.15,0.125]
 	alpha = [1,1,1]
 
-	Phi = false
+	#Phi = false
 	
 	
 	# -------------------------- #

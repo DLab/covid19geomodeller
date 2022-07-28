@@ -73,7 +73,7 @@ def simulate():
 
         results = {}
         for key,value in cfg.items():
-            print(key)
+            print(key) 
             sim = CV19SIM(dict(value))
             sim.solve()
             results.update({key:sim.sims[0].results.to_json()})
@@ -99,13 +99,13 @@ def simulate_meta():
     '''
     try:
         cfg =  request.get_json(force=True)
-
         results = {}
         for key,value in cfg.items():
             print(key)
+            print(value)
             sim = SEIRMETA(dict(value))
             sim.solve()
-            results.update({key:sim.sims[0].results.to_json()})
+            results.update({key:sim.results.to_json()})
 
         response = {'status': 'OK','results' : results}
         return jsonify(response), 200

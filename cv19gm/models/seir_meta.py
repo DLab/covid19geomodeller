@@ -67,15 +67,15 @@ class SEIRMETA:
     def set_initial_values(self):
         # Exposed
         #The np.array cast is transitory hopefuly:
-        if not hasattr(self,'E'):
+        if not hasattr(self,'E') or not self.E:
             self.E = np.array(self.mu)*np.array(self.I)
             self.E_d = np.array(self.mu)*np.array(self.I_d)
 
-        if not hasattr(self,'E_ac'):    
+        if not hasattr(self,'E_ac') or not self.E_ac:
             self.E_ac= 0 
        
         # Valores globales
-        if not hasattr(self,'popfraction'):
+        if not hasattr(self,'popfraction') or not self.popfraction:
             self.popfraction = 1
         
         self.nregions = len(self.population)
