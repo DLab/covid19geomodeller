@@ -102,11 +102,16 @@ def simulate_meta():
         results = {}
         for key,value in cfg.items():
             print(key)
-            print(value)
+            #print(value)
             sim = SEIRMETA(dict(value))
-            sim.solve()
-            results.update({key:sim.results.to_json()})
-
+            print('Simulating may take some time')
+            sim.solve() 
+            aux = {}
+            for i in range(sim.nodes):
+                aux[str(i)] = sim.results.loc[sim.results['node']==i].to_dict()               
+                    
+            results.update({key:json.dumps(aux)})
+        
         response = {'status': 'OK','results' : results}
         return jsonify(response), 200
     
