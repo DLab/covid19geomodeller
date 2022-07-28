@@ -143,7 +143,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
         # Overwrite by kwargs values. kwargs values overwrite everything
         if key in kwargs:
             value = kwargs[key]
-            if type (value) == tuple:
+            if type (value) == list:
                 value = np.array(value)            
             sim.initialconditions[key] = value
             sim.cfg['initialconditions'][key] = value       
@@ -157,7 +157,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
                 sim.__dict__.update({key:sim.inputdata.__dict__[value]})
         else:
             # Using the values expressed in the configuration file
-            if type (value) == tuple:
+            if type (value) == list:
                 value = np.array(value)
             sim.__dict__.update({key:value})
         

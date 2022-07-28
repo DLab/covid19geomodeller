@@ -3,18 +3,18 @@
 
 import pandas as pd
 import json
-
 import logging
 import numpy as np
-from cv19gm.cv19sim import CV19SIM
-import cv19gm.utils.cv19functions as cv19functions
-import cv19gm.utils.cv19paramfit as cv19paramfit
-
 from flask import Flask
 from flask import jsonify
 from flask import request
 from flask import send_file
 from flask_cors import CORS
+
+from cv19gm.cv19sim import CV19SIM
+import cv19gm.utils.cv19functions as cv19functions
+import cv19gm.utils.cv19paramfit as cv19paramfit
+from cv19gm.models.seir_meta import SEIRMETA
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -75,6 +75,35 @@ def simulate():
         for key,value in cfg.items():
             print(key)
             sim = CV19SIM(dict(value))
+            sim.solve()
+            results.update({key:sim.sims[0].results.to_json()})
+
+        response = {'status': 'OK','results' : results}
+        return jsonify(response), 200
+    
+    except Exception as e: 
+        print(e)        
+        response = {"error": "Wrong parameters"}
+        return response, 400 
+    
+@app.route('/simulate_meta', methods=['POST'])
+def simulate_meta():
+    '''
+    http://192.168.2.223:5003/simulate_meta?campo=1
+
+    Estructura del código
+     1.- leer parámetros
+     2.- Crear objetdo de simulación
+     3.- Simular. Lanzar un warning del tiempo que se puede tomar si es que es una RBM
+     4.- Retornar los resultados
+    '''
+    try:
+        cfg =  request.get_json(force=True)
+
+        results = {}
+        for key,value in cfg.items():
+            print(key)
+            sim = SEIRMETA(dict(value))
             sim.solve()
             results.update({key:sim.sims[0].results.to_json()})
 

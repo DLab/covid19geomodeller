@@ -20,6 +20,7 @@ from datetime import timedelta
 #import utils.cv19timeutils as cv19timeutils
 #import utils.cv19functions as cv19functions
 import cv19gm.utils.cv19files as cv19files
+import cv19gm.utils.cv19mobility as cv19mobility
 
 
 class SEIRMETA:  
@@ -44,8 +45,10 @@ class SEIRMETA:
             print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
         
-        if not self.Phi:
-            raise('Missing flux dynamics')
+        #if not self.Phi:
+        if not hasattr(self,'Phi') or not self.Phi:
+            print('Missing flux dynamics, using a random matrix instead')
+            self.Phi = cv19mobility.rnd_flux(self.population)
         if verbose:
             print('Initializing parameters and variables')
         self.set_initial_values()
@@ -63,10 +66,10 @@ class SEIRMETA:
    
     def set_initial_values(self):
         # Exposed
-        #if not self.Einit:
+        #The np.array cast is transitory hopefuly:
         if not hasattr(self,'E'):
-            self.E = self.mu*self.I
-            self.E_d=self.mu*self.I_d
+            self.E = np.array(self.mu)*np.array(self.I)
+            self.E_d = np.array(self.mu)*np.array(self.I_d)
 
         if not hasattr(self,'E_ac'):    
             self.E_ac= 0 
@@ -77,7 +80,7 @@ class SEIRMETA:
         
         self.nregions = len(self.population)
         
-        self.N = self.popfraction*self.population
+        self.N = self.popfraction*np.array(self.population)
         self.S = self.N-self.E-self.I-self.R
         self.nodes = len(self.population) # Amount of nodes /meta-populations
     

@@ -41,10 +41,12 @@ def build(input):
         return input
     elif type(input) == tuple:
         return build_add(*input)
-    elif type(input) == list:
+    elif type(input) == bool:
         # For building iterable simulations
         return input        
-    else:        
+    else:
+        if type(input) == list:
+            input = np.array(input)
         def out(t):
             return input
         setattr(locals()['out'],'constructor',str(input))            
