@@ -108,7 +108,7 @@ def simulate_meta():
             sim.solve() 
             aux = {}
             for i in range(sim.nodes):
-                aux[str(i)] = sim.results.loc[sim.results['node']==i].to_dict()               
+                aux[str(i)] = sim.results.loc[sim.results['node']==i].to_dict('list')               
                     
             results.update({key:json.dumps(aux)})
         
