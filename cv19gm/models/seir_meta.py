@@ -188,8 +188,8 @@ class SEIRMETA:
         #self.R_ac = np.cumsum(self.R_d)
 
         #self.analytics()
-        self.df_build()
-        self.params_df_build()
+        self.results_build()
+        self.global_results_build()
         #self.underreport()
         self.solved = True
 
@@ -208,29 +208,50 @@ class SEIRMETA:
         ydot[7]=self.dN(t,y[0],y[1],y[3],y[5],y[7])                                        
         return(ydot.flatten())
 
-
-    def df_build(self):
+    def results_build(self):
         """
-        Builds a dataframe with the simulation results
+        Builds a dataframe with the simulation results and parameters 
         Output structure: 
-        't','S','E','E_d','I','I_d','R','R_d','node'
+        't','S','E','E_d','I','I_d','R','R_d','beta','tE_I','tI_R','rR_S','node'
          0, ...
          1, ...
-         
           
         """
-        names = ['t','S','E','E_d','I','I_d','R','R_d','node']
+        names = ['t','S','E','E_d','I','I_d','R','R_d','beta','tE_I','tI_R','rR_S','node']
+        # Parameters
+        
+        beta_val = [[self.beta(t)[j] for t in self.t] for j in range(self.nodes)]        
+        tE_I_val = [self.tE_I(t) for t in self.t]
+        tI_R_val = [self.tI_R(t) for t in self.t]
+        rR_S_val = [self.rR_S(t) for t in self.t]
+        
         self.results = []
         for i in range(self.nodes):
             node = [i]*len(self.t)
-            self.results.append(pd.DataFrame(dict(zip(names,[self.t,self.S[i],self.E[i],self.E_d[i],self.I[i],self.I_d[i],self.R[i],self.R_d[i],node]))))        
+            self.results.append(pd.DataFrame(dict(zip(names,[self.t,self.S[i],self.E[i],self.E_d[i],self.I[i],self.I_d[i],self.R[i],self.R_d[i],beta_val[i],tE_I_val,tI_R_val,rR_S_val,node]))))        
         self.results = pd.concat(self.results,ignore_index=True).astype(int)
         return
+    
+    def global_results_build(self):
+        """Agregated results data frame
+        """
+        self.S_tot = self.S.sum(axis=0)
+        self.E_tot = self.E.sum(axis=0)
+        self.E_d_tot = self.E_d.sum(axis=0)
+        self.I_tot = self.I.sum(axis=0)
+        self.I_d_tot = self.I_d.sum(axis=0)
+        self.R_tot = self.R.sum(axis=0)
+        self.R_d_tot = self.R_d.sum(axis=0)
+        
+        names = ['t','S','E','E_d','I','I_d','R','R_d']        
+        self.global_results = pd.DataFrame(np.array([self.S_tot,self.E_tot,self.E_d_tot,self.I_tot,self.I_d_tot,self.R_tot,self.R_d_tot]).transpose(),columns=names).astype(int)        
+        return        
+        
 
     def params_df_build(self):
         """
         Builds a dataframe with the simulation parameters over time
-        """                
+        """
         
         names = ['t','beta','tE_I','tI_R','rR_S','node']                 
         beta_val = [[self.beta(t)[j] for t in self.t] for j in range(self.nodes)]
@@ -246,6 +267,8 @@ class SEIRMETA:
         
         self.params = pd.concat(self.params,ignore_index=True)
         return
+    
+    
 
     def analytics(self):
         """
@@ -270,16 +293,12 @@ class SEIRMETA:
         return
            
 
-    """
- 
+    """ 
     def calculateindicators(self):
         self.R_ef
         self.SHFR
-
         # SeroPrevalence Calculation
-
         # Errors (if real data)
-
         # Active infected
         print('wip')
 

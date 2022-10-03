@@ -133,7 +133,7 @@ class SEIR:
         # --------------------------- #
        
         # 0) dS/dt:
-        self.dS=lambda t,S,E,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
+        self.dS = lambda t,S,E,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
         
         # --------------------------- #
         #           Exposed           #
@@ -270,20 +270,31 @@ class SEIR:
         """
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
         names = ['S','E','E_d','I','I_d','R','R_d','Flux']
+        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names).astype(int)
+        names2 = ['E_ac','I_ac','R_ac','I_det','I_d_det','I_ac_det']#,'prevalence_total','prevalence_susc','prevalence_det']
+        vars2 = [self.E_ac,self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det]#,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
+        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2).astype(int)
         
-        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names)       
-
-        names2 = ['E_ac','I_ac','R_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
-        vars2 = [self.E_ac,self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
-        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
-
-        self.results = pd.concat([self.results,aux,aux2],axis=1)
-        self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
+        # Prevalence
+        self.prevalence = pd.DataFrame(np.transpose([self.prevalence_total,self.prevalence_susc,self.prevalence_det]),columns = ['prevalence_total','prevalence_susc','prevalence_det'])
+        
+        # Parameters
+        nameparams = ['beta','alpha','tE_I','tI_R','rR_S']
+        beta_val = [self.beta(t) for t in self.t]
+        alpha_val = [self.alpha(t) for t in self.t]
+        tE_I_val = [self.tE_I(t) for t in self.t]
+        tI_R_val = [self.tI_R(t) for t in self.t]
+        rR_S_val = [self.rR_S(t) for t in self.t]
+        self.params = pd.DataFrame(np.transpose([beta_val,alpha_val,tE_I_val,tI_R_val,rR_S_val]),columns = nameparams)
+        
+        # Build final Dataframe
+        self.compartments = pd.concat([self.results,aux,aux2],axis=1)
+        self.results = pd.concat([self.results,aux,aux2,self.params,self.prevalence],axis=1)
+        #self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
 
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
-        return
+        return    
 
-    
 
     """
  

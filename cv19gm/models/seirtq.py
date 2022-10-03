@@ -11,14 +11,14 @@ from datetime import datetime
 from datetime import timedelta
 
 # cv19gm libraries 
-import os
-import sys
-path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(1, path)
+#import os
+#import sys
+#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+#sys.path.insert(1, path)
 
-import data.cv19data as cv19data
-import utils.cv19timeutils as cv19timeutils
-import utils.cv19functions as cv19functions
+#import data.cv19data as cv19data
+#import utils.cv19timeutils as cv19timeutils
+#import utils.cv19functions as cv19functions
 import utils.cv19files as cv19files
 
 
@@ -282,20 +282,38 @@ class SEIRTQ:
         Builds a dataframe with the simulation results
         """
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
-        names = ['S','E','E_d','I','I_d','R','R_d','T','T_d','Q','N']
+        names = ['S','E','E_d','I','I_d','R','R_d','T','T_d','Q','N']        
+        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names).astype(int)
+        names2 = ['E_ac','I_ac','R_ac','T_ac','I_det','I_d_det','I_ac_det']
+        vars2 = [self.E_ac,self.I_ac,self.R_ac,self.T_ac,self.I_det,self.I_d_det,self.I_ac_det]
+        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2).astype(int)
+
+        # Prevalence
+        self.prevalence = pd.DataFrame(np.transpose([self.prevalence_total,self.prevalence_susc,self.prevalence_det]),columns = ['prevalence_total','prevalence_susc','prevalence_det'])
         
-        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names)       
-
-        names2 = ['E_ac','I_ac','R_ac','T_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
-        vars2 = [self.E_ac,self.I_ac,self.R_ac,self.T_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
-        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
-
-        self.results = pd.concat([self.results,aux,aux2],axis=1)
+        # Parameters
+        nameparams = ['beta','alpha','tE_I','tI_R','rR_S','tR_S','k_Ex','k_Eacc','k_Q','k_Tr','tQ_R','tT_Q']
+        beta_val = [self.beta(t) for t in self.t] 
+        alpha_val = [self.alpha(t) for t in self.t] 
+        tE_I_val = [self.tE_I(t) for t in self.t]
+        tI_R_val = [self.tI_R(t) for t in self.t]
+        rR_S_val = [self.rR_S(t) for t in self.t]
+        tR_S_val = [self.tR_S(t) for t in self.t]
+        k_Ex_val = [self.k_Ex(t) for t in self.t]
+        k_Eacc_val = [self.k_Eacc(t) for t in self.t]
+        k_Q_val = [self.k_Q(t) for t in self.t]
+        k_Tr_val = [self.k_Tr(t) for t in self.t]
+        tQ_R_val = [self.tQ_R(t) for t in self.t]
+        tT_Q_val = [self.tT_Q(t) for t in self.t]
+        self.params = pd.DataFrame(np.transpose([beta_val,alpha_val,tE_I_val,tI_R_val,rR_S_val,tR_S_val,k_Ex_val,k_Eacc_val,k_Q_val,k_Tr_val,tQ_R_val,tT_Q_val]),columns = nameparams)
+        
+        self.compartments = pd.concat([self.results,aux,aux2],axis=1)
+        self.results = pd.concat([self.results,aux,aux2,self.params,self.prevalence],axis=1)
         self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'T': int,'T_d': int,'Q': int,'E_ac': int,'I_ac': int,'R_ac': int,'T_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
 
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
         return
-
+    
     
 
     """

@@ -7,18 +7,18 @@ SEIRHVD Model
 import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
-import toml
+#import toml
 from datetime import datetime
 from datetime import timedelta
 
 # cv19gm libraries 
-import os
-import sys
-path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(1, path)
+#import os
+#import sys
+#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+#sys.path.insert(1, path)
 
-import data.cv19data as cv19data
-import utils.cv19timeutils as cv19timeutils
+#import data.cv19data as cv19data
+#import utils.cv19timeutils as cv19timeutils
 import utils.cv19functions as cv19functions
 import utils.cv19files as cv19files
 
@@ -385,36 +385,64 @@ class SEIRHVD:
         self.I_det = self.Im_det + self.Icr_det + self.Iv_det
         self.I_d_det = self.Im_d_det + self.Icr_d_det + self.Iv_d_det
         self.I_ac_det = self.Im_ac_det + self.Icr_ac_det + self.Iv_ac_det
-
-       
+        
+      
     def df_build(self):        
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
         names = ['S','Sv','E','E_d','Ev','Ev_d','Im','Im_d','Icr','Icr_d','Iv','Iv_d','H','H_d','D','D_d','R','R_d','Phi']
         
-        self.aux = pd.DataFrame(np.transpose(self.sol.y),columns=names)       
+        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names).astype(int)       
 
         names2 = ['E_ac','Ev_ac','Im_ac','Icr_ac','Iv_ac','R_ac','Im_det','Im_d_det','Im_ac_det','Icr_det','Icr_d_det','Icr_ac_det',
-        'Iv_det','Iv_d_det','Iv_ac_det','I','I_d','I_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det','CFR']
+        'Iv_det','Iv_d_det','Iv_ac_det','I','I_d','I_ac','I_det','I_d_det','I_ac_det']
         vars2 = [self.E_ac,self.Ev_ac,self.Im_ac,self.Icr_ac,self.Iv_ac,self.R_ac,self.Im_det,self.Im_d_det,self.Im_ac_det,
         self.Icr_det,self.Icr_d_det,self.Icr_ac_det,self.Iv_det,self.Iv_d_det,self.Iv_ac_det,self.I,self.I_d,self.I_ac,
-        self.I_det,self.I_d_det,self.I_ac_det,
-        self.prevalence_total,self.prevalence_susc,self.prevalence_det,self.CFR]
+        self.I_det,self.I_d_det,self.I_ac_det]
         
-        self.aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
+        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2).astype(int)
+        
+    
+       # Prevalence
+        self.prevalence = pd.DataFrame(np.transpose([self.prevalence_total,self.prevalence_susc,self.prevalence_det,self.CFR]),columns = ['prevalence_total','prevalence_susc','prevalence_det','CFR'])        
+    
+        # Parameters
+        nameparams = ['alpha','beta','beta_v','vac_d','vac_eff','pE_Im','tE_Im','pE_Icr','tE_Icr','tEv_Iv','tIm_R','tIcr_H','pIv_R','tIv_R',
+                      'pIv_H','tIv_H','pH_R','tH_R','pH_D','tH_D','pR_S','tR_S','pIcr_det','pIm_det','pIv_de']        
+        
+        alpha_val = [self.alpha(t) for t in self.t] 
+        beta_val = [self.beta(t) for t in self.t] 
+        beta_v_val = [self.beta_v(t) for t in self.t] 
+        vac_d_val = [self.vac_d(t) for t in self.t] 
+        vac_eff_val = [self.vac_eff(t) for t in self.t] 
+        pE_Im_val = [self.pE_Im(t) for t in self.t] 
+        tE_Im_val = [self.tE_Im(t) for t in self.t] 
+        pE_Icr_val = [self.pE_Icr(t) for t in self.t] 
+        tE_Icr_val = [self.tE_Icr(t) for t in self.t] 
+        tEv_Iv_val = [self.tEv_Iv(t) for t in self.t] 
+        tIm_R_val = [self.tIm_R(t) for t in self.t] 
+        tIcr_H_val = [self.tIcr_H(t) for t in self.t] 
+        pIv_R_val = [self.pIv_R(t) for t in self.t] 
+        tIv_R_val = [self.tIv_R(t) for t in self.t] 
+        pIv_H_val = [self.pIv_H(t) for t in self.t] 
+        tIv_H_val = [self.tIv_H(t) for t in self.t] 
+        pH_R_val = [self.pH_R(t) for t in self.t] 
+        tH_R_val = [self.tH_R(t) for t in self.t] 
+        pH_D_val = [self.pH_D(t) for t in self.t] 
+        tH_D_val = [self.tH_D(t) for t in self.t] 
+        pR_S_val = [self.pR_S(t) for t in self.t] 
+        tR_S_val = [self.tR_S(t) for t in self.t] 
+        pIcr_det_val = [self.pIcr_det(t) for t in self.t] 
+        pIm_det_val = [self.pIm_det(t) for t in self.t] 
+        pIv_det_val = [self.pIv_det(t) for t in self.t] 
+        
+        self.params = pd.DataFrame(np.transpose([alpha_val,beta_val,beta_v_val,vac_d_val,vac_eff_val,pE_Im_val,tE_Im_val,
+                                    pE_Icr_val,tE_Icr_val,tEv_Iv_val,tIm_R_val,tIcr_H_val,pIv_R_val,tIv_R_val,
+                                    pIv_H_val,tIv_H_val,pH_R_val,tH_R_val,pH_D_val,tH_D_val,pR_S_val,tR_S_val,
+                                    pIcr_det_val,pIm_det_val,pIv_det_val]),columns = nameparams)
 
-        self.results = pd.concat([self.results,self.aux,self.aux2],axis=1)
-
-        # Cast int
-        for i in self.results.keys():
-            if not i in ['dates','prevalence_total','prevalence_susc','prevalence_det','CFR']:
-                self.results[i] = self.results[i].astype('int')
-                #pass
-
-        #self.results = self.results.astype({'S': int,'E': int,'E_d': int,'I': int,'I_d': int,'R': int,'R_d': int,'E_ac': int,
-        #'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
-
+        self.compartments = pd.concat([self.results,aux,aux2],axis=1)
+        self.results = pd.concat([self.results,aux,aux2,self.params,self.prevalence],axis=1)
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
-
 
 
     """
