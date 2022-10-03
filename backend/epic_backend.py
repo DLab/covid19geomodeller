@@ -100,6 +100,7 @@ def simulate_meta():
     try:
         cfg =  request.get_json(force=True)
         results = {}
+        global_results = {}
         for key,value in cfg.items():
             print(key)
             #print(value)
@@ -110,9 +111,10 @@ def simulate_meta():
             for i in range(sim.nodes):
                 aux[str(i)] = sim.results.loc[sim.results['node']==i].to_dict('list')               
                     
-            results.update({key:json.dumps(aux)})
+            results.update({key:json.dumps(aux)})            
+            global_results.update({key:sim.global_results.to_json()})
         
-        response = {'status': 'OK','results' : results}
+        response = {'status': 'OK','results' : results,'global_results' : global_results}
         return jsonify(response), 200
     
     except Exception as e: 
