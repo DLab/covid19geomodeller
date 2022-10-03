@@ -188,8 +188,8 @@ class SEIRMETA:
         #self.R_ac = np.cumsum(self.R_d)
 
         #self.analytics()
-        self.results_build()
-        self.global_results_build()
+        #self.results_build()
+        #self.global_results_build()
         #self.underreport()
         self.solved = True
 
@@ -244,7 +244,7 @@ class SEIRMETA:
         self.R_d_tot = self.R_d.sum(axis=0)
         
         names = ['t','S','E','E_d','I','I_d','R','R_d']        
-        self.global_results = pd.DataFrame(np.array([self.S_tot,self.E_tot,self.E_d_tot,self.I_tot,self.I_d_tot,self.R_tot,self.R_d_tot]).transpose(),columns=names).astype(int)        
+        self.global_results = pd.DataFrame(np.array([self.t,self.S_tot,self.E_tot,self.E_d_tot,self.I_tot,self.I_d_tot,self.R_tot,self.R_d_tot]).transpose(),columns=names).astype(int)        
         return        
         
 
