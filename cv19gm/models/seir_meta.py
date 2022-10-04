@@ -188,8 +188,8 @@ class SEIRMETA:
         #self.R_ac = np.cumsum(self.R_d)
 
         #self.analytics()
-        #self.results_build()
-        #self.global_results_build()
+        self.results_build()
+        self.global_results_build()
         #self.underreport()
         self.solved = True
 
