@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import pandas as pd
+import sys
+#import pandas as pd
 import json
 import logging
 import numpy as np
 from flask import Flask
 from flask import jsonify
 from flask import request
-from flask import send_file
+#from flask import send_file
 from flask_cors import CORS
 
 from cv19gm.cv19sim import CV19SIM
 import cv19gm.utils.cv19functions as cv19functions
-import cv19gm.utils.cv19paramfit as cv19paramfit
+#import cv19gm.utils.cv19paramfit as cv19paramfit
 from cv19gm.models.seir_meta import SEIRMETA
+
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -25,6 +28,10 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 #     GUI communication     #
 # ------------------------- #
 """
+@app.route("/")
+def index():
+    return "<h1>Epic Suite Backend Server is up</h1>"
+
 @app.route('/health_check', methods=['GET'])
 def health_check():
     '''
@@ -154,6 +161,9 @@ def datafit():
     Returns:
         _type_: _description_
     """
+    if "cv19gm.utils.cv19paramfit" not in sys.modules:
+        import cv19gm.utils.cv19paramfit as cv19paramfit
+        #print('You have not imported the {} module'.format(modulename))
     
     input =  request.get_json(force=True)
 
@@ -182,7 +192,16 @@ def datafit():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5003, debug=True)
+    debug = False
+    if debug:
+        print("Initializing server in debugging mode")
+        app.run(host="0.0.0.0", port=5003, debug=True)
+    else: 
+        print("Initializing server in production mode")
+        from waitress import serve
+        serve(app, host="0.0.0.0", port=5003)
+    
+    
 else:
     # setup logging using gunicorn logger
     formatter = logging.Formatter(
