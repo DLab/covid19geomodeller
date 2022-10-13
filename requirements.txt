@@ -12,3 +12,4 @@ flask_cors
 matplotlib
 ipython
 pygmo
+waitress

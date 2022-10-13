@@ -17,7 +17,7 @@ setuptools.setup(
     },
     license='MIT',
     packages = setuptools.find_packages(),
-    install_requires=['requests','numpy','matplotlib','pandas','scipy','datetime','toml']
+    install_requires=['requests','numpy','matplotlib','pandas','scipy','datetime','toml','pygmo']
 )
 
 #packages = ['cv19gm','cv19gm.models']

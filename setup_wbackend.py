@@ -17,7 +17,7 @@ setuptools.setup(
     },
     license='MIT',
     packages = setuptools.find_packages(),
-    install_requires=['requests','numpy','matplotlib','pandas','scipy','datetime','toml','logging','flask','flask_cors','argparse']
+    install_requires=['requests','numpy','matplotlib','pandas','scipy','datetime','toml','logging','pygmo','flask','flask_cors','argparse','waitress']
 )
 
 #packages = ['cv19gm','cv19gm.models']
