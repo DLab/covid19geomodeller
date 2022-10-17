@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
+#import sys
 #import pandas as pd
 import json
 import logging
@@ -14,10 +14,12 @@ from flask_cors import CORS
 
 from cv19gm.cv19sim import CV19SIM
 import cv19gm.utils.cv19functions as cv19functions
-#import cv19gm.utils.cv19paramfit as cv19paramfit
+
 from cv19gm.models.seir_meta import SEIRMETA
+import cv19gm.utils.cv19paramfit as cv19paramfit
 
 
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -76,8 +78,11 @@ def simulate():
      4.- Retornar los resultados
     '''
     try:
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        print("Simulating metapopulation model (", current_time,")")
+        
         cfg =  request.get_json(force=True)
-
         results = {}
         for key,value in cfg.items():
             print(key) 
@@ -108,6 +113,11 @@ def simulate_meta():
         cfg =  request.get_json(force=True)
         results = {}
         global_results = {}
+        
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        print("Simulating metapopulation model (", current_time,")")
+        
         for key,value in cfg.items():
             print(key)
             #print(value)
@@ -142,13 +152,19 @@ def function():
     '''
     try:
         cfgfunction =  request.get_json(force=True)
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        print("Building function ",str(cfgfunction['function'])," (", current_time,")")                
         function = cv19functions.build(cfgfunction['function'])
         t = np.linspace(cfgfunction['t_init'],cfgfunction['t_end'],(cfgfunction['t_end']-cfgfunction['t_init'])*10+1)
         functionarray = function(t)
         response = {'status': 'OK','results' : {'t':list(t),'function':list(functionarray)}}
         return jsonify(response), 200
     
-    except Exception as e: 
+    except Exception as e:
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        print("Error ",current_time)
         print(e)        
         response = {"error": "Wrong parameters"}
         return response, 400    
@@ -161,10 +177,10 @@ def datafit():
     Returns:
         _type_: _description_
     """
-    if "cv19gm.utils.cv19paramfit" not in sys.modules:
-        import cv19gm.utils.cv19paramfit as cv19paramfit
-        #print('You have not imported the {} module'.format(modulename))
-    
+   
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Finding optimal parameters (",current_time,")")
     input =  request.get_json(force=True)
 
     results = {}
@@ -181,7 +197,7 @@ def datafit():
     results['simulation'] =  fit.sim.sims[0].results.to_json()
     
     response = {'status': 'OK','results' : results}
-    try:  
+    try:
         return jsonify(response), 200
     
     except Exception as e: 
