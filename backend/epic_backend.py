@@ -11,15 +11,13 @@ from flask import jsonify
 from flask import request
 #from flask import send_file
 from flask_cors import CORS
+from datetime import datetime
 
 from cv19gm.cv19sim import CV19SIM
 import cv19gm.utils.cv19functions as cv19functions
-
 from cv19gm.models.seir_meta import SEIRMETA
 import cv19gm.utils.cv19paramfit as cv19paramfit
 
-
-from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -181,6 +179,7 @@ def datafit():
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print("Finding optimal parameters (",current_time,")")
+
     input =  request.get_json(force=True)
 
     results = {}
