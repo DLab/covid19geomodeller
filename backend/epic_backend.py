@@ -16,6 +16,7 @@ from cv19gm.cv19sim import CV19SIM
 import cv19gm.utils.cv19functions as cv19functions
 #import cv19gm.utils.cv19paramfit as cv19paramfit
 from cv19gm.models.seir_meta import SEIRMETA
+import cv19gm.utils.cv19paramfit as cv19paramfit
 
 
 
@@ -161,8 +162,8 @@ def datafit():
     Returns:
         _type_: _description_
     """
-    if "cv19gm.utils.cv19paramfit" not in sys.modules:
-        import cv19gm.utils.cv19paramfit as cv19paramfit
+    #if "cv19gm.utils.cv19paramfit" not in sys.modules:
+        
         #print('You have not imported the {} module'.format(modulename))
     
     input =  request.get_json(force=True)
