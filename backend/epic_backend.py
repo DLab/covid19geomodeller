@@ -78,7 +78,7 @@ def simulate():
     try:
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        print("Simulating metapopulation model (", current_time,")")
+        print("Simulating monopopulation model (", current_time,")")
         
         cfg =  request.get_json(force=True)
         results = {}
@@ -119,12 +119,22 @@ def simulate_meta():
         for key,value in cfg.items():
             print(key)
             #print(value)
-            sim = SEIRMETA(dict(value))
+            cfg = dict(value)
+            sim = SEIRMETA(cfg)
             print('Simulating may take some time')
             sim.solve() 
             aux = {}
+            
+            # Assigns the fips code to the data. Could be done in the simulation library 
+            if sim.cfg['data']['state']:
+                names = sim.cfg['data']['state']
+            elif sim.cfg['data']['county']:
+                names = sim.cfg['data']['county']
+            else: 
+                names = [str(i) for i in range(sim.nodes)]
+                
             for i in range(sim.nodes):
-                aux[str(i)] = sim.results.loc[sim.results['node']==i].to_dict('list')               
+                aux[names[i]] = sim.results.loc[sim.results['node']==i].to_dict('list')               
                     
             results.update({key:json.dumps(aux)})            
             global_results.update({key:sim.global_results.to_json()})

@@ -54,6 +54,9 @@ def to_symmetric_function(inputmatrix):
     return Phi
 
 
-def rnd_flux(population,fraction=0.1):
+def rnd_flux_symmetric(population,fraction=0.1):
     aux = rnd_flux_matrix(population,fraction)
     return to_symmetric_function(aux)
+
+def rnd_flux(population,fraction=0.1):
+    return rnd_flux_symmetric(population,fraction)
