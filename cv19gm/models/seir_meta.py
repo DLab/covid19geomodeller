@@ -48,7 +48,7 @@ class SEIRMETA:
         #if not self.Phi:
         if not hasattr(self,'Phi') or not self.Phi:
             print('Missing flux dynamics, using a random matrix instead')
-            self.Phi = cv19mobility.rnd_flux(self.population)
+            self.Phi = cv19mobility.rnd_flux_symmetric(self.population)
         if verbose:
             print('Initializing parameters and variables')
         self.set_initial_values()
