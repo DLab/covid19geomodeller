@@ -30,7 +30,7 @@ class SEIRMETA:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False,**kwargs):    
+    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, **kwargs):    
         if not config:
             #print('Missing configuration file ')
             raise('Missing configuration file')
@@ -45,10 +45,17 @@ class SEIRMETA:
             print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
         
-        #if not self.Phi:
-        if not hasattr(self,'Phi') or not self.Phi:
+        # Definition of mobility matrix (Work in progress, it will be done inside the cb19mobility lib)
+        if Phi:
+            self.Phi = Phi
+        else:
             print('Missing flux dynamics, using a random matrix instead')
             self.Phi = cv19mobility.rnd_flux_symmetric(self.population)
+            
+        #if not hasattr(self,'Phi') or not self.Phi:
+        #    print('Missing flux dynamics, using a random matrix instead')
+        #    self.Phi = cv19mobility.rnd_flux_symmetric(self.population)
+            
         if verbose:
             print('Initializing parameters and variables')
         self.set_initial_values()
