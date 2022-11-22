@@ -20,7 +20,7 @@ To Do:
 """
 Flux matrix generation
 """
-def rnd_flux_matrix(population,fraction = 0.1):
+def rnd_flux_matrix(population,fraction = 0.1,seed=None):
     """Generate a random flux matrix that moves the specified fraction of the population.
     This method uses the dirichlet distribution in order to distribute the population mantaining the total.
         
@@ -40,7 +40,7 @@ def rnd_flux_matrix(population,fraction = 0.1):
     
     aux = []
     for i in range(size):
-        aux.append(np.insert(np.random.default_rng().dirichlet(np.ones(size-1),size=1)*population[i]*fraction[i],i,0))
+        aux.append(np.insert(np.random.default_rng(np.random.default_rng(seed=seed)).dirichlet(np.ones(size-1),size=1)*population[i]*fraction[i],i,0))
     return np.array(aux).astype(int)
 
 
@@ -84,3 +84,13 @@ def import_mobility(file):
     # Import file
     # Build Mobility Matrix
     return 
+
+def create_mobility():
+    # Create mobility matrix from static matrix, json or a random one if no input is given
+    pass
+
+def mobility_to_tensor(mobfunction,t_end):
+    return np.array([mobfunction(i/2)for i in range(2*t_end+1)])
+
+def mobility_transposed(matrix):
+    return np.array([matrix[i].transpose() for i in range(len(matrix))])

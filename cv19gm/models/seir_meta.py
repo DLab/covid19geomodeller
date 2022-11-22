@@ -22,6 +22,11 @@ from datetime import timedelta
 import cv19gm.utils.cv19files as cv19files
 import cv19gm.utils.cv19mobility as cv19mobility
 
+""" To Do
+* Y tener precargaada la matriz de movilidad como transpuesta
+* Matriz de movilidad de función a tensor
+
+"""
 
 class SEIRMETA:  
     """|
@@ -30,7 +35,7 @@ class SEIRMETA:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, **kwargs):    
+    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, seed=None, **kwargs):    
         if not config:
             #print('Missing configuration file ')
             raise('Missing configuration file')
@@ -50,7 +55,7 @@ class SEIRMETA:
             self.Phi = Phi
         else:
             print('Missing flux dynamics, using a random matrix instead')
-            self.Phi = cv19mobility.rnd_flux_symmetric(self.population)
+            self.Phi = cv19mobility.rnd_flux_symmetric(self.population,seed=seed)
             
         #if not hasattr(self,'Phi') or not self.Phi:
         #    print('Missing flux dynamics, using a random matrix instead')
@@ -139,12 +144,40 @@ class SEIRMETA:
         # --------------------------- #
         #         People Flux         #
         # --------------------------- #         
-        self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np.ones(self.nregions)
-        self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np.ones(self.nregions)
-        self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np.ones(self.nregions)
-        self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np.ones(self.nregions)
+        # Version original
+        #self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np.ones(self.nregions)
+        #self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np.ones(self.nregions)
+        #self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np.ones(self.nregions)
+        #self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np.ones(self.nregions)
+                
+        # Primera propuesta
+        #np_ones = np.ones(self.nregions)
+        #self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np_ones
+        #self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np_ones
+        #self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np_ones
+        #self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np_ones
         
-
+        # segunda propuesta 
+        #self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
+        #self.Phi_matrix_T = np.transpose(self.Phi_matrix)        
+        #np_ones = np.ones(self.nregions)
+        
+        #self.phi_S = lambda t,S,N: self.Phi_matrix_T[int(2*t)]@(S/N) - np.diag(S/N)@self.Phi_matrix[int(2*t)]@np_ones
+        #self.phi_E = lambda t,E,N: self.Phi_matrix_T[int(2*t)]@(E/N) - np.diag(E/N)@self.Phi_matrix[int(2*t)]@np_ones
+        #self.phi_I = lambda t,I,N: self.Phi_matrix_T[int(2*t)]@(I/N) - np.diag(I/N)@self.Phi_matrix[int(2*t)]@np_ones
+        #self.phi_R = lambda t,R,N: self.Phi_matrix_T[int(2*t)]@(R/N) - np.diag(R/N)@self.Phi_matrix[int(2*t)]@np_ones        
+        
+        # Tercera propuesta 
+        self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
+        self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
+        np_ones = np.ones(self.nregions)
+        
+        self.phi_S = lambda t,S,N: np.dot(self.Phi_matrix_T[int(2*t)],(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi_matrix[int(2*t)]),np_ones)
+        self.phi_E = lambda t,E,N: np.dot(self.Phi_matrix_T[int(2*t)],(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi_matrix[int(2*t)]),np_ones)
+        self.phi_I = lambda t,I,N: np.dot(self.Phi_matrix_T[int(2*t)],(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi_matrix[int(2*t)]),np_ones)
+        self.phi_R = lambda t,R,N: np.dot(self.Phi_matrix_T[int(2*t)],(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi_matrix[int(2*t)]),np_ones)
+                
+        
     def integrate(self,t0=0,T=None,h=0.01):
         print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h)
