@@ -35,13 +35,14 @@ class SEIRMETA:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, seed=None, **kwargs):    
+    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, seed=None, method = 0, **kwargs):    
         if not config:
             #print('Missing configuration file ')
             raise('Missing configuration file')
             #return None
         self.kwargs = kwargs
         
+        self.method = method
         # ------------------------------- #
         #         Parameters Load         #
         # ------------------------------- #
@@ -143,39 +144,44 @@ class SEIRMETA:
         
         # --------------------------- #
         #         People Flux         #
-        # --------------------------- #         
+        # --------------------------- # 
+        
+        if self.method == 0:        
         # Version original
-        #self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np.ones(self.nregions)
-        #self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np.ones(self.nregions)
-        #self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np.ones(self.nregions)
-        #self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np.ones(self.nregions)
-                
+            self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np.ones(self.nregions)
+            self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np.ones(self.nregions)
+            self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np.ones(self.nregions)
+            self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np.ones(self.nregions)
+
+        elif self.method == 1:        
         # Primera propuesta
-        #np_ones = np.ones(self.nregions)
-        #self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np_ones
-        #self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np_ones
-        #self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np_ones
-        #self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np_ones
+            np_ones = np.ones(self.nregions)
+            self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np_ones
+            self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np_ones
+            self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np_ones
+            self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np_ones
         
         # segunda propuesta 
-        #self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
-        #self.Phi_matrix_T = np.transpose(self.Phi_matrix)        
-        #np_ones = np.ones(self.nregions)
+        elif self.method == 2:
+            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
+            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
+            np_ones = np.ones(self.nregions)
         
-        #self.phi_S = lambda t,S,N: self.Phi_matrix_T[int(2*t)]@(S/N) - np.diag(S/N)@self.Phi_matrix[int(2*t)]@np_ones
-        #self.phi_E = lambda t,E,N: self.Phi_matrix_T[int(2*t)]@(E/N) - np.diag(E/N)@self.Phi_matrix[int(2*t)]@np_ones
-        #self.phi_I = lambda t,I,N: self.Phi_matrix_T[int(2*t)]@(I/N) - np.diag(I/N)@self.Phi_matrix[int(2*t)]@np_ones
-        #self.phi_R = lambda t,R,N: self.Phi_matrix_T[int(2*t)]@(R/N) - np.diag(R/N)@self.Phi_matrix[int(2*t)]@np_ones        
+            self.phi_S = lambda t,S,N: self.Phi_matrix_T[int(2*t)]@(S/N) - np.diag(S/N)@self.Phi_matrix[int(2*t)]@np_ones
+            self.phi_E = lambda t,E,N: self.Phi_matrix_T[int(2*t)]@(E/N) - np.diag(E/N)@self.Phi_matrix[int(2*t)]@np_ones
+            self.phi_I = lambda t,I,N: self.Phi_matrix_T[int(2*t)]@(I/N) - np.diag(I/N)@self.Phi_matrix[int(2*t)]@np_ones
+            self.phi_R = lambda t,R,N: self.Phi_matrix_T[int(2*t)]@(R/N) - np.diag(R/N)@self.Phi_matrix[int(2*t)]@np_ones        
         
         # Tercera propuesta 
-        self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
-        self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
-        np_ones = np.ones(self.nregions)
-        
-        self.phi_S = lambda t,S,N: np.dot(self.Phi_matrix_T[int(2*t)],(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi_matrix[int(2*t)]),np_ones)
-        self.phi_E = lambda t,E,N: np.dot(self.Phi_matrix_T[int(2*t)],(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi_matrix[int(2*t)]),np_ones)
-        self.phi_I = lambda t,I,N: np.dot(self.Phi_matrix_T[int(2*t)],(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi_matrix[int(2*t)]),np_ones)
-        self.phi_R = lambda t,R,N: np.dot(self.Phi_matrix_T[int(2*t)],(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi_matrix[int(2*t)]),np_ones)
+        elif self.method == 3:
+            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
+            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
+            np_ones = np.ones(self.nregions)
+
+            self.phi_S = lambda t,S,N: np.dot(self.Phi_matrix_T[int(2*t)],(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi_matrix[int(2*t)]),np_ones)
+            self.phi_E = lambda t,E,N: np.dot(self.Phi_matrix_T[int(2*t)],(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi_matrix[int(2*t)]),np_ones)
+            self.phi_I = lambda t,I,N: np.dot(self.Phi_matrix_T[int(2*t)],(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi_matrix[int(2*t)]),np_ones)
+            self.phi_R = lambda t,R,N: np.dot(self.Phi_matrix_T[int(2*t)],(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi_matrix[int(2*t)]),np_ones)
                 
         
     def integrate(self,t0=0,T=None,h=0.01):
