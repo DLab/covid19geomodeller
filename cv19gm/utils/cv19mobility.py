@@ -44,29 +44,40 @@ def rnd_flux_matrix(population,fraction = 0.1,seed=None):
     return np.array(aux).astype(int)
 
 
-def to_symmetric_function(inputmatrix):
+def to_symmetric_function(inputmatrix,transposed=False):
     """Convert a flux matrix into a daily symmetric flux function, 
     in order to conserve the population throughout the day, avoiding long-term mass migrations
 
     Args:
         inputmatrix (np.array): Base flux matrix
+        transposed (bool, optional): Returns the transposed matrix
     
     Returns:
         function: Time symmetric flux function
     """
-    def Phi(t):
+    inputmatrix_T = inputmatrix.transpose()
+    def Phi(t):        
         if t%1<0.5:
             return inputmatrix
         else:
-            return inputmatrix.transpose()
-    return Phi
+            return inputmatrix_T
+    if transposed:
+        def Phi_T(t):            
+            if t%1<0.5:
+                return inputmatrix_T
+            else:
+                return inputmatrix
+        return Phi, Phi_T
+    else:
+        return Phi
 
 
-def rnd_flux_symmetric(population,fraction=0.1):
-    return to_symmetric_function(rnd_flux_matrix(population,fraction))
 
-def rnd_flux(population,fraction=0.1):
-    return rnd_flux_symmetric(population,fraction)
+def rnd_flux_symmetric(population,fraction=0.1, transposed = False):
+    return to_symmetric_function(rnd_flux_matrix(population,fraction),transposed)
+
+def rnd_flux(population,fraction=0.1,transposed=False):
+    return rnd_flux_symmetric(population,fraction,transposed)
 
 
 def export_mobility(mobfunction,t=None,path=None):

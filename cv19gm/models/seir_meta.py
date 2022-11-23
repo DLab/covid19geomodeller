@@ -35,7 +35,7 @@ class SEIRMETA:
             SEIR(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, seed=None, method = 0, **kwargs):    
+    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, Phi_T = None, seed=None, method = 0, **kwargs):    
         if not config:
             #print('Missing configuration file ')
             raise('Missing configuration file')
@@ -54,9 +54,14 @@ class SEIRMETA:
         # Definition of mobility matrix (Work in progress, it will be done inside the cb19mobility lib)
         if Phi:
             self.Phi = Phi
+            if Phi_T:
+                self.Phi_T = Phi_T
+            else:
+                self.Phi_T = lambda t: Phi(t).transpose()
+                
         else:
             print('Missing flux dynamics, using a random matrix instead')
-            self.Phi = cv19mobility.rnd_flux_symmetric(self.population,seed=seed)
+            self.Phi, self.Phi_T = cv19mobility.rnd_flux_symmetric(self.population,seed=seed, transposed = True)
             
         #if not hasattr(self,'Phi') or not self.Phi:
         #    print('Missing flux dynamics, using a random matrix instead')
@@ -183,7 +188,15 @@ class SEIRMETA:
             self.phi_I = lambda t,I,N: np.dot(self.Phi_matrix_T[int(2*t)],(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi_matrix[int(2*t)]),np_ones)
             self.phi_R = lambda t,R,N: np.dot(self.Phi_matrix_T[int(2*t)],(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi_matrix[int(2*t)]),np_ones)
                 
-        
+        # Tercera propuesta 
+        elif self.method == 4:
+            np_ones = np.ones(self.nregions)
+            self.phi_S = lambda t,S,N: np.dot(self.Phi_T(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
+            self.phi_E = lambda t,E,N: np.dot(self.Phi_T(t),(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi(t)),np_ones)
+            self.phi_I = lambda t,I,N: np.dot(self.Phi_T(t),(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi(t)),np_ones)
+            self.phi_R = lambda t,R,N: np.dot(self.Phi_T(t),(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi(t)),np_ones)
+
+                    
     def integrate(self,t0=0,T=None,h=0.01):
         print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h)
