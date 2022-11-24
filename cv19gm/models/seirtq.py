@@ -19,17 +19,21 @@ class SEIRTQ:
 
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
-    
+        self.model = "SEIRTQ"
+        
         if not config:
-            raise('Missing configuration file')
+            #raise('Missing configuration file')
+            print('Missing configuration file, using default')
+    
         
         # ------------------------------- #
         #         Parameters Load         #
         # ------------------------------- #
-        self.config = config
+        #self.config = config
         if verbose:
             print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
+        
         if verbose:
             print('Initializing parameters and variables')
         self.set_relational_values()
@@ -171,11 +175,10 @@ class SEIRTQ:
         self.solve(t0=t0,T=T,h=h)
 
     def run(self,t0=0,T=None,h=0.01):
-        #print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h)
 
     # Scipy
-    def solve(self,t0=0,T=None,h=0.01):
+    def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         """
         Solves ODEs using scipy.integrate
         Args:
@@ -196,7 +199,7 @@ class SEIRTQ:
         self.t=np.arange(t0,T+h,h)
         initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,self.R_d,self.T,self.T_d,self.Q,self.N]) # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
         
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 

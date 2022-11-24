@@ -37,11 +37,12 @@ class SEIRMETA:
     """
     def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, Phi_T = None, seed=None, method = 0, **kwargs):    
         if not config:
-            #print('Missing configuration file ')
+            #print('Missing configuration file')
             raise('Missing configuration file')
             #return None
-        self.kwargs = kwargs
-        
+            
+        self.model = "SEIR_meta"        
+        self.kwargs = kwargs        
         self.method = method
         # ------------------------------- #
         #         Parameters Load         #
@@ -62,10 +63,6 @@ class SEIRMETA:
         else:
             print('Missing flux dynamics, using a random matrix instead')
             self.Phi, self.Phi_T = cv19mobility.rnd_flux_symmetric(self.population,seed=seed, transposed = True)
-            
-        #if not hasattr(self,'Phi') or not self.Phi:
-        #    print('Missing flux dynamics, using a random matrix instead')
-        #    self.Phi = cv19mobility.rnd_flux_symmetric(self.population)
             
         if verbose:
             print('Initializing parameters and variables')
@@ -206,7 +203,7 @@ class SEIRMETA:
         self.solve(t0=t0,T=T,h=h)
 
     # Scipy
-    def solve(self,t0=0,T=None,h=0.01):
+    def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         """
         Solves ODEs using scipy.integrate
         Args:
@@ -227,7 +224,7 @@ class SEIRMETA:
         self.R_d = np.zeros(self.nregions)
         initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,self.R_d,self.N]).flatten() # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
         
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method='LSODA',t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t         

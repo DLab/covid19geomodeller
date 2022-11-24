@@ -12,16 +12,8 @@ from datetime import datetime
 from datetime import timedelta
 
 # cv19gm libraries 
-#import os
-#import sys
-#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-#sys.path.insert(1, path)
-
-#import data.cv19data as cv19data
-#import utils.cv19timeutils as cv19timeutils
 import utils.cv19functions as cv19functions
 import utils.cv19files as cv19files
-
 
 
 class SEIRHVD:  
@@ -31,20 +23,22 @@ class SEIRHVD:
             SEIRHVD(self, config = None, inputdata=None)
 
     """
-    def __init__(self, config, inputdata=None,verbose = False,**kwargs):        
-
+    def __init__(self, config=None, inputdata=None,verbose = False,**kwargs):
+        self.model = 'SEIRHVD'
+        
         if not config:
-            print('Missing configuration file ')
-            return None
+            print('Missing configuration file, using default')
+            #return None
 
         # ------------------------------- #
         #        Parameters Load          #
         # ------------------------------- #
         self.verbose = verbose
-        self.config = config  
+        #self.config = config  
+        
         if verbose:
             print('Loading configuration file')
-        cv19files.loadconfig(self,config,inputdata,**kwargs) # Load configuration file
+        cv19files.loadconfig(self,config=config,model=self.model,inputdata=inputdata,**kwargs) # Load configuration file
         
         # Hospital capacity:        
         if verbose:
@@ -231,12 +225,16 @@ class SEIRHVD:
         self.dPhi = lambda t: self.S_f(t) + self.Sv_f(t) + self.E_f(t) + self.Ev_f(t) + self.Im_f(t) + self.Icr_f(t) + self.Iv_f(t) + self.H_f(t) + self.D_f(t) + self.R_f(t) 
 
 
-    def integrate(self,t0=0,T=None,h=0.01):
+    def integrate(self,t0=0,T=None,h=0.01,method='LSODA'):
         print('The use of integrate() is now deprecated. Use solve() instead.')
-        self.solve(t0=t0,T=T,h=h)
+        self.solve(t0=t0,T=T,h=h,method=method)
+
+    def run(self,t0=0,T=None,h=0.01,method='LSODA'):
+        #print('The use of integrate() is now deprecated. Use solve() instead.')
+        self.solve(t0=t0,T=T,h=h,method=method)
 
     # Scipy
-    def solve(self,t0=0,T=None,h=0.01):
+    def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,mu*(self.I_ac)T] function doesn't
         #start. Or it's start if class object is initialze.
@@ -259,7 +257,7 @@ class SEIRHVD:
         if self.verbose:
             print('Solving EDOs')
 
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), self.initcond,method='LSODA',t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.model_SEIR_graph,(t0,T), self.initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -369,17 +367,17 @@ class SEIRHVD:
             self.Im_d_det = [self.Im_d[i]*self.pI_det(self.t(i)) for i in range(len(self.t))]
             self.Im_ac_det = np.cumsum(self.Im_d_det)
 
-        self.Im_det = self.Im*self.pI_det(0)
-        self.Im_d_det = self.Im_d*self.pI_det(0)
-        self.Im_ac_det = self.Im_ac*self.pI_det(0)
+        self.Im_det = self.Im*self.pI_det
+        self.Im_d_det = self.Im_d*self.pI_det
+        self.Im_ac_det = self.Im_ac*self.pI_det
 
-        self.Icr_det = self.Icr*self.pI_det(0)
-        self.Icr_d_det = self.Icr_d*self.pI_det(0)
-        self.Icr_ac_det = self.Icr_ac*self.pI_det(0)
+        self.Icr_det = self.Icr*self.pI_det
+        self.Icr_d_det = self.Icr_d*self.pI_det
+        self.Icr_ac_det = self.Icr_ac*self.pI_det
 
-        self.Iv_det = self.Iv*self.pIv_det(0)
-        self.Iv_d_det = self.Iv_d*self.pIv_det(0)
-        self.Iv_ac_det = self.Iv_ac*self.pIv_det(0)
+        self.Iv_det = self.Iv*self.pIv_det
+        self.Iv_d_det = self.Iv_d*self.pIv_det
+        self.Iv_ac_det = self.Iv_ac*self.pIv_det
 
 
         self.I_det = self.Im_det + self.Icr_det + self.Iv_det
@@ -407,7 +405,7 @@ class SEIRHVD:
     
         # Parameters
         nameparams = ['alpha','beta','beta_v','vac_d','vac_eff','pE_Im','tE_Im','pE_Icr','tE_Icr','tEv_Iv','tIm_R','tIcr_H','pIv_R','tIv_R',
-                      'pIv_H','tIv_H','pH_R','tH_R','pH_D','tH_D','pR_S','tR_S','pIcr_det','pIm_det','pIv_de']        
+                      'pIv_H','tIv_H','pH_R','tH_R','pH_D','tH_D','pR_S','tR_S',]#'pIcr_det','pIm_det','pIv_de']        
         
         alpha_val = [self.alpha(t) for t in self.t] 
         beta_val = [self.beta(t) for t in self.t] 
@@ -431,14 +429,14 @@ class SEIRHVD:
         tH_D_val = [self.tH_D(t) for t in self.t] 
         pR_S_val = [self.pR_S(t) for t in self.t] 
         tR_S_val = [self.tR_S(t) for t in self.t] 
-        pIcr_det_val = [self.pIcr_det(t) for t in self.t] 
-        pIm_det_val = [self.pIm_det(t) for t in self.t] 
-        pIv_det_val = [self.pIv_det(t) for t in self.t] 
+        #pIcr_det_val = [self.pIcr_det(t) for t in self.t] 
+        #pIm_det_val = [self.pIm_det(t) for t in self.t] 
+        #pIv_det_val = [self.pIv_det(t) for t in self.t] 
         
         self.params = pd.DataFrame(np.transpose([alpha_val,beta_val,beta_v_val,vac_d_val,vac_eff_val,pE_Im_val,tE_Im_val,
                                     pE_Icr_val,tE_Icr_val,tEv_Iv_val,tIm_R_val,tIcr_H_val,pIv_R_val,tIv_R_val,
-                                    pIv_H_val,tIv_H_val,pH_R_val,tH_R_val,pH_D_val,tH_D_val,pR_S_val,tR_S_val,
-                                    pIcr_det_val,pIm_det_val,pIv_det_val]),columns = nameparams)
+                                    pIv_H_val,tIv_H_val,pH_R_val,tH_R_val,pH_D_val,tH_D_val,pR_S_val,tR_S_val,]),columns = nameparams)
+                                    #pIcr_det_val,pIm_det_val,pIv_det_val]),columns = nameparams)
 
         self.compartments = pd.concat([self.results,aux,aux2],axis=1)
         self.results = pd.concat([self.results,aux,aux2,self.params,self.prevalence],axis=1)
