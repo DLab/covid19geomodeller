@@ -33,11 +33,19 @@ Todo: [ ] Solve está siendo aplicado más de una vez. Ver donde ocurre eso!
 """
 
 class CV19SIM():
-    def __init__(self,config, inputdata = None, model=None, verbose=False,**kwargs):
-        config = deepcopy(config)
+    def __init__(self,config = None, inputdata = None, model=None, verbose=False,**kwargs):
+        
         # Leer el archivo de configuracion
-        if not type(config) == dict:
-            config = toml.load(config)
+        if not config:
+            if not model:
+                raise Exception("Missing compartmental model definition")
+            print("Using default configuration file for "+model+" model")
+            config = cv19files.getdefault(model)
+        else:
+            if not type(config) == dict:
+                config = toml.load(config)
+            else:
+                config = deepcopy(config)
             
         aux = cv19files.unwrapconfig(config,**kwargs)        
         if not model:
@@ -92,6 +100,8 @@ class CV19SIM():
                 print('Simulating over 1 level and 1 element')
                
         self.vectsolve = np.vectorize(solve)
+        
+        print(+str(np.prod(np.shape(self.sims)))+" models created")
         
     def integrate(self):
         print('The use of integrate() is now deprecated. Use solve() instead.')
