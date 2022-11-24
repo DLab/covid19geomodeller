@@ -1,0 +1,93 @@
+[data]
+	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
+	datafile = false # File path for importing data from file 
+	importdata = false # Import data from external source
+
+	# parameters to use when importing from external sources 
+	initdate = ''
+	country = ''
+	state = ''
+	county = ''
+	loc_name= '' 
+
+[sir]
+	[sir.parameters]
+		[sir.parameters.static]
+		# Saturation dynamic
+		k_I = 0
+		k_R = 0
+
+		populationfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
+		
+		[sir.parameters.dynamic]
+		# External flux rates over time 
+		S_f = 0
+		I_f = 0
+		R_f = 0	
+
+		# Subreport: Detected infected are calculated from the real infected given in the IC
+		pI_det = 1	
+
+
+[seir]
+	[seir.parameters]
+		[seir.parameters.static]
+		# Saturation dynamic
+		k_I = 0
+		k_R = 0
+
+		populationfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
+		
+		[seir.parameters.dynamic]
+		# External flux rates over time 
+		S_f = 0
+		E_f = 0
+		I_f = 0 
+		R_f = 0	
+
+		# Subreport: Detected infected are calculated from the real infected given in the IC
+		pI_det = 1	
+
+
+[seirtq]
+	[seirtq.parameters]
+		[seirtq.parameters.static]
+
+		populationfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
+		
+		[seirtq.parameters.dynamic]
+		# External flux rates over time 
+		S_f = 0
+		E_f = 0
+		I_f = 0
+		R_f = 0
+		T_f = 0			
+
+		# Subreport: Detected infected are calculated from the real infected given in the IC
+		pI_det = 1	
+
+
+
+[seirhvd]
+	[seirhvd.parameters]
+		[seirhvd.parameters.static]
+		populationfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
+		
+		[seirhvd.parameters.dynamic]
+		# External flux rates over time 
+		S_f = 0
+		Sv_f = 0
+		E_f = 0
+		Ev_f = 0
+		Iv_f = 0
+		Im_f = 0
+		Icr_f = 0
+		H_f = 0
+		D_f = 0 
+		R_f = 0	
+
+		# Subreport: Detected infected are calculated from the real infected given in the IC
+		pIcr_det = 1	
+		pIm_det = 1
+		pIv_det = 1
+

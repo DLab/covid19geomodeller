@@ -1,0 +1,83 @@
+# Pandemic Suite Configuration File		
+
+title = 'Example of a SEIR Configuration File'
+date = '2022-12-1' # YY-MM-DD
+user = 'Default'
+
+[model]
+	name = "Example simulation"
+	id = ''
+	model = 'SEIR'
+	compartments  = ['S','E','I','R'] 
+	
+
+[data]
+	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
+	datafile = false # File path for importing data from file 
+	importdata = false # Import data from external source
+
+	# parameters to use when importing from external sources 
+	initdate = ''
+	country = ''
+	state = ''
+	county = ''
+	healthservice = ''
+	loc_name= '' # optional 
+
+[parameters]
+	[parameters.static]
+	t_init = 0 # Initial day
+	t_end = 500 # Final day	
+	
+	# Saturation dynamic
+	k_I = 0
+	k_R = 0
+
+	popfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
+
+	mu = 1.5 # E(0) = mu*I(0)
+	
+	# Subreport
+	pI_det = 1		
+	
+	[parameters.dynamic]
+	beta = 0.2
+	alpha = 1
+	
+	# External flux rates over time 
+	S_f = 0
+	E_f = 0
+	I_f = 0
+	R_f = 0	
+	
+	# -------------------------- #
+	#   Transition Parameters    # 
+	# -------------------------- #	
+	# Transition time between exposed and infectious
+        tE_I = 5.0 # 1/sigma
+	# Transition time between infectious and removed
+        tI_R = 10.0 # 1/gamma
+	
+	# Average Immunity loss rate (1/time)
+	rR_S = 0 
+	
+[initialconditions]
+	# total population in area
+	population = 100_000
+
+	# Recovered	
+	R = 0
+
+	# Infected	
+	# Active Infected
+	I = 100	
+	# New daily Infected
+	I_d = 10	
+	# Accumulated Infected	
+	I_ac = 100
+
+	# Leave E and E_d as false for using mu
+	E = false
+	E_d = false
+	
+
