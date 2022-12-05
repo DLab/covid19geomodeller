@@ -5,7 +5,7 @@ date = '2021-04-20'
 user = 'Samuel'
 
 [model]
-	name = "SEIR"
+	model = "SEIR"
 	compartments  = ['S','E','I','R'] 
 	
 
