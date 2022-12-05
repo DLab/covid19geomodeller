@@ -20,6 +20,9 @@ from copy import deepcopy
 
 
 """
+CV19SIM interphaces the user with all the cv19gm library tools.
+It also adds the capability of performing multiple simulations in order to study the behavior of some parameters.  
+
 Todo: [ ] Construir una función resumen que imprima las características principales
         * tipo de modelo
         * variables a iterar
@@ -101,7 +104,7 @@ class CV19SIM():
                
         self.vectsolve = np.vectorize(solve)
         
-        print(+str(np.prod(np.shape(self.sims)))+" models created")
+        print(str(np.prod(np.shape(self.sims)))+" models created")
         
     def integrate(self):
         print('The use of integrate() is now deprecated. Use solve() instead.')
@@ -133,7 +136,14 @@ class CV19SIM():
         """
         shape = np.shape(self.sims)
         
+    def expose_variable(self,variable):
+        """Expose variables so they can be accessed directly from the main class object
 
+        Args:
+            variable (string): Variable to be exposed
+        """
+        setattr(self,variable, np.reshape(list(map(lambda sim: sim.__dict__[variable],self.sims.flatten())),np.shape(self.sims)))
+        return
         
 def simapply(config,model,inputdata,**kwargs):
     """Builds an array of models instances using the iterable variables array
@@ -183,4 +193,5 @@ def iterate(config, iterables=None,verbose=False,**kwargs,):
         for key,value in kwargs.items():
             aux.update({key:value})
         return(aux)
+
 
