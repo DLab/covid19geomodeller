@@ -185,7 +185,7 @@ class SEIRMETA:
             self.phi_I = lambda t,I,N: np.dot(self.Phi_matrix_T[int(2*t)],(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi_matrix[int(2*t)]),np_ones)
             self.phi_R = lambda t,R,N: np.dot(self.Phi_matrix_T[int(2*t)],(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi_matrix[int(2*t)]),np_ones)
                 
-        # Tercera propuesta 
+        # Cuarta propuesta 
         elif self.method == 4:
             np_ones = np.ones(self.nregions)
             self.phi_S = lambda t,S,N: np.dot(self.Phi_T(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
@@ -193,6 +193,14 @@ class SEIRMETA:
             self.phi_I = lambda t,I,N: np.dot(self.Phi_T(t),(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi(t)),np_ones)
             self.phi_R = lambda t,R,N: np.dot(self.Phi_T(t),(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi(t)),np_ones)
 
+	# Quinta propuesta, Phi(t)=Phi_T(t)
+        elif self.method == 5:
+            np_ones = np.ones(self.nregions)
+            self.phi_S = lambda t,S,N: np.dot(self.Phi(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
+            self.phi_E = lambda t,E,N: np.dot(self.Phi(t),(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi(t)),np_ones)
+            self.phi_I = lambda t,I,N: np.dot(self.Phi(t),(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi(t)),np_ones)
+            self.phi_R = lambda t,R,N: np.dot(self.Phi(t),(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi(t)),np_ones)
+    
                     
     def integrate(self,t0=0,T=None,h=0.01):
         print('The use of integrate() is now deprecated. Use solve() instead.')
