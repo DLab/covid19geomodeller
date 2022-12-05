@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy import signal
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from scipy.special import expit
-import json
+#import json
 import pandas as pd
 import ast
 
@@ -16,11 +16,7 @@ import ast
 # ------------------------------------------------- #
 
 To Do:    
-    * Agregar tipos de subidas y bajadas al Events function
-    * Reducir las funciones de subida y bajada continuas en 1 con tipo de subida y bajada
-    * Revisar el valor por defecto de events
-    * Revisar si se puede simplificar la llamada a events 
-    * Considerar el crear funciones directamente, sin pasar por ese formato que cree   
+    * Agregar tipos de subidas y bajadas al Events function 
 """
 def build(input):
     """
@@ -339,7 +335,6 @@ def sigmoidal_transition(t_init,t_end,initvalue=0,endvalue = 1,gw=8):
     out = lambda t:  initvalue + (endvalue-initvalue)*(expit((t-(t_init+t_end)/2)*gw/(t_end-t_init))) 
     return out 
 
-
 # Value transition functions
 # t_init - t_end enviarlo desde el events
 def transition(t_init,t_end,ftype = 'linear', initvalue=0,endvalue = 1, concavity=0, gw=8):
@@ -383,7 +378,6 @@ def transition(t_init,t_end,ftype = 'linear', initvalue=0,endvalue = 1, concavit
         print('Wrong function type input')
         out = None
     return out
-
 
 
 # Saturation function

@@ -12,28 +12,21 @@ import os
 import sys
 path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(1, path)
+package_directory = os.path.dirname(os.path.abspath(__file__))
+
 
 import data.cv19data as cv19data
 import utils.cv19functions as cv19functions 
 import utils.cv19timeutils as cv19timeutils
 
 
+
 """
 # ------------------------------------------------- #   
 #                                                   #
-#                   File manager                    #
+#            Configuration File manager             #
 #                                                   #
 # ------------------------------------------------- #
-Todo:
-    [] Capacidad de guardar un archivo de configuración de un objeto de simulación en un archivo toml
-    [] Change the isdict() function for something more elegant
-Functions:
-    loadconfig: Load parameters from a configuration file or object
-    saveconfig: Save parameters into a configuration file
-    loaddata: Load data from file
-    savedata: Save data to file
-
- 
 """
 def isdict(var):
     try:
@@ -54,14 +47,13 @@ def loadconfig(sim,config,inputdata,**kwargs):
     # ------------------------------- #
     #        Parameters Load          #
     # ------------------------------- #
+    load_default(sim) # Serves for loading optional parameters when they are not defined
+    
     if type(config) == dict:
-        sim.cfg = config    
-    else:
-        sim.cfg = toml.load(config)
+        sim.cfg.update(config)
+    elif type(config) == str:
+        sim.cfg.update(toml.load(config))
             
-    # sim
-    sim.model = sim.cfg['model']
-
     # Copies
     copies = {}
 
@@ -168,14 +160,42 @@ def loadconfig(sim,config,inputdata,**kwargs):
 
     return
 
+def load_default(sim):
+    """[summary]
+
+    Args:
+        sim ([type]): [description]
+        config ([type]): [description]
+        inputdata ([type]): [description]
+    """
+    sim.cfg = getdefault(sim.model)
+
+    # Static variables
+    for key,value in sim.cfg['parameters']['static'].items():
+        sim.__dict__.update({key:value})
+
+    # Dynamic variables
+    for key,value in sim.cfg['parameters']['dynamic'].items():          
+        sim.__dict__.update({key:cv19functions.build(value)})
+        
+    
+    # Initial conditions        
+    sim.initialconditions = sim.cfg['initialconditions']
+    for key,value in sim.cfg.items():
+        sim.__dict__.update({key:value})
+    
+    return
+
+def getdefault(model):
+    return toml.load(os.path.abspath(package_directory+'/../default_config_files/'+model+'.toml'))    
+    
+
 def saveconfig(filename,config):    
     with open(filename, "w") as toml_file:
         toml.dump(config, toml_file)
     print('Configuration file saved in:\n'+filename)#update
     return 
 
-def loaddata(filename):
-    return
 
 def savedata(data=None,simulation=None,filename=None):
     if data:
