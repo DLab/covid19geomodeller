@@ -73,8 +73,8 @@ def to_symmetric_function(inputmatrix,transposed=False):
 
 
 
-def rnd_flux_symmetric(population,fraction=0.1, transposed = False):
-    return to_symmetric_function(rnd_flux_matrix(population,fraction),transposed)
+def rnd_flux_symmetric(population,fraction=0.1, transposed = False,seed=None):
+    return to_symmetric_function(rnd_flux_matrix(population,fraction,seed),transposed)
 
 def rnd_flux(population,fraction=0.1,transposed=False):
     return rnd_flux_symmetric(population,fraction,transposed)

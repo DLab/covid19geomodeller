@@ -37,11 +37,11 @@ class SEIRMETA:
     """
     def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, Phi_T = None, seed=None, method = 0, **kwargs):    
         if not config:
-            #print('Missing configuration file')
-            raise('Missing configuration file')
+            print('Missing configuration file')
+            #raise('Missing configuration file')
             #return None
             
-        self.model = "SEIR_meta"        
+        self.model = "SEIR_Metapopulation"
         self.kwargs = kwargs        
         self.method = method
         # ------------------------------- #
