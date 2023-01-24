@@ -13,8 +13,8 @@ user = 'Samuel'
 	# Differential Equations
 	EDOs = true
 	# Rule based modeling
-	RBM = false
-	RBM_N = 1
+	ABM = false
+	ABM_NSim = 1
 
 [data]
 	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
