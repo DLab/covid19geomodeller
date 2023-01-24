@@ -30,7 +30,8 @@ extensions = ['sphinx.ext.duration',
 			'sphinx.ext.autodoc',
    			'sphinx.ext.autosummary',
             'sphinx.ext.viewcode',
-            'sphinx.ext.napoleon']
+            'sphinx.ext.napoleon',
+            'sphinx.ext.githubpages']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
