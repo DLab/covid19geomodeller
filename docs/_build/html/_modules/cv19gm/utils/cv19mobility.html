@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm.utils.cv19mobility &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cv19gm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cv19gm.utils.cv19mobility</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cv19gm.utils.cv19mobility</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># ------------------------------------------------- #   </span>
+<span class="sd">#                                                   #</span>
+<span class="sd">#          Mobility Networks Construction           #</span>
+<span class="sd">#                                                   #</span>
+<span class="sd"># ------------------------------------------------- #</span>
+
+<span class="sd">To Do:</span>
+<span class="sd">* Build functions for:</span>
+<span class="sd">    * Weighted Small World Network -&gt; Flux Matrix</span>
+<span class="sd">    * Weighted prefferential attachment network -&gt; Flux matrix</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Flux matrix generation</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="rnd_flux_matrix"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.rnd_flux_matrix">[docs]</a><span class="k">def</span> <span class="nf">rnd_flux_matrix</span><span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="n">fraction</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a random flux matrix that moves the specified fraction of the population.</span>
+<span class="sd">    This method uses the dirichlet distribution in order to distribute the population mantaining the total.</span>
+<span class="sd">        </span>
+<span class="sd">    ref: https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.dirichlet.html#numpy.random.Generator.dirichlet</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        population (array): array with the population of each town that makes part of this meta-population system. </span>
+<span class="sd">        fraction (float, array, optional): Population fraction that travels per day. This can also be an array that specifies a different </span>
+<span class="sd">        fraction per population. Defaults to 0.1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: Flux matrix with 0 diagonals </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fraction</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="n">fraction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="n">fraction</span>
+    
+    <span class="n">aux</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">aux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">))</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">population</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">fraction</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_symmetric_function"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.to_symmetric_function">[docs]</a><span class="k">def</span> <span class="nf">to_symmetric_function</span><span class="p">(</span><span class="n">inputmatrix</span><span class="p">,</span><span class="n">transposed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a flux matrix into a daily symmetric flux function, </span>
+<span class="sd">    in order to conserve the population throughout the day, avoiding long-term mass migrations</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inputmatrix (np.array): Base flux matrix</span>
+<span class="sd">        transposed (bool, optional): Returns the transposed matrix</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        function: Time symmetric flux function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inputmatrix_T</span> <span class="o">=</span> <span class="n">inputmatrix</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">Phi</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>        
+        <span class="k">if</span> <span class="n">t</span><span class="o">%</span><span class="mi">1</span><span class="o">&lt;</span><span class="mf">0.5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">inputmatrix</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">inputmatrix_T</span>
+    <span class="k">if</span> <span class="n">transposed</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">Phi_T</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>            
+            <span class="k">if</span> <span class="n">t</span><span class="o">%</span><span class="mi">1</span><span class="o">&lt;</span><span class="mf">0.5</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">inputmatrix_T</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">inputmatrix</span>
+        <span class="k">return</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">Phi_T</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Phi</span></div>
+
+
+
+<div class="viewcode-block" id="rnd_flux_symmetric"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.rnd_flux_symmetric">[docs]</a><span class="k">def</span> <span class="nf">rnd_flux_symmetric</span><span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">transposed</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">to_symmetric_function</span><span class="p">(</span><span class="n">rnd_flux_matrix</span><span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="n">fraction</span><span class="p">,</span><span class="n">seed</span><span class="p">),</span><span class="n">transposed</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="rnd_flux"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.rnd_flux">[docs]</a><span class="k">def</span> <span class="nf">rnd_flux</span><span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">transposed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">rnd_flux_symmetric</span><span class="p">(</span><span class="n">population</span><span class="p">,</span><span class="n">fraction</span><span class="p">,</span><span class="n">transposed</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="export_mobility"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.export_mobility">[docs]</a><span class="k">def</span> <span class="nf">export_mobility</span><span class="p">(</span><span class="n">mobfunction</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">aux</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
+        <span class="n">aux</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mobfunction</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span></div>
+
+<span class="c1"># </span>
+<div class="viewcode-block" id="import_mobility"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.import_mobility">[docs]</a><span class="k">def</span> <span class="nf">import_mobility</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+    <span class="c1"># Import file</span>
+    <span class="c1"># Build Mobility Matrix</span>
+    <span class="k">return</span> </div>
+
+<div class="viewcode-block" id="create_mobility"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.create_mobility">[docs]</a><span class="k">def</span> <span class="nf">create_mobility</span><span class="p">(</span><span class="n">inputmatrix</span><span class="p">,</span><span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="c1"># Create mobility matrix from static matrix, json    </span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="mobility_to_tensor"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.mobility_to_tensor">[docs]</a><span class="k">def</span> <span class="nf">mobility_to_tensor</span><span class="p">(</span><span class="n">mobfunction</span><span class="p">,</span><span class="n">t_end</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mobfunction</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t_end</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span></div>
+
+<div class="viewcode-block" id="mobility_transposed"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19mobility.mobility_transposed">[docs]</a><span class="k">def</span> <span class="nf">mobility_transposed</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="p">))])</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

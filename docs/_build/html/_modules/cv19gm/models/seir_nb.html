@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm.models.seir_nb &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cv19gm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cv19gm.models.seir_nb</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cv19gm.models.seir_nb</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">SEIR Model</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">solve_ivp</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+
+<span class="kn">from</span> <span class="nn">numbalsoda</span> <span class="kn">import</span> <span class="n">lsoda_sig</span><span class="p">,</span> <span class="n">lsoda</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+
+
+<span class="c1"># cv19gm libraries </span>
+<span class="kn">import</span> <span class="nn">cv19gm.utils.cv19files</span> <span class="k">as</span> <span class="nn">cv19files</span>
+
+
+<div class="viewcode-block" id="SEIR"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR">[docs]</a><span class="k">class</span> <span class="nc">SEIR</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        SEIR model object:</span>
+<span class="sd">        Construction:</span>
+<span class="sd">            SEIR(self, config = None, inputdata=None)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inputdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nbsolver</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
+            <span class="c1">#print(&#39;Missing configuration file &#39;)</span>
+            <span class="k">raise</span><span class="p">(</span><span class="s1">&#39;Missing configuration file&#39;</span><span class="p">)</span>
+            <span class="c1">#return None</span>
+        
+        <span class="c1"># ------------------------------- #</span>
+        <span class="c1">#         Parameters Load         #</span>
+        <span class="c1"># ------------------------------- #</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading configuration file&#39;</span><span class="p">)</span>          
+        <span class="n">cv19files</span><span class="o">.</span><span class="n">loadconfig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">,</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Initializing parameters and variables&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_relational_values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Building equations&#39;</span><span class="p">)</span>          
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_equations</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">solved</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">nbsolver</span> <span class="o">=</span> <span class="n">nbsolver</span>
+        
+        <span class="c1">#if self.nbsolver:</span>
+        <span class="c1">#    self.nbfunctions()</span>
+        
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SEIR object created&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ------------------- #</span>
+    <span class="c1">#  Valores Iniciales  #</span>
+    <span class="c1"># ------------------- #</span>
+   
+<div class="viewcode-block" id="SEIR.set_relational_values"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.set_relational_values">[docs]</a>    <span class="k">def</span> <span class="nf">set_relational_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Active infected</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;I_det&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_det</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+
+
+        <span class="c1"># New daily Infected</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;I_d_det&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_det</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+
+
+        <span class="c1"># Accumulated Infected</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;I_ac_det&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_det</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+
+        
+        <span class="c1"># Exposed</span>
+        <span class="c1">#if not self.Einit:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;E&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;E_d&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_d</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;E_ac&#39;</span><span class="p">):</span>    
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_ac</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_ac</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_ac</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span>
+       
+        <span class="c1"># Valores globales</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;popfraction&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">popfraction</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popfraction</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+
+        <span class="c1"># External flux functions: </span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;S_f&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">S_f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span><span class="mi">0</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;E_f&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span><span class="mi">0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;I_f&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span><span class="mi">0</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;R_f&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R_f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span><span class="mi">0</span>
+
+        <span class="c1"># Saturation kinetics</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;k_I&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k_I</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;k_R&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k_R</span><span class="o">=</span><span class="mi">0</span>            </div>
+    
+
+<div class="viewcode-block" id="SEIR.set_equations"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.set_equations">[docs]</a>    <span class="k">def</span> <span class="nf">set_equations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;        </span>
+<span class="sd">        Sets Diferential Equations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Dynamic Parameters</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+        <span class="n">rR_S</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rR_S</span><span class="p">)</span>
+        <span class="n">tE_I</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tE_I</span><span class="p">)</span>
+        <span class="n">tI_R</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tI_R</span><span class="p">)</span>
+        <span class="c1"># Flux</span>
+        <span class="n">S_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S_f</span><span class="p">)</span>
+        <span class="n">E_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_f</span><span class="p">)</span>
+        <span class="n">I_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_f</span><span class="p">)</span>
+        <span class="n">R_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R_f</span><span class="p">)</span>
+        
+        <span class="c1"># Static Parameters</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
+        <span class="n">k_I</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_I</span>
+        <span class="n">k_R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_R</span>
+        
+    
+        <span class="c1"># --------------------------- #</span>
+        <span class="c1">#        Susceptibles         #</span>
+        <span class="c1"># --------------------------- #</span>
+       
+        <span class="c1"># 0) dS/dt:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dS</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="n">R</span><span class="p">:</span> <span class="n">S_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">beta</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="n">k_I</span><span class="o">*</span><span class="n">I</span> <span class="o">+</span> <span class="n">k_R</span><span class="o">*</span><span class="n">R</span><span class="p">)</span> <span class="o">+</span> <span class="n">rR_S</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">R</span>
+        
+        <span class="c1"># --------------------------- #</span>
+        <span class="c1">#           Exposed           #</span>
+        <span class="c1"># --------------------------- #     </span>
+        
+        <span class="c1"># 1) dE/dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="n">R</span><span class="p">:</span> <span class="n">E_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">beta</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="n">k_I</span><span class="o">*</span><span class="n">I</span> <span class="o">+</span> <span class="n">k_R</span><span class="o">*</span><span class="n">R</span><span class="p">)</span> <span class="o">-</span> <span class="n">E</span><span class="o">/</span><span class="n">tE_I</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+ 
+        <span class="c1"># 2) Daily dE/dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dE_d</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">E_d</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="n">R</span><span class="p">:</span> <span class="n">E_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">beta</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="n">k_I</span><span class="o">*</span><span class="n">I</span> <span class="o">+</span> <span class="n">k_R</span><span class="o">*</span><span class="n">R</span><span class="p">)</span> <span class="o">-</span> <span class="n">E_d</span>
+
+        <span class="c1"># --------------------------- #</span>
+        <span class="c1">#           Infected          #</span>
+        <span class="c1"># --------------------------- #                </span>
+        
+        <span class="c1"># 3) Active</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dI</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">I</span><span class="p">:</span> <span class="n">I_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">E</span><span class="o">/</span><span class="n">tE_I</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">I</span><span class="o">/</span><span class="n">tI_R</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        
+        <span class="c1"># 4) New Daily</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dI_d</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">I_d</span><span class="p">:</span> <span class="n">I_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">E</span><span class="o">/</span><span class="n">tE_I</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">I_d</span> 
+
+        <span class="c1"># --------------------------- #</span>
+        <span class="c1">#         Recovered           #</span>
+        <span class="c1"># --------------------------- #  </span>
+        
+        <span class="c1"># 5) Total recovered</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dR</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="n">R</span><span class="p">:</span> <span class="n">R_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">I</span><span class="o">/</span><span class="n">tI_R</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">rR_S</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">R</span>
+
+        <span class="c1"># 6) Recovered per day</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dR_d</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="n">R_d</span><span class="p">:</span> <span class="n">R_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">I</span><span class="o">/</span><span class="n">tI_R</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">R_d</span>
+
+        <span class="c1"># 7) External Flux:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dFlux</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">S_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">E_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">I_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">R_f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="SEIR.integrate"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.integrate">[docs]</a>    <span class="k">def</span> <span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">h</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The use of integrate() is now deprecated. Use solve() instead.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span><span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SEIR.run"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">h</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="c1">#print(&#39;The use of integrate() is now deprecated. Use solve() instead.&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span><span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">)</span></div>
+
+    <span class="c1"># Scipy</span>
+<div class="viewcode-block" id="SEIR.solve"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.solve">[docs]</a>    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">h</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solves ODEs using scipy.integrate</span>
+<span class="sd">        Args:</span>
+<span class="sd">            t0 (int, optional): Initial time. Defaults to 0.</span>
+<span class="sd">            T ([type], optional): Endtime. Defaults to time given when building the object</span>
+<span class="sd">            h (float, optional): Time step. Defaults to 0.01.            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tsim</span>
+
+        <span class="c1"># Check if we already simulated the array</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solved</span><span class="p">:</span>
+            <span class="c1">#print(&#39;Already solved&#39;)</span>
+            <span class="k">return</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">initcond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">E_d</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbsolver</span><span class="p">:</span>
+            <span class="n">dS</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dS</span><span class="p">)</span>
+            <span class="n">dE</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dE</span><span class="p">)</span>
+            <span class="n">dE_d</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dE_d</span><span class="p">)</span>
+            <span class="n">dI</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dI</span><span class="p">)</span>
+            <span class="n">dI_d</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dI_d</span><span class="p">)</span>
+            <span class="n">dR</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dR</span><span class="p">)</span>
+            <span class="n">dR_d</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dR_d</span><span class="p">)</span>
+            <span class="n">dFlux</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dFlux</span><span class="p">)</span>
+            
+            <span class="nd">@nb</span><span class="o">.</span><span class="n">cfunc</span><span class="p">(</span><span class="n">lsoda_sig</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">model_SEIR_graph_nb</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">ydot</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dS</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">dE</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">dE_d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">dI</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">dI_d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">dR</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">dR_d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                <span class="n">ydot</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">dFlux</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            
+            <span class="n">funcptr</span> <span class="o">=</span> <span class="n">model_SEIR_graph_nb</span><span class="o">.</span><span class="n">address</span>
+            <span class="n">sol</span><span class="p">,</span> <span class="n">success</span> <span class="o">=</span> <span class="n">lsoda</span><span class="p">(</span><span class="n">funcptr</span><span class="p">,</span> <span class="n">initcond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_d</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">5</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R_d</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">6</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Flux</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span>   
+            <span class="bp">self</span><span class="o">.</span><span class="n">sol</span> <span class="o">=</span> <span class="n">sol</span>         
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sol</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_SEIR_graph</span><span class="p">,(</span><span class="n">t0</span><span class="p">,</span><span class="n">T</span><span class="p">),</span> <span class="n">initcond</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;LSODA&#39;</span><span class="p">,</span><span class="n">t_eval</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span><span class="n">T</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">t</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_d</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R_d</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">6</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Flux</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">7</span><span class="p">,:]</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">sol</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span>
+
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_ac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">E_ac</span><span class="p">]),</span><span class="bp">self</span><span class="o">.</span><span class="n">E_d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="p">]),</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]))</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">R_ac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span><span class="bp">self</span><span class="o">.</span><span class="n">R_d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_d_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">analytics</span><span class="p">()</span>
+        <span class="c1">#self.df_build()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solved</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> </div>
+    
+
+<div class="viewcode-block" id="SEIR.model_SEIR_graph"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.model_SEIR_graph">[docs]</a>    <span class="k">def</span> <span class="nf">model_SEIR_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">ydot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dS</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dE</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dE_d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dI</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dI_d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dR</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dR_d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+
+        <span class="n">ydot</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dFlux</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>      
+                                        
+        <span class="k">return</span><span class="p">(</span><span class="n">ydot</span><span class="p">)</span></div>
+    
+ 
+
+<div class="viewcode-block" id="SEIR.analytics"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.analytics">[docs]</a>    <span class="k">def</span> <span class="nf">analytics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform simulation analytics after running it.</span>
+<span class="sd">        It calculates peaks, prevalence, and will include R(t). </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#Cálculo de la fecha del Peak  </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="o">==</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peakindex</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">initdate</span><span class="o">+</span><span class="n">timedelta</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">peak_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span><span class="o">+</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_t</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">peak_date</span> <span class="o">=</span> <span class="kc">None</span>            
+
+        <span class="c1"># Prevalence: </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prevalence_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prevalence_susc</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prevalence_det</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pI_det</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="p">))]</span>                         
+        <span class="k">return</span></div>
+       
+<div class="viewcode-block" id="SEIR.df_build"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.df_build">[docs]</a>    <span class="k">def</span> <span class="nf">df_build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a dataframe with the simulation results</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;t&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="s1">&#39;dates&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dates</span><span class="p">})</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">,</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;E_d&#39;</span><span class="p">,</span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="s1">&#39;I_d&#39;</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">,</span><span class="s1">&#39;R_d&#39;</span><span class="p">,</span><span class="s1">&#39;Flux&#39;</span><span class="p">]</span>
+        
+        
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sol</span><span class="p">),</span><span class="n">columns</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>       
+
+        <span class="n">names2</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;E_ac&#39;</span><span class="p">,</span><span class="s1">&#39;I_ac&#39;</span><span class="p">,</span><span class="s1">&#39;R_ac&#39;</span><span class="p">,</span><span class="s1">&#39;I_det&#39;</span><span class="p">,</span><span class="s1">&#39;I_d_det&#39;</span><span class="p">,</span><span class="s1">&#39;I_ac_det&#39;</span><span class="p">,</span><span class="s1">&#39;prevalence_total&#39;</span><span class="p">,</span><span class="s1">&#39;prevalence_susc&#39;</span><span class="p">,</span><span class="s1">&#39;prevalence_det&#39;</span><span class="p">]</span>
+        <span class="n">vars2</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">E_ac</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">R_ac</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">I_det</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d_det</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac_det</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">prevalence_total</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">prevalence_susc</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">prevalence_det</span><span class="p">]</span>
+        <span class="n">aux2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">vars2</span><span class="p">),</span><span class="n">columns</span><span class="o">=</span><span class="n">names2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span><span class="n">aux</span><span class="p">,</span><span class="n">aux2</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;E_d&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;I&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;I_d&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;R_d&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;E_ac&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;I_ac&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;R_ac&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;I_det&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;I_d_det&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span><span class="s1">&#39;I_ac_det&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resume</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;peak&#39;</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peak</span><span class="p">),</span><span class="s1">&#39;peak_t&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_t</span><span class="p">,</span><span class="s1">&#39;peak_date&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">peak_date</span><span class="p">},</span><span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span></div>
+
+    
+<div class="viewcode-block" id="SEIR.nbfunctions"><a class="viewcode-back" href="../../../cv19gm.models.html#cv19gm.models.seir_nb.SEIR.nbfunctions">[docs]</a>    <span class="k">def</span> <span class="nf">nbfunctions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using numbaLSODA&#39;</span><span class="p">)</span>
+        <span class="c1"># Equations</span>
+        <span class="c1">#self.dS = nb.njit(self.dS)</span>
+        <span class="c1">#self.dE =  nb.njit(self.dE)</span>
+        <span class="c1">#self.dE_d = nb.njit(self.dE_d)</span>
+        <span class="c1">#self.dI =  nb.njit(self.dI)</span>
+        <span class="c1">#self.dI_d =  nb.njit(self.dI_d)</span>
+        <span class="c1">#self.dR =  nb.njit(self.dR)</span>
+        <span class="c1">#self.dR_d =  nb.njit(self.dR_d)</span>
+        <span class="c1">#self.dFlux =  nb.njit(self.dFlux)</span>
+        <span class="c1"># Parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rR_S</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rR_S</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tE_I</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tE_I</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tI_R</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tI_R</span><span class="p">)</span>
+        <span class="c1"># Flux</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">S_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S_f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R_f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R_f</span><span class="p">)</span></div>
+        
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"> </span>
+<span class="sd">    def calculateindicators(self):</span>
+<span class="sd">        self.R_ef</span>
+<span class="sd">        self.SHFR</span>
+
+<span class="sd">        # SeroPrevalence Calculation</span>
+
+<span class="sd">        # Errors (if real data)</span>
+
+<span class="sd">        # Active infected</span>
+<span class="sd">        print(&#39;wip&#39;)</span>
+
+<span class="sd">    def resume(self):        </span>
+<span class="sd">        print(&quot;Resumen de resultados:&quot;)</span>
+<span class="sd">        qtype = &quot;&quot;</span>
+<span class="sd">        for i in range(self.numescenarios):</span>
+<span class="sd">            if self.inputarray[i][-1]==0:</span>
+<span class="sd">                qtype = &quot;Cuarentena total&quot;</span>
+<span class="sd">            if self.inputarray[i][-1]&gt;0:</span>
+<span class="sd">                qtype =&quot;Cuarentena Dinámica&quot;            </span>
+
+<span class="sd">            print(&quot;Escenario &quot;+str(i))</span>
+<span class="sd">            print(&quot;Tipo de Cuarentena: &quot;+qtype+&#39;\nmov_rem: &#39;+str(self.inputarray[i][2])+&#39;\nmov_max: &#39;+str(self.inputarray[i][2])+</span>
+<span class="sd">            &quot;\nInicio cuarentena: &quot;+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime(&#39;%Y/%m/%d&#39;)+&quot;\nFin cuarentena: &quot;+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime(&#39;%Y/%m/%d&#39;))</span>
+<span class="sd">            print(&quot;Peak infetados \n&quot;+&quot;Peak value: &quot;+str(self.peak[i])+&quot;\nPeak date: &quot;+str(self.peak_date[i]))</span>
+<span class="sd">            print(&quot;Fallecidos totales:&quot;+str(max(self.B[i])))</span>
+<span class="sd">            print(&quot;Fecha de colapso hospitalario \n&quot;+&quot;Camas: &quot;+self.H_colapsedate[i]+&quot;\nVentiladores: &quot;+self.V_colapsedate[i])</span>
+<span class="sd">            print(&quot;\n&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

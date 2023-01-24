@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm.utils package &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="cv19gm.models package" href="cv19gm.models.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cv19gm</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cv19gm.html">cv19gm package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cv19gm.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html">cv19gm.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html">cv19gm.models package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cv19gm.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.html#module-cv19gm.cv19sim">cv19gm.cv19sim module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.html#module-cv19gm">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">cv19gm</a></li>
+          <li class="breadcrumb-item"><a href="cv19gm.html">cv19gm package</a></li>
+      <li class="breadcrumb-item active">cv19gm.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cv19gm.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="cv19gm-utils-package">
+<h1>cv19gm.utils package<a class="headerlink" href="#cv19gm-utils-package" title="Permalink to this heading"></a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</div>
+<div class="section" id="module-cv19gm.utils.cv19errors">
+<span id="cv19gm-utils-cv19errors-module"></span><h2>cv19gm.utils.cv19errors module<a class="headerlink" href="#module-cv19gm.utils.cv19errors" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.ITWE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">ITWE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#ITWE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.ITWE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.ITWE_log">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">ITWE_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#ITWE_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.ITWE_log" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.LAE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">LAE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#LAE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.LAE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.LCE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">LCE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#LCE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.LCE" title="Permalink to this definition"></a></dt>
+<dd><p>Local Cummulative Error
+To do
+:param sim: Simulation data
+:type sim: list
+:param data: Data to compare
+:type data: list
+:param t_data: _description_. Defaults to None.
+:type t_data: list, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>accumulative error</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.LRAE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">LRAE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#LRAE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.LRAE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.LRCE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">LRCE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#LRCE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.LRCE" title="Permalink to this definition"></a></dt>
+<dd><p>Local Relative Cummulative Error
+To do
+:param sim: Simulation data
+:type sim: list
+:param data: Data to compare
+:type data: list
+:param t_data: _description_. Defaults to None.
+:type t_data: list, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>accumulative error</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.MSE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">MSE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#MSE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.MSE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.RMSE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">RMSE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#RMSE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.RMSE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.RRMSE">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">RRMSE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#RRMSE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.RRMSE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19errors.cv19errorbuild">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19errors.</span></span><span class="sig-name descname"><span class="pre">cv19errorbuild</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19errors.html#cv19errorbuild"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19errors.cv19errorbuild" title="Permalink to this definition"></a></dt>
+<dd><p>Function builder
+# crear un iterador que recorra el input y cree la función a partir de un comando exec:
+# Acepta diccionarios o strings con forma de diccionario</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.utils.cv19files">
+<span id="cv19gm-utils-cv19files-module"></span><h2>cv19gm.utils.cv19files module<a class="headerlink" href="#module-cv19gm.utils.cv19files" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19files.getdefault">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19files.</span></span><span class="sig-name descname"><span class="pre">getdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19files.html#getdefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19files.getdefault" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19files.isdict">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19files.</span></span><span class="sig-name descname"><span class="pre">isdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19files.html#isdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19files.isdict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19files.load_default">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19files.</span></span><span class="sig-name descname"><span class="pre">load_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19files.html#load_default"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19files.load_default" title="Permalink to this definition"></a></dt>
+<dd><p>[summary]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>config</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>inputdata</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19files.loadconfig">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19files.</span></span><span class="sig-name descname"><span class="pre">loadconfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19files.html#loadconfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19files.loadconfig" title="Permalink to this definition"></a></dt>
+<dd><p>[summary]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>config</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>inputdata</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19files.saveconfig">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19files.</span></span><span class="sig-name descname"><span class="pre">saveconfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19files.html#saveconfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19files.saveconfig" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19files.savedata">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19files.</span></span><span class="sig-name descname"><span class="pre">savedata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19files.html#savedata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19files.savedata" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19files.unwrapconfig">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19files.</span></span><span class="sig-name descname"><span class="pre">unwrapconfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19files.html#unwrapconfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19files.unwrapconfig" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.utils.cv19functions">
+<span id="cv19gm-utils-cv19functions-module"></span><h2>cv19gm.utils.cv19functions module<a class="headerlink" href="#module-cv19gm.utils.cv19functions" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.build">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.build" title="Permalink to this definition"></a></dt>
+<dd><p>Function builder
+# crear un iterador que recorra el input y cree la función a partir de un comando exec:
+# Acepta diccionarios o strings con forma de diccionario</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.build_add">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">build_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#build_add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.build_add" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a function Build a functions and adds t
+# Construir funcion que sume multiples funciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.data_function">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">data_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">future</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#data_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.data_function" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a function that returns the data during its length</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>list</em><em>| </em><em>np.array</em><em>|</em><em>pd.Series</em><em>|</em><em>pd.DataFrame</em>) – Data</p></li>
+<li><p><strong>future</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.events">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.events" title="Permalink to this definition"></a></dt>
+<dd><p>Event creator function. Create a time dependent function that returns the values (or functions) given in the
+values vector for the intervals specified in the days vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>list</em>) – list with the values for the different intervals</p></li>
+<li><p><strong>days</strong> (<em>list</em>) – list of lists of len == 2 with the values for the function on that v.</p></li>
+<li><p><strong>default</strong> (<em>float</em><em>, </em><em>optional</em>) – value that the function takes in undefined intervals. Defaults to 0</p></li>
+<li><p><strong>functions</strong> – extra functions to add with no interval definition</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function created</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>out (function)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.events_append">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">events_append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#events_append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.events_append" title="Permalink to this definition"></a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>days</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>new_val</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>new_days</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>default</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.func_add">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">func_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#func_add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.func_add" title="Permalink to this definition"></a></dt>
+<dd><p>Creates the function that results adding the functions received.
+Receives a list where each element is a function that receives 1 argument</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.interpolate_data">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">interpolate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#interpolate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.interpolate_data" title="Permalink to this definition"></a></dt>
+<dd><p>Interpolates the data in order to have a daily array of data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>[description]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[type]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.linear_transition">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">linear_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#linear_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.linear_transition" title="Permalink to this definition"></a></dt>
+<dd><p>linearTransition
+Creates a function which performs a linear transition from initvalue to endvalue between t_init and t_end.
+:param t_init: Transition beginningt_init
+:type t_init: int
+:param t_end: Transition end
+:type t_end: int
+:param initvalue: Initial value. Defaults to 0.
+:type initvalue: int, optional
+:param endvalue: End value. Defaults to 1.
+:type endvalue: int, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>function that performs the linear transition</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.piecewise">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">piecewise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-inf]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#piecewise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.piecewise" title="Permalink to this definition"></a></dt>
+<dd><p>Piecewise creator function. Create a smooth time dependent function that returns the values (or functions) given in the
+values vector for the intervals specified through the limits vector. In order to make this function differentiable, we use a sigmoid to have a smooth change between values. This produces that the
+value at the limit is equal to the mean between both sides.</p>
+<dl class="simple">
+<dt>f(x) = {v0 for t in ]-inf,limits[0][</dt><dd><p>v1 for t in ]limits[0],limits[1][
+…
+vn for t in  ]limits[n-1], inf[</p>
+</dd>
+</dl>
+<p>}
+f(limit[0]) = (v0+v1)/2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>list</em>) – list with the values for the different intervals</p></li>
+<li><p><strong>limits</strong> (<em>list</em>) – list of days where the function takes the next value. len(limits)=len(values)-1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function created</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>out (function)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.polyfit">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">polyfit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endvalue_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#polyfit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.polyfit" title="Permalink to this definition"></a></dt>
+<dd><p>polyfit:
+Function data fits real data with a polynom of a given degree, and then projects the future values with it.
+values: values to fit
+time: time array from data to fit. If no time array given, daily data is assumed
+degree: polynom degree</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.quadratic_transition">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">quadratic_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concavity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#quadratic_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.quadratic_transition" title="Permalink to this definition"></a></dt>
+<dd><p>quadraticTransition
+Creates a function which performs a quadratic transition from initvalue to endvalue between t_init and t_end.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_init</strong> (<em>int</em>) – Transition beginning</p></li>
+<li><p><strong>t_end</strong> (<em>int</em>) – Transition end</p></li>
+<li><p><strong>initvalue</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial value. Defaults to 0.</p></li>
+<li><p><strong>endvalue</strong> (<em>int</em><em>, </em><em>optional</em>) – End value. Defaults to 1.</p></li>
+<li><p><strong>concavity</strong> (<em>int</em><em>, </em><em>optional</em>) – Function’s concavity. 0: convex, 1: concave. Defaults to convex.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function that performs the quadratic transition</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.saturation">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">saturation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upperlimit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#saturation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.saturation" title="Permalink to this definition"></a></dt>
+<dd><p>Function that builds binary functions which indicates when the sum of the arguments are bigger than the saturation function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>upperlimit</strong> (<em>function</em><em> or </em><em>cv19function builder arg</em>) – Upper limit function</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>binary function with time multiple arguments that returns 1 when the arguments addition function</dt><dd><dl class="simple">
+<dt>Args:</dt><dd><p>t (float): time value
+<a href="#id1"><span class="problematic" id="id2">*</span></a>args: multiple arguments which are added and then compared with the saturation value at time t</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>int:</dt><dd><p>0 when the functions given are smaller than the saturation function
+1 when they are bigger or equal</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>saturationfunction (function)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.sawtooth">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">sawtooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initphase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#sawtooth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.sawtooth" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.sigmoidal_transition">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">sigmoidal_transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#sigmoidal_transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.sigmoidal_transition" title="Permalink to this definition"></a></dt>
+<dd><p>Sigmoidal Transition
+Creates a function which performs a sigmoidal transition from initvalue to endvalue between t_init and t_end.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_init</strong> (<em>int</em>) – Transition beginning</p></li>
+<li><p><strong>t_end</strong> (<em>int</em>) – Transition end</p></li>
+<li><p><strong>initvalue</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial value. Defaults to 0.</p></li>
+<li><p><strong>endvalue</strong> (<em>int</em><em>, </em><em>optional</em>) – End value. Defaults to 1.</p></li>
+<li><p><strong>gw</strong> (<em>float</em><em>, </em><em>optional</em>) – Gain weight. Calibrates the “strength” of the sigmoid change</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>function that performs the sigmoidal transition</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.sine">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">sine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initphase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#sine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.sine" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.square">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">square</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initphase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#square"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.square" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19functions.transition">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19functions.</span></span><span class="sig-name descname"><span class="pre">transition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ftype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concavity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19functions.html#transition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19functions.transition" title="Permalink to this definition"></a></dt>
+<dd><p>Transition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_init</strong> (<em>int</em>) – Transition beginning</p></li>
+<li><p><strong>t_end</strong> (<em>int</em>) – Transition end</p></li>
+<li><p><strong>ftype</strong> (<em>str</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Transition function type. Defaults to ‘linear’. 0 or “linear”, 1 or “quadratic”, 2 or “sigmoidal”</p></li>
+<li><p><strong>initvalue</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.</p></li>
+<li><p><strong>endvalue</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+<li><p><strong>concavity</strong> (<em>int</em><em>, </em><em>optional</em>) – Quadratic Function’s concavity. 0: convex, 1: concave. Defaults to convex.</p></li>
+<li><p><strong>gw</strong> (<em>float</em><em>, </em><em>optional</em>) – Gain weight. Calibrates the “strength” of the sigmoid change. Defaults to 8.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.utils.cv19mobility">
+<span id="cv19gm-utils-cv19mobility-module"></span><h2>cv19gm.utils.cv19mobility module<a class="headerlink" href="#module-cv19gm.utils.cv19mobility" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.create_mobility">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">create_mobility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputmatrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#create_mobility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.create_mobility" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.export_mobility">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">export_mobility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mobfunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#export_mobility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.export_mobility" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.import_mobility">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">import_mobility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#import_mobility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.import_mobility" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.mobility_to_tensor">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">mobility_to_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mobfunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#mobility_to_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.mobility_to_tensor" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.mobility_transposed">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">mobility_transposed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#mobility_transposed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.mobility_transposed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.rnd_flux">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">rnd_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transposed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#rnd_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.rnd_flux" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.rnd_flux_matrix">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">rnd_flux_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#rnd_flux_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.rnd_flux_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a random flux matrix that moves the specified fraction of the population.
+This method uses the dirichlet distribution in order to distribute the population mantaining the total.</p>
+<p>ref: <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.dirichlet.html#numpy.random.Generator.dirichlet">https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.dirichlet.html#numpy.random.Generator.dirichlet</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>population</strong> (<em>array</em>) – array with the population of each town that makes part of this meta-population system.</p></li>
+<li><p><strong>fraction</strong> (<em>float</em><em>, </em><em>array</em><em>, </em><em>optional</em>) – Population fraction that travels per day. This can also be an array that specifies a different</p></li>
+<li><p><strong>0.1.</strong> (<em>fraction per population. Defaults to</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Flux matrix with 0 diagonals</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.rnd_flux_symmetric">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">rnd_flux_symmetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transposed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#rnd_flux_symmetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.rnd_flux_symmetric" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19mobility.to_symmetric_function">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19mobility.</span></span><span class="sig-name descname"><span class="pre">to_symmetric_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputmatrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transposed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19mobility.html#to_symmetric_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19mobility.to_symmetric_function" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a flux matrix into a daily symmetric flux function,
+in order to conserve the population throughout the day, avoiding long-term mass migrations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputmatrix</strong> (<em>np.array</em>) – Base flux matrix</p></li>
+<li><p><strong>transposed</strong> (<em>bool</em><em>, </em><em>optional</em>) – Returns the transposed matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Time symmetric flux function</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.utils.cv19paramfit">
+<span id="cv19gm-utils-cv19paramfit-module"></span><h2>cv19gm.utils.cv19paramfit module<a class="headerlink" href="#module-cv19gm.utils.cv19paramfit" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETAMU_FIT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">BETAMU_FIT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I_d_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ITWE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETAMU_FIT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETAMU_FIT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Optimizador de beta con Inverse Time Weighted Error</p>
+<ol class="arabic simple">
+<li><p>Se deben encontrar las condiciones iniciales para todas las variables</p></li>
+<li><p>Elegir qué variable se utilizará en el fitness. Voy a partir con I_d</p></li>
+</ol>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETAMU_FIT.fitness">
+<span class="sig-name descname"><span class="pre">fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETAMU_FIT.fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETAMU_FIT.fitness" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETAMU_FIT.get_bounds">
+<span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETAMU_FIT.get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETAMU_FIT.get_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETAMU_FIT.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETAMU_FIT.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETAMU_FIT.gradient" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETAMU_FIT.set_bounds">
+<span class="sig-name descname"><span class="pre">set_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETAMU_FIT.set_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETAMU_FIT.set_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_FIT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">BETA_FIT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">I_d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RMSE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_FIT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_FIT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Optimizador de beta con Inverse Time Weighted Error</p>
+<ol class="arabic simple">
+<li><p>Se deben encontrar las condiciones iniciales para todas las variables</p></li>
+<li><p>Elegir qué variable se utilizará en el fitness. Voy a partir con I_d</p></li>
+</ol>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_FIT.fitness">
+<span class="sig-name descname"><span class="pre">fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_FIT.fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_FIT.fitness" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_FIT.get_bounds">
+<span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_FIT.get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_FIT.get_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_FIT.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_FIT.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_FIT.gradient" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_FIT.set_bounds">
+<span class="sig-name descname"><span class="pre">set_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_FIT.set_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_FIT.set_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">BETA_PIECEWISE_FIT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I_d_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-inf]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RMSE'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_PIECEWISE_FIT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>_summary_
+# beta_days includes the last transition date, the objetive of this method is to find the best value for this transition.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.fitness">
+<span class="sig-name descname"><span class="pre">fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_PIECEWISE_FIT.fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.fitness" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.get_bounds">
+<span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_PIECEWISE_FIT.get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.get_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_PIECEWISE_FIT.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.gradient" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.set_bounds">
+<span class="sig-name descname"><span class="pre">set_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#BETA_PIECEWISE_FIT.set_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.set_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.CV19PARAMFIT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">CV19PARAMFIT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'interval_fit'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I_d_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dates_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initdate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv19gmdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nintervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vartofit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'I_d'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#CV19PARAMFIT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.CV19PARAMFIT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.CV19PARAMFIT.evolve">
+<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">npop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#CV19PARAMFIT.evolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.CV19PARAMFIT.evolve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xaxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#CV19PARAMFIT.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot simulation results with optimized parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot_history">
+<span class="sig-name descname"><span class="pre">plot_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#CV19PARAMFIT.plot_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot_history" title="Permalink to this definition"></a></dt>
+<dd><p>Plots optimization history
+# log of the optimization, for PSO. log = [Gen, Fevals, gbest, Mean Vel., Mean lbest, Avg. Dist]
+# Gen: generation, Fevals:fitness evaluations, gbest: global best,
+# Mean Vel.: mean velocity, Mean lbest: mean fitness, Avg. Dist: average distance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.CV19PARAMFIT.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#CV19PARAMFIT.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.CV19PARAMFIT.simulate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.INTERVAL_FIT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">INTERVAL_FIT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">I_d_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RMSE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nintervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#INTERVAL_FIT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.INTERVAL_FIT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data Fit
+Developed by A. Bernardin, modified by S. Ropert</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.INTERVAL_FIT.fitness">
+<span class="sig-name descname"><span class="pre">fitness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#INTERVAL_FIT.fitness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.INTERVAL_FIT.fitness" title="Permalink to this definition"></a></dt>
+<dd><p>We search a vector that includes values for alpha and for the days intervals.</p>
+<dl class="simple">
+<dt>x: Optimization vector, by default from Pygmo2. Vector of lenght 20, where x[:10] are the alpha values and x[10:] are</dt><dd><p>the days values for the intervals.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.INTERVAL_FIT.get_bounds">
+<span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#INTERVAL_FIT.get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.INTERVAL_FIT.get_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.INTERVAL_FIT.set_bounds">
+<span class="sig-name descname"><span class="pre">set_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#INTERVAL_FIT.set_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.INTERVAL_FIT.set_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">SEQUENTIAL_FIT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">cfg,</span> <span class="pre">I_d_data=None,</span> <span class="pre">t_data=None,</span> <span class="pre">dates_data=None,</span> <span class="pre">tstate=None,</span> <span class="pre">initdate=None,</span> <span class="pre">cv19gmdata=None,</span> <span class="pre">global_errortol=100,</span> <span class="pre">local_errortol=100,</span> <span class="pre">global_errfunct=&lt;function</span> <span class="pre">RMSE&gt;,</span> <span class="pre">local_errfunct=&lt;function</span> <span class="pre">LAE&gt;,</span> <span class="pre">intervalsize=10,</span> <span class="pre">maxintervals=5,</span> <span class="pre">bounds_beta=[0,</span> <span class="pre">1],</span> <span class="pre">bounds_mu=[0,</span> <span class="pre">4],</span> <span class="pre">inputdata=None,</span> <span class="pre">paramtol=0.05,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#SEQUENTIAL_FIT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Sequential fit optimization method
+1. We aply betamu_fit for fiting the initial parameters using a truncated part of the data
+2. We calculate a global error function and check if we are under the error tolerance. If not we continue with the following points
+3. Using tendency_change we look for the tendency change day.
+4. We optimize with beta_fit from the day found in (2).
+5. We iterate points 2, 3 and 4 until we reach the end of the data or we reduce the error below the tolerance</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.beta_fit">
+<span class="sig-name descname"><span class="pre">beta_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actualidx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#SEQUENTIAL_FIT.beta_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.beta_fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.betamu_fit">
+<span class="sig-name descname"><span class="pre">betamu_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actualidx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#SEQUENTIAL_FIT.betamu_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.betamu_fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.optimize">
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#SEQUENTIAL_FIT.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.optimize" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xaxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#SEQUENTIAL_FIT.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_history">
+<span class="sig-name descname"><span class="pre">plot_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#SEQUENTIAL_FIT.plot_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_history" title="Permalink to this definition"></a></dt>
+<dd><p>Plots optimization history</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_step">
+<span class="sig-name descname"><span class="pre">plot_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#SEQUENTIAL_FIT.plot_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_step" title="Permalink to this definition"></a></dt>
+<dd><p>Plots optimization history</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.beta_fit">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">beta_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">bounds,</span> <span class="pre">cfg,</span> <span class="pre">I_d_data,</span> <span class="pre">t_data,</span> <span class="pre">beta_values=[],</span> <span class="pre">beta_days=[-inf],</span> <span class="pre">actualidx=-1,</span> <span class="pre">debug=True,</span> <span class="pre">global_errfunct=&lt;function</span> <span class="pre">RMSE&gt;,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#beta_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.beta_fit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.data_management">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">data_management</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I_d_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dates_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initdate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv19gmdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#data_management"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.data_management" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19paramfit.tendency_change">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19paramfit.</span></span><span class="sig-name descname"><span class="pre">tendency_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">I_d_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_err_tol=100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorfunction=&lt;function</span> <span class="pre">LAE&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startingday=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19paramfit.html#tendency_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19paramfit.tendency_change" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.utils.cv19timeutils">
+<span id="cv19gm-utils-cv19timeutils-module"></span><h2>cv19gm.utils.cv19timeutils module<a class="headerlink" href="#module-cv19gm.utils.cv19timeutils" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19timeutils.JS2Datetime">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19timeutils.</span></span><span class="sig-name descname"><span class="pre">JS2Datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19timeutils.html#JS2Datetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19timeutils.JS2Datetime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19timeutils.timeJStoPy">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19timeutils.</span></span><span class="sig-name descname"><span class="pre">timeJStoPy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19timeutils.html#timeJStoPy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19timeutils.timeJStoPy" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.utils.cv19timeutils.txt2Datetime">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.utils.cv19timeutils.</span></span><span class="sig-name descname"><span class="pre">txt2Datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/utils/cv19timeutils.html#txt2Datetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.utils.cv19timeutils.txt2Datetime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="cv19gm-utils-reproduction-number-module">
+<h2>cv19gm.utils.reproduction_number module<a class="headerlink" href="#cv19gm-utils-reproduction-number-module" title="Permalink to this heading"></a></h2>
+</div>
+<div class="section" id="module-cv19gm.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cv19gm.utils" title="Permalink to this heading"></a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cv19gm.models.html" class="btn btn-neutral float-left" title="cv19gm.models package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

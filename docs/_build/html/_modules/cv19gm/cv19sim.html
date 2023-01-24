@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm.cv19sim &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">cv19gm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cv19gm.cv19sim</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cv19gm.cv19sim</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">toml</span>
+<span class="c1">#from datetime import datetime</span>
+<span class="c1">#from datetime import timedelta</span>
+
+
+<span class="c1">#import os</span>
+<span class="c1">#import sys</span>
+<span class="c1">#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))</span>
+<span class="c1">#sys.path.insert(1, path)</span>
+
+<span class="c1">#import cv19gm.data.cv19data as cv19data</span>
+<span class="c1">#import cv19gm.utils.cv19timeutils as cv19timeutils</span>
+<span class="c1">#import cv19gm.utils.cv19functions as cv19functions</span>
+
+<span class="kn">import</span> <span class="nn">cv19gm.utils.cv19files</span> <span class="k">as</span> <span class="nn">cv19files</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">CV19SIM interphaces the user with all the cv19gm library tools.</span>
+<span class="sd">It also adds the capability of performing multiple simulations in order to study the behavior of some parameters.  </span>
+
+<span class="sd">Todo: [ ] Construir una función resumen que imprima las características principales</span>
+<span class="sd">        * tipo de modelo</span>
+<span class="sd">        * variables a iterar</span>
+<span class="sd">        * Condiciones iniciales reales </span>
+<span class="sd">Todo: [ ] Sacar variables para hacerlas accesibles desde el objeto principal</span>
+<span class="sd">Todo: [ ] simplificar la vectorización de la función de integración</span>
+<span class="sd">Todo: [ ] Paralelizar la integración de las EDOs dentro de lo posible</span>
+<span class="sd">Todo: [x] Agregar SEIRHVD</span>
+<span class="sd">Todo: [ ] Solve está siendo aplicado más de una vez. Ver donde ocurre eso! </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CV19SIM"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.CV19SIM">[docs]</a><span class="k">class</span> <span class="nc">CV19SIM</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inputdata</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="c1"># Leer el archivo de configuracion</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Missing compartmental model definition&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using default configuration file for &quot;</span><span class="o">+</span><span class="n">model</span><span class="o">+</span><span class="s2">&quot; model&quot;</span><span class="p">)</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">cv19files</span><span class="o">.</span><span class="n">getdefault</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+                <span class="n">config</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">cv19files</span><span class="o">.</span><span class="n">unwrapconfig</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">aux</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;SEIR&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelname</span> <span class="o">=</span> <span class="n">model</span>
+            <span class="kn">from</span> <span class="nn">cv19gm.models.seir</span> <span class="kn">import</span> <span class="n">SEIR</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">SEIR</span>
+             
+        <span class="k">elif</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;SEIRHVD&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelname</span> <span class="o">=</span> <span class="n">model</span>
+            <span class="kn">from</span> <span class="nn">cv19gm.models.seirhvd</span> <span class="kn">import</span> <span class="n">SEIRHVD</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">SEIRHVD</span>
+
+        <span class="k">elif</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;SIR&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelname</span> <span class="o">=</span> <span class="n">model</span>
+            <span class="kn">from</span> <span class="nn">cv19gm.models.sir</span> <span class="kn">import</span> <span class="n">SIR</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">SIR</span>
+
+        <span class="k">elif</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">&#39;SEIRTQ&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelname</span> <span class="o">=</span> <span class="n">model</span>
+            <span class="kn">from</span> <span class="nn">cv19gm.models.seirtq</span> <span class="kn">import</span> <span class="n">SEIRTQ</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">SEIRTQ</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="s1">&#39;Incorrect model&#39;</span><span class="p">)</span>
+
+
+        <span class="n">sims</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># Find iterable parameters:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">aux</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="nb">list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iterables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
+
+        <span class="c1">#print(&#39;There are &#39;+ str(len(iterables))+&#39; iterable parameters&#39;)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterables</span><span class="p">:</span>
+            <span class="c1"># Pop iterables from kwargs</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterables</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">expandediterables</span> <span class="o">=</span> <span class="n">iterate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterables</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">buildsim</span> <span class="o">=</span> <span class="n">simapply</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>            
+            <span class="bp">self</span><span class="o">.</span><span class="n">sims</span> <span class="o">=</span> <span class="n">buildsim</span><span class="p">(</span><span class="n">expandediterables</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sims</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Simulating over 1 level and 1 element&#39;</span><span class="p">)</span>
+               
+        <span class="bp">self</span><span class="o">.</span><span class="n">vectsolve</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">solve</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sims</span><span class="p">)))</span><span class="o">+</span><span class="s2">&quot; models created&quot;</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="CV19SIM.integrate"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.CV19SIM.integrate">[docs]</a>    <span class="k">def</span> <span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The use of integrate() is now deprecated. Use solve() instead.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vectsolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sims</span><span class="p">)</span>
+        <span class="k">return</span>        </div>
+        
+<div class="viewcode-block" id="CV19SIM.solve"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.CV19SIM.solve">[docs]</a>    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vectsolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sims</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="CV19SIM.resume"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.CV19SIM.resume">[docs]</a>    <span class="k">def</span> <span class="nf">resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resume:</span>
+<span class="sd">        Prints a resume of the object with</span>
+
+<span class="sd">        Model type:</span>
+<span class="sd">        Simulated:</span>
+<span class="sd">        Number of simulations: </span>
+<span class="sd">        Iterated variables:</span>
+<span class="sd">        RealData:</span>
+<span class="sd">            * CUT</span>
+<span class="sd">            * Dates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Model: &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">modelname</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Iterables: &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">iterables</span><span class="p">)</span>
+        <span class="k">return</span></div>
+    
+<div class="viewcode-block" id="CV19SIM.extract"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.CV19SIM.extract">[docs]</a>    <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract variables from simulation objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sims</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="CV19SIM.expose_variable"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.CV19SIM.expose_variable">[docs]</a>    <span class="k">def</span> <span class="nf">expose_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">variable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Expose variables so they can be accessed directly from the main class object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            variable (string): Variable to be exposed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">variable</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">sim</span><span class="p">:</span> <span class="n">sim</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">variable</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">sims</span><span class="o">.</span><span class="n">flatten</span><span class="p">())),</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sims</span><span class="p">)))</span>
+        <span class="k">return</span></div></div>
+        
+<div class="viewcode-block" id="simapply"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.simapply">[docs]</a><span class="k">def</span> <span class="nf">simapply</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds an array of models instances using the iterable variables array</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config ([dict or path]): base configuration file</span>
+<span class="sd">        model (cv19model): compartmental model class</span>
+<span class="sd">        inputdata (cv19data): (optional) Input data for IC and fitting</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">aux</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span><span class="o">**</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">aux2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">aux2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="solve"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.solve">[docs]</a><span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Solves EDOs in models instances</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (cv19model): cv19model instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+    <span class="k">return</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="iterate"><a class="viewcode-back" href="../../cv19gm.html#cv19gm.cv19sim.iterate">[docs]</a><span class="k">def</span> <span class="nf">iterate</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">iterables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,):</span>
+    <span class="k">if</span> <span class="n">iterables</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">iterables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">nelements</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="n">iterables</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
+                <span class="n">nelements</span><span class="o">*=</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Simulating over &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">iterables</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; levels and &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">nelements</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; elements&#39;</span><span class="p">)</span>        
+        
+    
+    <span class="k">if</span> <span class="n">iterables</span><span class="p">:</span>
+        <span class="n">iterables_aux</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">iterables</span><span class="p">)</span>
+        <span class="n">iterating</span> <span class="o">=</span> <span class="n">iterables_aux</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">iterating</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">kwargs_aux</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">kwargs_aux</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">iterating</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">i</span><span class="p">})</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iterate</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="n">iterables</span><span class="o">=</span><span class="n">iterables_aux</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs_aux</span><span class="p">))</span>   
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">aux</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

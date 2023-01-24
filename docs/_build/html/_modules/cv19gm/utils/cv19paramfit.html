@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm.utils.cv19paramfit &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cv19gm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cv19gm.utils.cv19paramfit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cv19gm.utils.cv19paramfit</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="c1">#from logging import raiseExceptions</span>
+<span class="kn">from</span> <span class="nn">distutils.log</span> <span class="kn">import</span> <span class="n">error</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># optimization</span>
+<span class="kn">import</span> <span class="nn">pygmo</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linalg</span> <span class="k">as</span> <span class="n">LA</span>
+
+<span class="c1"># cv19gm libraries</span>
+<span class="kn">from</span> <span class="nn">cv19gm.data.cv19data</span> <span class="kn">import</span> <span class="n">ImportData</span> <span class="k">as</span> <span class="n">importdata</span>
+<span class="kn">from</span> <span class="nn">cv19gm.cv19sim</span> <span class="kn">import</span> <span class="n">CV19SIM</span>
+<span class="kn">import</span> <span class="nn">cv19gm.utils.cv19functions</span> <span class="k">as</span> <span class="nn">cv19functions</span>
+<span class="kn">from</span> <span class="nn">cv19gm.utils.cv19errors</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="sd">&quot;&quot;&quot;To Do</span>
+<span class="sd">* Implementar método Alejo:</span>
+<span class="sd">    * Ver si se puede optimizar, demora como media hora =S </span>
+
+<span class="sd">* Implementar mi método</span>
+<span class="sd">* Agregarlo a la función general cv19paramfit</span>
+
+
+<span class="sd"># To Do:</span>
+<span class="sd">[x] 1. Arreglar lo del cálculo de error para datos discontinuos</span>
+<span class="sd">[x] 2. Testear error ScaledRMSE vs RMSE</span>
+<span class="sd">[x] 3. Crear función piecewise con sólo los días de intermedios [t0,t1,t2,t3] en vez de [[t0,t1],[t2,t3],[t4,t5]]</span>
+<span class="sd">[x] 4. Comprobar que el opti_mu esté bien implementado</span>
+<span class="sd">[x] 5. Intentar no tener que simular nuevamente con el beta obtenido, ver si se puede obtener la última simulación: can&#39;t</span>
+<span class="sd">[ ] 6. Calcular error global al avanzar con las iteraciones</span>
+<span class="sd">[ ] 7. Implementar número mínimo de días entre cambios de tendencias</span>
+<span class="sd">[ ] 8. Implementar iteración beta_fit. Condiciones de salida:</span>
+<span class="sd">       * Error &lt; erro_tol</span>
+<span class="sd">       * Numero de iteraciones</span>
+<span class="sd">       * Disminusión relativa de error entre iteraciones</span>
+<span class="sd">[ ] 9. Revisar consistencia al establecer las condiciones iniciales de las simulaciones</span>
+<span class="sd">[ ] 10. Agregar la posibilidad de meter objetos de datos a los fiteos</span>
+<span class="sd">[ ] 11. Ordenar, limpiar y reducir el código</span>
+<span class="sd">[ ] 12. Exponer variables de optimización como población y número de generaciones</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="CV19PARAMFIT"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT">[docs]</a><span class="k">class</span> <span class="nc">CV19PARAMFIT</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cfg</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;interval_fit&quot;</span><span class="p">,</span>
+        <span class="n">I_d_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">t_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dates_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tstate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">initdate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cv19gmdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nintervals</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">gen</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">vartofit</span><span class="o">=</span><span class="s2">&quot;I_d&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;CV19PARAMFIT</span>
+<span class="sd">        Data fitting library for cv19gm platform. Manages the data and initializes the optimization method.</span>
+
+<span class="sd">        The data to fit can be given in three different ways:</span>
+<span class="sd">            * Data array using I_d_data and t_data</span>
+<span class="sd">            * Target state id and initial date for obtaining the data from our servers, usubg tstate and initdate</span>
+<span class="sd">            * cv19gmdata object with the data already loaded</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cfg (str,dict): Simulation configuration file</span>
+<span class="sd">            method (str, optional): Fitting method (add list of available methods). Defaults to &#39;interval_fit&#39;.</span>
+<span class="sd">            I_d_data (_type_, optional): Data new cases to fit. Defaults to None.</span>
+<span class="sd">            t_data (list or nparray, optional): Data time array. Defaults to None.</span>
+<span class="sd">            dates_data (_type_, optional): Data dates array. Defaults to None.</span>
+<span class="sd">            tstate (_type_, optional): State code to obtain data to fit. Defaults to None.</span>
+<span class="sd">            initdate (_type_, optional): Initial date to fit from data obtained automatically. Defaults to None.</span>
+<span class="sd">            cv19gmdata (_type_, optional): cv19gmdata object with data to fit. Defaults to None.</span>
+<span class="sd">            verbose (bool, optional): Verbose output. Defaults to False.</span>
+<span class="sd">            nintervals (int, optional): Number of intervals to fit. Applies to interval_fit method. Defaults to 3.</span>
+<span class="sd">            gen (int, optional): Number of generation for fitting method. Defaults to 200.</span>
+<span class="sd">            vartofit (str, optional): Variable to fit on simulation. Does nothing for the moment, but it may be used in the future. Defaults to &#39;I_d&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gen</span> <span class="o">=</span> <span class="n">gen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="c1"># Data management: data source and data load</span>
+
+        <span class="c1"># Data array</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">I_d_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span> <span class="o">=</span> <span class="n">I_d_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span> <span class="o">=</span> <span class="n">t_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span> <span class="o">=</span> <span class="n">dates_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># State code + inital date: downloads data from remote server</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">importdata</span><span class="p">(</span><span class="n">tstate</span><span class="o">=</span><span class="n">tstate</span><span class="p">,</span> <span class="n">initdate</span><span class="o">=</span><span class="n">initdate</span><span class="p">)</span>
+            <span class="c1"># Import data for seir - change this for adding more models</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Importing data from remote server&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">import_data_seir</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_tr</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_dates</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># cv19gmdata object</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">cv19gmdata</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">cv19gmdata</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_tr</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_dates</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Missing data to fit</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Missing data to fit&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            <span class="c1"># raiseExceptions</span>
+
+        <span class="c1"># Optimization methods</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;interval_fit&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span> <span class="o">=</span> <span class="n">nintervals</span>  <span class="c1"># number of intervals</span>
+
+            <span class="c1"># Set bounds</span>
+            <span class="n">alpha_low_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span><span class="p">)</span>  <span class="c1"># lower bound for alpha</span>
+            <span class="n">days_interval_low_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+                <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span>
+            <span class="p">)</span>  <span class="c1"># lower bound for days interval</span>
+
+            <span class="n">alpha_up_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span><span class="p">)</span>  <span class="c1"># upper bound alpha</span>
+            <span class="n">days_interval_up_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+                <span class="mi">90</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span>
+            <span class="p">)</span>  <span class="c1"># upper bound for days interval, 90 is the max day between intervals.</span>
+
+            <span class="n">low_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha_low_bound</span><span class="p">,</span> <span class="n">days_interval_low_bound</span><span class="p">)</span>
+            <span class="n">up_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alpha_up_bound</span><span class="p">,</span> <span class="n">days_interval_up_bound</span><span class="p">)</span>
+
+            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">low_bound</span><span class="p">,</span> <span class="n">up_bound</span><span class="p">]</span>
+            <span class="n">t_sim</span> <span class="o">=</span> <span class="mi">500</span>  <span class="c1"># simulation time in days</span>
+
+            <span class="c1"># until = 150                                   # set limit to optimize with real data</span>
+
+            <span class="c1"># Set individual</span>
+            <span class="c1"># ver si funciona bien la inicialización de I_d para casos sin inputdata</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opti</span> <span class="o">=</span> <span class="n">INTERVAL_FIT</span><span class="p">(</span>
+                <span class="n">I_d_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span>
+                <span class="n">t_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span>
+                <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+                <span class="n">cfg</span><span class="o">=</span><span class="n">cfg</span><span class="p">,</span>
+                <span class="n">nintervals</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span><span class="p">,</span>
+                <span class="n">inputdata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">I_d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Set Particle Swarm Optimization parameters, gen=200, population=40 -&gt; time: 20 min</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">pso</span><span class="p">(</span><span class="n">gen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gen</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;other_method&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Performing other method =)&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CV19PARAMFIT.evolve"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.evolve">[docs]</a>    <span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npop</span><span class="o">=</span><span class="mi">40</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pop</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opti</span><span class="p">,</span> <span class="n">npop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opti</span><span class="o">.</span><span class="n">fitness</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="o">.</span><span class="n">champion_x</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="o">.</span><span class="n">champion_f</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CV19PARAMFIT.simulate"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;initdate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opti</span><span class="o">.</span><span class="n">beta_funct</span><span class="p">,</span>
+            <span class="n">inputdata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">I_d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CV19PARAMFIT.plot"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xaxis</span><span class="o">=</span><span class="s2">&quot;days&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot simulation results with optimized parameters&quot;&quot;&quot;</span>
+        <span class="n">interval_array</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opti</span><span class="o">.</span><span class="n">beta_funct</span><span class="p">[</span><span class="s2">&quot;days&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opti</span><span class="o">.</span><span class="n">beta_funct</span><span class="p">[</span><span class="s2">&quot;days&quot;</span><span class="p">]))</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">xaxis</span> <span class="o">==</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Simulation&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Data&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Days&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interval_array</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">xaxis</span> <span class="o">==</span> <span class="s2">&quot;dates&quot;</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Simulation&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Data&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Dates&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interval_array</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dates</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span>
+                <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;New cases&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Optimization results&quot;</span><span class="p">)</span></div>
+
+        <span class="c1"># plot vertical lines, where days intervals start</span>
+
+<div class="viewcode-block" id="CV19PARAMFIT.plot_history"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot_history">[docs]</a>    <span class="k">def</span> <span class="nf">plot_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plots optimization history</span>
+<span class="sd">        # log of the optimization, for PSO. log = [Gen, Fevals, gbest, Mean Vel., Mean lbest, Avg. Dist]</span>
+<span class="sd">        # Gen: generation, Fevals:fitness evaluations, gbest: global best,</span>
+<span class="sd">        # Mean Vel.: mean velocity, Mean lbest: mean fitness, Avg. Dist: average distance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">pso</span><span class="p">)</span>  <span class="c1"># uda = user-defined algorithm</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uda</span><span class="o">.</span><span class="n">get_log</span><span class="p">())</span>
+        <span class="c1"># plot global best vs generations</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">log</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">log</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Generation&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Fitness&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span></div></div>
+
+
+<div class="viewcode-block" id="BETA_FIT"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT">[docs]</a><span class="k">class</span> <span class="nc">BETA_FIT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optimizador de beta con Inverse Time Weighted Error</span>
+
+
+<span class="sd">    1. Se deben encontrar las condiciones iniciales para todas las variables</span>
+<span class="sd">    2. Elegir qué variable se utilizará en el fitness. Voy a partir con I_d</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">I_d</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;RMSE&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span> <span class="o">=</span> <span class="n">I_d</span>  <span class="c1"># New daily infected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>  <span class="c1"># real time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>  <span class="c1"># Bounds for the variables to optimize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="s2">&quot;ITWE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">ITWE</span>
+        <span class="k">elif</span> <span class="n">error</span> <span class="o">==</span> <span class="s2">&quot;RMSE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">RMSE</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ITWE_error</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RMSE_error</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p2p_error</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># self.mu = mu</span>
+
+<div class="viewcode-block" id="BETA_FIT.fitness"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.fitness">[docs]</a>    <span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ITWE_error</span> <span class="o">=</span> <span class="n">ITWE</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RMSE_error</span> <span class="o">=</span> <span class="n">RMSE</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p2p_error</span> <span class="o">=</span> <span class="n">P2PE</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ITWE_error</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BETA_FIT.get_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.get_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># mandatory function of Pygmo2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div>
+
+<div class="viewcode-block" id="BETA_FIT.set_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.set_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">set_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div>
+
+<div class="viewcode-block" id="BETA_FIT.gradient"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pg</span><span class="o">.</span><span class="n">estimate_gradient_h</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BETAMU_FIT"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT">[docs]</a><span class="k">class</span> <span class="nc">BETAMU_FIT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optimizador de beta con Inverse Time Weighted Error</span>
+
+<span class="sd">    1. Se deben encontrar las condiciones iniciales para todas las variables</span>
+<span class="sd">    2. Elegir qué variable se utilizará en el fitness. Voy a partir con I_d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="n">error</span><span class="o">=</span><span class="s2">&quot;ITWE&quot;</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+       
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span> <span class="o">=</span> <span class="n">I_d_data</span>  <span class="c1"># New cases </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_d_data</span><span class="p">)))</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">t_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">t_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>  <span class="c1"># Bounds for the variables to optimize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">rho</span> <span class="c1"># Decide if keeping this</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="s2">&quot;ITWE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">ITWE</span>
+        <span class="k">elif</span> <span class="n">error</span> <span class="o">==</span> <span class="s2">&quot;RMSE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">RMSE</span>
+
+<div class="viewcode-block" id="BETAMU_FIT.fitness"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.fitness">[docs]</a>    <span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># mandatory function of Pygmo2</span>
+        <span class="c1"># We construct the days intervals with the values that are being</span>
+        <span class="c1"># optimized.</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mu</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">err</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BETAMU_FIT.get_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.get_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># mandatory function of Pygmo2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div>
+
+<div class="viewcode-block" id="BETAMU_FIT.set_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.set_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">set_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div>
+
+<div class="viewcode-block" id="BETAMU_FIT.gradient"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pg</span><span class="o">.</span><span class="n">estimate_gradient_h</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="BETA_PIECEWISE_FIT"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT">[docs]</a><span class="k">class</span> <span class="nc">BETA_PIECEWISE_FIT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;_summary_</span>
+<span class="sd">    # beta_days includes the last transition date, the objetive of this method is to find the best value for this transition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cfg</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="n">beta_values</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">beta_days</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">],</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;RMSE&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span> <span class="o">=</span> <span class="n">I_d_data</span>  <span class="c1"># Data new cases </span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">t_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">t_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_d_data</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span> <span class="o">=</span> <span class="n">t_data</span>  <span class="c1"># Data time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>  <span class="c1"># Bounds for the variables to optimize [[beta_min],[beta_max]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span> <span class="c1"># Configuration file for the rest of the model&#39;s parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span> <span class="o">=</span> <span class="n">beta_values</span> <span class="c1"># if none we start optimizing from the beginning</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span> <span class="o">=</span> <span class="n">beta_days</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="s2">&quot;ITWE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">ITWE</span>
+        <span class="k">elif</span> <span class="n">error</span> <span class="o">==</span> <span class="s2">&quot;RMSE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">RMSE</span>
+        <span class="k">elif</span> <span class="n">error</span> <span class="o">==</span> <span class="s2">&quot;RRMSE&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">RRMSE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Wrong error function&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BETA_PIECEWISE_FIT.fitness"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.fitness">[docs]</a>    <span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">cv19functions</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="o">+</span><span class="p">[</span><span class="n">x</span><span class="p">],</span><span class="n">limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">)</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RMSE_error</span> <span class="o">=</span> <span class="n">RMSE</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">RMSE_error</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BETA_PIECEWISE_FIT.get_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.get_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># mandatory function of Pygmo2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div>
+
+<div class="viewcode-block" id="BETA_PIECEWISE_FIT.set_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.set_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">set_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div>
+
+<div class="viewcode-block" id="BETA_PIECEWISE_FIT.gradient"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pg</span><span class="o">.</span><span class="n">estimate_gradient_h</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="INTERVAL_FIT"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT">[docs]</a><span class="k">class</span> <span class="nc">INTERVAL_FIT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Data Fit</span>
+<span class="sd">    Developed by A. Bernardin, modified by S. Ropert</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;RMSE&quot;</span><span class="p">,</span> <span class="n">nintervals</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span> <span class="o">=</span> <span class="n">I_d_data</span>  <span class="c1"># real infected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span> <span class="o">=</span> <span class="n">t_data</span>  <span class="c1"># real time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_interval_array</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># interval_array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_funct</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span> <span class="o">=</span> <span class="n">nintervals</span>
+
+        <span class="c1"># if error == &#39;ITWE&#39;:</span>
+        <span class="c1">#     self.error =  ITWE</span>
+        <span class="c1"># elif error == &#39;RMSE&#39;:</span>
+        <span class="c1">#     self.error =  RMSE</span>
+
+<div class="viewcode-block" id="INTERVAL_FIT.fitness"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT.fitness">[docs]</a>    <span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c1"># mandatory function of Pygmo2</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        We search a vector that includes values for alpha and for the days intervals.</span>
+
+<span class="sd">        x: Optimization vector, by default from Pygmo2. Vector of lenght 20, where x[:10] are the alpha values and x[10:] are</span>
+<span class="sd">           the days values for the intervals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We construct the days intervals with the values that are being</span>
+        <span class="c1"># optimized.</span>
+        <span class="n">alpha_interval_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">first_element</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span> <span class="p">:]:</span>
+            <span class="n">second_element</span> <span class="o">=</span> <span class="n">first_element</span> <span class="o">+</span> <span class="n">i</span>
+            <span class="n">alpha_interval_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">first_element</span><span class="p">,</span> <span class="n">second_element</span><span class="p">])</span>
+            <span class="n">first_element</span> <span class="o">=</span> <span class="n">second_element</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_interval_array</span> <span class="o">=</span> <span class="n">alpha_interval_array</span>
+        <span class="n">beta_funct</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;events&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>  <span class="c1"># dictionary that includes betas and values for days intervals</span>
+        <span class="n">beta_funct</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nintervals</span><span class="p">])</span>
+        <span class="n">beta_funct</span><span class="p">[</span><span class="s2">&quot;days&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha_interval_array</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_funct</span> <span class="o">=</span> <span class="n">beta_funct</span>
+
+        <span class="c1"># set simulation</span>
+        <span class="n">sims</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta_funct</span><span class="p">,</span> <span class="n">t_end</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+        <span class="p">)</span>  <span class="c1"># x[i] takes values between limits define by &quot;bounds&quot;</span>
+        <span class="n">sims</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>  <span class="c1"># run simulation</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span>
+            <span class="n">sims</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span>
+        <span class="p">)</span>  <span class="c1"># to adjust data to simulation (data are each three days)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span> <span class="o">-</span> <span class="n">sims</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="p">)</span>  <span class="c1"># Norm between data and simulation. This is the fitness.</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">res</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="INTERVAL_FIT.get_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT.get_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># mandatory function of Pygmo2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div>
+
+<div class="viewcode-block" id="INTERVAL_FIT.set_bounds"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT.set_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">set_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span></div></div>
+
+
+<div class="viewcode-block" id="SEQUENTIAL_FIT"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT">[docs]</a><span class="k">class</span> <span class="nc">SEQUENTIAL_FIT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sequential fit optimization method</span>
+<span class="sd">    1. We aply betamu_fit for fiting the initial parameters using a truncated part of the data</span>
+<span class="sd">    2. We calculate a global error function and check if we are under the error tolerance. If not we continue with the following points</span>
+<span class="sd">    3. Using tendency_change we look for the tendency change day.</span>
+<span class="sd">    4. We optimize with beta_fit from the day found in (2). </span>
+<span class="sd">    5. We iterate points 2, 3 and 4 until we reach the end of the data or we reduce the error below the tolerance</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">I_d_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dates_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tstate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">initdate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cv19gmdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_errortol</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">local_errortol</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">global_errfunct</span><span class="o">=</span><span class="n">RMSE</span><span class="p">,</span><span class="n">local_errfunct</span><span class="o">=</span><span class="n">LAE</span><span class="p">,</span> 
+        <span class="n">intervalsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">maxintervals</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">bounds_beta</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">bounds_mu</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">inputdata</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">paramtol</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span> <span class="o">=</span> <span class="n">I_d_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span> <span class="o">=</span> <span class="n">t_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span> <span class="o">=</span> <span class="n">dates_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span> <span class="o">=</span> <span class="n">tstate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span> <span class="o">=</span> <span class="n">initdate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv19gmdata</span> <span class="o">=</span> <span class="n">cv19gmdata</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span> <span class="o">=</span> <span class="n">inputdata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intervalsize</span> <span class="o">=</span> <span class="n">intervalsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxintervals</span> <span class="o">=</span> <span class="n">maxintervals</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_beta</span> <span class="o">=</span> <span class="n">bounds_beta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_mu</span> <span class="o">=</span> <span class="n">bounds_mu</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_errortol</span> <span class="o">=</span> <span class="n">global_errortol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_errortol</span> <span class="o">=</span> <span class="n">local_errortol</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">actualidx</span> <span class="o">=</span> <span class="n">intervalsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paramtol</span> <span class="o">=</span> <span class="n">paramtol</span>
+        
+        <span class="c1"># Data management: data source</span>
+        <span class="n">data_management</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="p">,</span> <span class="n">dates_data</span><span class="p">,</span> <span class="n">tstate</span><span class="p">,</span> <span class="n">initdate</span><span class="p">,</span> <span class="n">cv19gmdata</span><span class="p">)</span>
+
+        <span class="c1"># Choose error functions (later will add the capability of choosing)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_errfunct</span> <span class="o">=</span> <span class="n">cv19errorbuild</span><span class="p">(</span><span class="n">global_errfunct</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_errfunct</span> <span class="o">=</span> <span class="n">cv19errorbuild</span><span class="p">(</span><span class="n">local_errfunct</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">betaiter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_error_hist</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># ------------------------- #</span>
+    <span class="c1"># First step: betamu_fit    #</span>
+    <span class="c1"># ------------------------- #</span>
+<div class="viewcode-block" id="SEQUENTIAL_FIT.betamu_fit"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.betamu_fit">[docs]</a>    <span class="k">def</span> <span class="nf">betamu_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">actualidx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">actualidx</span><span class="p">:</span>
+            <span class="n">actualidx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervalsize</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Set bounds</span>
+        <span class="n">lb</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds_beta</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds_mu</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># lower bound</span>
+        <span class="n">ub</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds_beta</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds_mu</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>  <span class="c1"># upper bound</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">]</span>
+
+        <span class="c1"># Build beta_mu optimization Problem</span>
+        <span class="n">opti_mu</span> <span class="o">=</span> <span class="n">BETAMU_FIT</span><span class="p">(</span><span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">I_d_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[:</span><span class="n">actualidx</span><span class="p">],</span> <span class="n">t_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">[:</span><span class="n">actualidx</span><span class="p">],</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;RMSE&quot;</span><span class="p">,</span> <span class="n">inputdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Choose algorithm</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">nlopt</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s2">&quot;bobyqa&quot;</span><span class="p">))</span>
+        <span class="n">algo</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="c1"># Solve</span>
+        <span class="k">if</span> <span class="n">debug</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solving for beta and mu&quot;</span><span class="p">)</span>
+        <span class="n">pop</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="n">opti_mu</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">pop</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">pop</span><span class="p">)</span>
+
+        <span class="c1"># Extract results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">pop</span><span class="o">.</span><span class="n">champion_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">4</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">pop</span><span class="o">.</span><span class="n">champion_x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="c1"># Calculate Global Error</span>
+        <span class="c1"># Try to avoid simulating again</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">mu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span><span class="n">inputdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_errfunct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_error_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_error</span><span class="p">)</span>
+
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">debug</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Initial values&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elapsed time:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; s&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;beta: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;mu &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">))</span>  
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Global Error: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_error</span><span class="p">))</span>  </div>
+
+    <span class="c1"># ----------------------------------------------------- #</span>
+    <span class="c1"># Second step: recursing beta fit for short intervals    #</span>
+    <span class="c1"># ----------------------------------------------------- #</span>
+<div class="viewcode-block" id="SEQUENTIAL_FIT.beta_fit"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.beta_fit">[docs]</a>    <span class="k">def</span> <span class="nf">beta_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">actualidx</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Find right beta for the divergence point</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds_beta</span><span class="p">[</span><span class="mi">0</span><span class="p">]],[</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds_beta</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span>
+        <span class="n">opti</span> <span class="o">=</span> <span class="n">BETA_PIECEWISE_FIT</span><span class="p">(</span><span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">I_d_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[:</span><span class="n">actualidx</span><span class="p">],</span> 
+        <span class="n">t_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">[:</span><span class="n">actualidx</span><span class="p">],</span>  <span class="n">beta_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">,</span><span class="n">beta_days</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">,</span> <span class="n">inputdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span>  <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Choose algorithm</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">nlopt</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s2">&quot;bobyqa&quot;</span><span class="p">))</span>
+        <span class="n">algo</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="c1"># Find parameters</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solving for beta&quot;</span><span class="p">)</span>
+        <span class="n">pop</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="n">opti</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">pop</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">pop</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">pop</span><span class="o">.</span><span class="n">champion_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">4</span><span class="p">))</span>
+
+        <span class="c1"># Calculate Global error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">cv19functions</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">,</span><span class="n">limits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span><span class="n">mu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span><span class="n">inputdata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_errfunct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_error_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_error</span><span class="p">)</span>
+        
+        <span class="n">endtime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Optimization process Finished&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elapsed time:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">endtime</span> <span class="o">-</span> <span class="n">starttime</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; s&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;beta: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;days: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Global Error: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_error</span><span class="p">))</span>            
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">betaiter</span><span class="o">+=</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="SEQUENTIAL_FIT.optimize"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># Finding initial values</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">betamu_fit</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="c1"># Stop condition: global error under a tolerance or reaching the end of the data</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_error</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_errortol</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+            
+            <span class="c1"># 1. Find divergence point </span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">tendency_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span>  <span class="n">t_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="n">sim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="p">,</span> <span class="n">errorfunction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_errfunct</span><span class="p">,</span> <span class="n">l_err_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_errortol</span><span class="p">,</span><span class="n">startingday</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actualidx</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            
+            <span class="c1"># Choose the last data point to fit in this iteration. Check if we reached the end of the data</span>
+            <span class="k">if</span> <span class="n">idx</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">intervalsize</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reached the end of data&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">actualidx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">)</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">actualidx</span> <span class="o">=</span> <span class="n">idx</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">intervalsize</span>
+
+            <span class="c1"># 2. Find the best fit for this interval</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta_fit</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">actualidx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actualidx</span><span class="p">)</span>
+            
+            <span class="c1"># 3. Check if the solution represents a transition or it is due to noise.</span>
+            <span class="c1">#    If the betas are too similar we find one that fits this extended range altogether</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">paramtol</span><span class="p">:</span>
+                <span class="c1"># Delete last idx and 2 last betas</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+                <span class="c1"># Find beta for the extended range</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">beta_fit</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">actualidx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actualidx</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">betamu_fit</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">actualidx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actualidx</span><span class="p">)</span>
+
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Optimization process Finished&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elapsed time:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; s&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;beta: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;days: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;mu: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Global Error: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_error</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of iterations: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaiter</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="SEQUENTIAL_FIT.plot"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xaxis</span><span class="o">=</span><span class="s2">&quot;days&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">xaxis</span> <span class="o">==</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Simulation&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Data&quot;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:red&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Days&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">xaxis</span> <span class="o">==</span> <span class="s2">&quot;dates&quot;</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Simulation&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Data&quot;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:red&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Dates&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dates</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span>
+                <span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%m/%Y&#39;</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DayLocator</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">autofmt_xdate</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;New cases&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Optimization results&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SEQUENTIAL_FIT.plot_step"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_step">[docs]</a>    <span class="k">def</span> <span class="nf">plot_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">step</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plots optimization history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">step</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">step</span><span class="p">)</span><span class="o">==</span><span class="nb">bool</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">)</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">))</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Data&quot;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">beta_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[:</span><span class="n">step</span><span class="p">]</span>
+            <span class="n">beta_days</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">]</span> <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">[:</span><span class="n">step</span><span class="p">]</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">cv19functions</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">beta_values</span><span class="p">,</span><span class="n">limits</span><span class="o">=</span><span class="n">beta_days</span><span class="p">)</span> 
+            <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span><span class="n">mu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span><span class="n">inputdata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Step: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">step</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">beta_days</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Days&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;New Cases&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Optimization evolution&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="SEQUENTIAL_FIT.plot_history"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_history">[docs]</a>    <span class="k">def</span> <span class="nf">plot_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plots optimization history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">steps</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span><span class="o">==</span><span class="nb">bool</span><span class="p">:</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Data&quot;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">beta_values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">beta_days</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">cv19functions</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">beta_values</span><span class="p">,</span><span class="n">limits</span><span class="o">=</span><span class="n">beta_days</span><span class="p">)</span> 
+            <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span><span class="n">mu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span><span class="n">inputdata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Iter: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">beta_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_values</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">beta_days</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">beta_days</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_days</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
+
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">cv19functions</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">beta_values</span><span class="p">,</span><span class="n">limits</span><span class="o">=</span><span class="n">beta_days</span><span class="p">)</span> 
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span><span class="n">mu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span><span class="n">inputdata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputdata</span><span class="p">,</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Final&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Days&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;New Cases&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Optimization evolution&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span></div></div>
+
+
+<span class="c1"># Tendency Change</span>
+<div class="viewcode-block" id="tendency_change"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.tendency_change">[docs]</a><span class="k">def</span> <span class="nf">tendency_change</span><span class="p">(</span><span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sim</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">l_err_tol</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">errorfunction</span><span class="o">=</span><span class="n">LAE</span><span class="p">,</span> <span class="n">startingday</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sim</span><span class="p">:</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d</span> <span class="o">=</span> <span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+    
+    <span class="c1"># Add options for calculating local error</span>
+    <span class="n">l_err</span> <span class="o">=</span> <span class="n">errorfunction</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span><span class="n">I_d_data</span><span class="p">,</span><span class="n">t_data</span><span class="p">)</span> <span class="c1"># Local Absolute error</span>
+    <span class="n">aux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">l_err</span><span class="p">)</span><span class="o">&gt;</span><span class="n">l_err_tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># first index over error tolerance</span>
+    <span class="n">changeindex</span> <span class="o">=</span> <span class="n">aux</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">I_d_data</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t_data</span><span class="o">&gt;</span><span class="n">startingday</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">I_d_data</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">changeindex</span><span class="p">,</span><span class="n">idx</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Data Management</span>
+<div class="viewcode-block" id="data_management"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.data_management">[docs]</a><span class="k">def</span> <span class="nf">data_management</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="p">,</span> <span class="n">dates_data</span><span class="p">,</span> <span class="n">tstate</span><span class="p">,</span> <span class="n">initdate</span><span class="p">,</span> <span class="n">cv19gmdata</span><span class="p">):</span>
+        <span class="c1"># Data array</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">I_d_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span> <span class="o">=</span> <span class="n">I_d_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span> <span class="o">=</span> <span class="n">t_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span> <span class="o">=</span> <span class="n">dates_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># State code + inital date: downloads data from remote server</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">importdata</span><span class="p">(</span><span class="n">tstate</span><span class="o">=</span><span class="n">tstate</span><span class="p">,</span> <span class="n">initdate</span><span class="o">=</span><span class="n">initdate</span><span class="p">)</span>
+            <span class="c1"># Import data for seir - change this for adding more models</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Importing data from remote server&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">import_data_seir</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_tr</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_dates</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># cv19gmdata object</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">cv19gmdata</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">cv19gmdata</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates_data</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_tr</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">I_d_r_dates</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Missing data to fit</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Raise exception</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Missing data to fit&quot;</span><span class="p">)</span></div>
+
+            
+<div class="viewcode-block" id="beta_fit"><a class="viewcode-back" href="../../../cv19gm.utils.html#cv19gm.utils.cv19paramfit.beta_fit">[docs]</a><span class="k">def</span> <span class="nf">beta_fit</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d_data</span><span class="p">,</span><span class="n">t_data</span><span class="p">,</span><span class="n">beta_values</span><span class="o">=</span><span class="p">[],</span> <span class="n">beta_days</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">infty</span><span class="p">],</span><span class="n">actualidx</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">global_errfunct</span><span class="o">=</span><span class="n">RMSE</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c1"># Find right beta for the divergence point</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[[</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]],[</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span>
+    <span class="n">opti</span> <span class="o">=</span> <span class="n">BETA_PIECEWISE_FIT</span><span class="p">(</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">I_d_data</span> <span class="o">=</span> <span class="n">I_d_data</span><span class="p">[:</span><span class="n">actualidx</span><span class="p">],</span>
+    <span class="n">t_data</span> <span class="o">=</span> <span class="n">t_data</span><span class="p">[:</span><span class="n">actualidx</span><span class="p">],</span>  <span class="n">beta_values</span><span class="o">=</span><span class="n">beta_values</span><span class="p">,</span><span class="n">beta_days</span><span class="o">=</span><span class="n">beta_days</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># mu and inputdata are given through the kwargs</span>
+
+    <span class="c1"># Choose algorithm</span>
+    <span class="n">algo</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">nlopt</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s2">&quot;bobyqa&quot;</span><span class="p">))</span>
+    <span class="n">algo</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="c1"># Find parameters</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solving for beta&quot;</span><span class="p">)</span>
+    <span class="n">pop</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="n">opti</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">pop</span> <span class="o">=</span> <span class="n">algo</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">pop</span><span class="p">)</span>
+
+    <span class="n">beta_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">pop</span><span class="o">.</span><span class="n">champion_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">4</span><span class="p">))</span>
+
+    <span class="c1"># Calculate Global error</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">cv19functions</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">beta_values</span><span class="p">,</span><span class="n">limits</span><span class="o">=</span><span class="n">beta_days</span><span class="p">)</span>
+    
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">CV19SIM</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="n">I_d</span> <span class="o">=</span> <span class="n">I_d_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+    <span class="n">global_errfunct</span> <span class="o">=</span> <span class="n">cv19errorbuild</span><span class="p">(</span><span class="n">global_errfunct</span><span class="p">)</span>
+    <span class="n">global_error</span> <span class="o">=</span> <span class="n">global_errfunct</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">sims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">I_d</span><span class="p">,</span> <span class="n">I_d_data</span><span class="p">,</span> <span class="n">t_data</span><span class="o">=</span><span class="n">t_data</span><span class="p">)</span>
+    <span class="n">endtime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Optimization process Finished&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elapsed time:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">endtime</span> <span class="o">-</span> <span class="n">starttime</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="s1">&#39; s&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;beta: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">beta_values</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;days: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">beta_days</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Global Error: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">global_error</span><span class="p">))</span>            
+    
+    <span class="k">return</span> <span class="n">beta_values</span><span class="p">,</span> <span class="n">beta_days</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">global_error</span></div>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

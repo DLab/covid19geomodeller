@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm package &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cv19gm.data package" href="cv19gm.data.html" />
+    <link rel="prev" title="cv19gm" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cv19gm</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">cv19gm package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html">cv19gm.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html">cv19gm.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html">cv19gm.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-cv19gm.cv19sim">cv19gm.cv19sim module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cv19gm.cv19sim.CV19SIM"><code class="docutils literal notranslate"><span class="pre">CV19SIM</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cv19gm.cv19sim.iterate"><code class="docutils literal notranslate"><span class="pre">iterate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cv19gm.cv19sim.simapply"><code class="docutils literal notranslate"><span class="pre">simapply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cv19gm.cv19sim.solve"><code class="docutils literal notranslate"><span class="pre">solve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-cv19gm">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">cv19gm</a></li>
+      <li class="breadcrumb-item active">cv19gm package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cv19gm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="cv19gm-package">
+<h1>cv19gm package<a class="headerlink" href="#cv19gm-package" title="Permalink to this heading"></a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cv19gm.data.html">cv19gm.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.data.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.data.html#module-cv19gm.data.cv19data">cv19gm.data.cv19data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData"><code class="docutils literal notranslate"><span class="pre">ImportData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.add_data"><code class="docutils literal notranslate"><span class="pre">ImportData.add_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_adj_matrix_national"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_adj_matrix_national()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_adj_matrix_regional"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_adj_matrix_regional()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_deaths_accumulated"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_deaths_accumulated()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_deaths_deis"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_deaths_deis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_deaths_deis_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_deaths_deis_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_deaths_excess"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_deaths_excess()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_hosp_icu"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_hosp_icu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_hosp_icu_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_hosp_icu_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_hosp_vmibeds"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_hosp_vmibeds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_hospitalized_deaths"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_hospitalized_deaths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_accumulated"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_accumulated()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_accumulated_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_accumulated_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_active"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_active()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_active_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_active_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_daily"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_daily()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_daily_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_daily_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_daily_mcyt_backprop"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_daily_mcyt_backprop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_infected_daily_national"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_daily_national()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_lockdowns"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_lockdowns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_pcr_population"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_pcr_population()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_population"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_population()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_population_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_population_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_reproduction_number"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_reproduction_number()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_sochimi"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_sochimi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_sochimi_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_sochimi_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.imp_vacc_infected_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_vacc_infected_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.import_data"><code class="docutils literal notranslate"><span class="pre">ImportData.import_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.import_data_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.import_data_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.import_data_seir"><code class="docutils literal notranslate"><span class="pre">ImportData.import_data_seir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.load"><code class="docutils literal notranslate"><span class="pre">ImportData.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.plot"><code class="docutils literal notranslate"><span class="pre">ImportData.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.ImportData.save"><code class="docutils literal notranslate"><span class="pre">ImportData.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.dataretriever"><code class="docutils literal notranslate"><span class="pre">dataretriever()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.dfappend"><code class="docutils literal notranslate"><span class="pre">dfappend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data.help"><code class="docutils literal notranslate"><span class="pre">help()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.data.html#module-cv19gm.data.cv19data_national">cv19gm.data.cv19data_national module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData"><code class="docutils literal notranslate"><span class="pre">ImportData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.add_data"><code class="docutils literal notranslate"><span class="pre">ImportData.add_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.calculateIC"><code class="docutils literal notranslate"><span class="pre">ImportData.calculateIC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.calculateIC_SEIR"><code class="docutils literal notranslate"><span class="pre">ImportData.calculateIC_SEIR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_deaths_deis_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_deaths_deis_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_hosp_icu_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_hosp_icu_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_accumulated_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_accumulated_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_active_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_active_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_daily_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_daily_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_mcyt_infdiario"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_infected_mcyt_infdiario()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_population_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_population_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_vacc_infected_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_vacc_infected_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_vaccinated_mcyt"><code class="docutils literal notranslate"><span class="pre">ImportData.imp_vaccinated_mcyt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.import_data"><code class="docutils literal notranslate"><span class="pre">ImportData.import_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.load"><code class="docutils literal notranslate"><span class="pre">ImportData.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.save"><code class="docutils literal notranslate"><span class="pre">ImportData.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.dfappend"><code class="docutils literal notranslate"><span class="pre">dfappend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.data.html#cv19gm.data.cv19data_national.help"><code class="docutils literal notranslate"><span class="pre">help()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.data.html#module-cv19gm.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cv19gm.models.html">cv19gm.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#cv19gm-models-rbm-seir-module">cv19gm.models.RBM_seir module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#module-cv19gm.models.seir">cv19gm.models.seir module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR"><code class="docutils literal notranslate"><span class="pre">SEIR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.analytics"><code class="docutils literal notranslate"><span class="pre">SEIR.analytics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.df_build"><code class="docutils literal notranslate"><span class="pre">SEIR.df_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.integrate"><code class="docutils literal notranslate"><span class="pre">SEIR.integrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.model_SEIR_graph"><code class="docutils literal notranslate"><span class="pre">SEIR.model_SEIR_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.run"><code class="docutils literal notranslate"><span class="pre">SEIR.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.set_equations"><code class="docutils literal notranslate"><span class="pre">SEIR.set_equations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.set_relational_values"><code class="docutils literal notranslate"><span class="pre">SEIR.set_relational_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir.SEIR.solve"><code class="docutils literal notranslate"><span class="pre">SEIR.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#module-cv19gm.models.seir_meta">cv19gm.models.seir_meta module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA"><code class="docutils literal notranslate"><span class="pre">SEIRMETA</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.analytics"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.analytics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.global_results_build"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.global_results_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.integrate"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.integrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.model_SEIR_graph"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.model_SEIR_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.params_df_build"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.params_df_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.results_build"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.results_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.run"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.set_equations"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.set_equations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.set_initial_values"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.set_initial_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_meta.SEIRMETA.solve"><code class="docutils literal notranslate"><span class="pre">SEIRMETA.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#module-cv19gm.models.seir_nb">cv19gm.models.seir_nb module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR"><code class="docutils literal notranslate"><span class="pre">SEIR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.analytics"><code class="docutils literal notranslate"><span class="pre">SEIR.analytics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.df_build"><code class="docutils literal notranslate"><span class="pre">SEIR.df_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.integrate"><code class="docutils literal notranslate"><span class="pre">SEIR.integrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.model_SEIR_graph"><code class="docutils literal notranslate"><span class="pre">SEIR.model_SEIR_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.nbfunctions"><code class="docutils literal notranslate"><span class="pre">SEIR.nbfunctions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.run"><code class="docutils literal notranslate"><span class="pre">SEIR.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.set_equations"><code class="docutils literal notranslate"><span class="pre">SEIR.set_equations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.set_relational_values"><code class="docutils literal notranslate"><span class="pre">SEIR.set_relational_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seir_nb.SEIR.solve"><code class="docutils literal notranslate"><span class="pre">SEIR.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#module-cv19gm.models.seirhvd">cv19gm.models.seirhvd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD"><code class="docutils literal notranslate"><span class="pre">SEIRHVD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.analytics"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.analytics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.df_build"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.df_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.integrate"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.integrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.model_SEIR_graph"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.model_SEIR_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.run"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.set_equations"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.set_equations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.set_relational_values"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.set_relational_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.solve"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.solve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirhvd.SEIRHVD.underreport"><code class="docutils literal notranslate"><span class="pre">SEIRHVD.underreport()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#module-cv19gm.models.seirtq">cv19gm.models.seirtq module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ"><code class="docutils literal notranslate"><span class="pre">SEIRTQ</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.analytics"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.analytics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.df_build"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.df_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.integrate"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.integrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.model_SEIR_graph"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.model_SEIR_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.run"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.set_equations"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.set_equations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.set_relational_values"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.set_relational_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.seirtq.SEIRTQ.solve"><code class="docutils literal notranslate"><span class="pre">SEIRTQ.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#cv19gm-models-seirtqm-module">cv19gm.models.seirtqm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#module-cv19gm.models.sir">cv19gm.models.sir module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR"><code class="docutils literal notranslate"><span class="pre">SIR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.analytics"><code class="docutils literal notranslate"><span class="pre">SIR.analytics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.df_build"><code class="docutils literal notranslate"><span class="pre">SIR.df_build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.integrate"><code class="docutils literal notranslate"><span class="pre">SIR.integrate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.model_SEIR_graph"><code class="docutils literal notranslate"><span class="pre">SIR.model_SEIR_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.run"><code class="docutils literal notranslate"><span class="pre">SIR.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.set_equations"><code class="docutils literal notranslate"><span class="pre">SIR.set_equations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.set_relational_values"><code class="docutils literal notranslate"><span class="pre">SIR.set_relational_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.models.html#cv19gm.models.sir.SIR.solve"><code class="docutils literal notranslate"><span class="pre">SIR.solve()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.models.html#module-cv19gm.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cv19gm.utils.html">cv19gm.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#module-cv19gm.utils.cv19errors">cv19gm.utils.cv19errors module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.ITWE"><code class="docutils literal notranslate"><span class="pre">ITWE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.ITWE_log"><code class="docutils literal notranslate"><span class="pre">ITWE_log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.LAE"><code class="docutils literal notranslate"><span class="pre">LAE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.LCE"><code class="docutils literal notranslate"><span class="pre">LCE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.LRAE"><code class="docutils literal notranslate"><span class="pre">LRAE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.LRCE"><code class="docutils literal notranslate"><span class="pre">LRCE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.MSE"><code class="docutils literal notranslate"><span class="pre">MSE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.RMSE"><code class="docutils literal notranslate"><span class="pre">RMSE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.RRMSE"><code class="docutils literal notranslate"><span class="pre">RRMSE()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19errors.cv19errorbuild"><code class="docutils literal notranslate"><span class="pre">cv19errorbuild()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#module-cv19gm.utils.cv19files">cv19gm.utils.cv19files module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19files.getdefault"><code class="docutils literal notranslate"><span class="pre">getdefault()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19files.isdict"><code class="docutils literal notranslate"><span class="pre">isdict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19files.load_default"><code class="docutils literal notranslate"><span class="pre">load_default()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19files.loadconfig"><code class="docutils literal notranslate"><span class="pre">loadconfig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19files.saveconfig"><code class="docutils literal notranslate"><span class="pre">saveconfig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19files.savedata"><code class="docutils literal notranslate"><span class="pre">savedata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19files.unwrapconfig"><code class="docutils literal notranslate"><span class="pre">unwrapconfig()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#module-cv19gm.utils.cv19functions">cv19gm.utils.cv19functions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.build"><code class="docutils literal notranslate"><span class="pre">build()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.build_add"><code class="docutils literal notranslate"><span class="pre">build_add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.data_function"><code class="docutils literal notranslate"><span class="pre">data_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.events"><code class="docutils literal notranslate"><span class="pre">events()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.events_append"><code class="docutils literal notranslate"><span class="pre">events_append()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.func_add"><code class="docutils literal notranslate"><span class="pre">func_add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.interpolate_data"><code class="docutils literal notranslate"><span class="pre">interpolate_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.linear_transition"><code class="docutils literal notranslate"><span class="pre">linear_transition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.piecewise"><code class="docutils literal notranslate"><span class="pre">piecewise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.polyfit"><code class="docutils literal notranslate"><span class="pre">polyfit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.quadratic_transition"><code class="docutils literal notranslate"><span class="pre">quadratic_transition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.saturation"><code class="docutils literal notranslate"><span class="pre">saturation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.sawtooth"><code class="docutils literal notranslate"><span class="pre">sawtooth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.sigmoidal_transition"><code class="docutils literal notranslate"><span class="pre">sigmoidal_transition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.sine"><code class="docutils literal notranslate"><span class="pre">sine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.square"><code class="docutils literal notranslate"><span class="pre">square()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19functions.transition"><code class="docutils literal notranslate"><span class="pre">transition()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#module-cv19gm.utils.cv19mobility">cv19gm.utils.cv19mobility module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.create_mobility"><code class="docutils literal notranslate"><span class="pre">create_mobility()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.export_mobility"><code class="docutils literal notranslate"><span class="pre">export_mobility()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.import_mobility"><code class="docutils literal notranslate"><span class="pre">import_mobility()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.mobility_to_tensor"><code class="docutils literal notranslate"><span class="pre">mobility_to_tensor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.mobility_transposed"><code class="docutils literal notranslate"><span class="pre">mobility_transposed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.rnd_flux"><code class="docutils literal notranslate"><span class="pre">rnd_flux()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.rnd_flux_matrix"><code class="docutils literal notranslate"><span class="pre">rnd_flux_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.rnd_flux_symmetric"><code class="docutils literal notranslate"><span class="pre">rnd_flux_symmetric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19mobility.to_symmetric_function"><code class="docutils literal notranslate"><span class="pre">to_symmetric_function()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#module-cv19gm.utils.cv19paramfit">cv19gm.utils.cv19paramfit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT"><code class="docutils literal notranslate"><span class="pre">BETAMU_FIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.fitness"><code class="docutils literal notranslate"><span class="pre">BETAMU_FIT.fitness()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.get_bounds"><code class="docutils literal notranslate"><span class="pre">BETAMU_FIT.get_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.gradient"><code class="docutils literal notranslate"><span class="pre">BETAMU_FIT.gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETAMU_FIT.set_bounds"><code class="docutils literal notranslate"><span class="pre">BETAMU_FIT.set_bounds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT"><code class="docutils literal notranslate"><span class="pre">BETA_FIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.fitness"><code class="docutils literal notranslate"><span class="pre">BETA_FIT.fitness()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.get_bounds"><code class="docutils literal notranslate"><span class="pre">BETA_FIT.get_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.gradient"><code class="docutils literal notranslate"><span class="pre">BETA_FIT.gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_FIT.set_bounds"><code class="docutils literal notranslate"><span class="pre">BETA_FIT.set_bounds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT"><code class="docutils literal notranslate"><span class="pre">BETA_PIECEWISE_FIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.fitness"><code class="docutils literal notranslate"><span class="pre">BETA_PIECEWISE_FIT.fitness()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.get_bounds"><code class="docutils literal notranslate"><span class="pre">BETA_PIECEWISE_FIT.get_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.gradient"><code class="docutils literal notranslate"><span class="pre">BETA_PIECEWISE_FIT.gradient()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.BETA_PIECEWISE_FIT.set_bounds"><code class="docutils literal notranslate"><span class="pre">BETA_PIECEWISE_FIT.set_bounds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT"><code class="docutils literal notranslate"><span class="pre">CV19PARAMFIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.evolve"><code class="docutils literal notranslate"><span class="pre">CV19PARAMFIT.evolve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot"><code class="docutils literal notranslate"><span class="pre">CV19PARAMFIT.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.plot_history"><code class="docutils literal notranslate"><span class="pre">CV19PARAMFIT.plot_history()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.CV19PARAMFIT.simulate"><code class="docutils literal notranslate"><span class="pre">CV19PARAMFIT.simulate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT"><code class="docutils literal notranslate"><span class="pre">INTERVAL_FIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT.fitness"><code class="docutils literal notranslate"><span class="pre">INTERVAL_FIT.fitness()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT.get_bounds"><code class="docutils literal notranslate"><span class="pre">INTERVAL_FIT.get_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.INTERVAL_FIT.set_bounds"><code class="docutils literal notranslate"><span class="pre">INTERVAL_FIT.set_bounds()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT"><code class="docutils literal notranslate"><span class="pre">SEQUENTIAL_FIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.beta_fit"><code class="docutils literal notranslate"><span class="pre">SEQUENTIAL_FIT.beta_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.betamu_fit"><code class="docutils literal notranslate"><span class="pre">SEQUENTIAL_FIT.betamu_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.optimize"><code class="docutils literal notranslate"><span class="pre">SEQUENTIAL_FIT.optimize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot"><code class="docutils literal notranslate"><span class="pre">SEQUENTIAL_FIT.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_history"><code class="docutils literal notranslate"><span class="pre">SEQUENTIAL_FIT.plot_history()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.SEQUENTIAL_FIT.plot_step"><code class="docutils literal notranslate"><span class="pre">SEQUENTIAL_FIT.plot_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.beta_fit"><code class="docutils literal notranslate"><span class="pre">beta_fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.data_management"><code class="docutils literal notranslate"><span class="pre">data_management()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19paramfit.tendency_change"><code class="docutils literal notranslate"><span class="pre">tendency_change()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#module-cv19gm.utils.cv19timeutils">cv19gm.utils.cv19timeutils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19timeutils.JS2Datetime"><code class="docutils literal notranslate"><span class="pre">JS2Datetime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19timeutils.timeJStoPy"><code class="docutils literal notranslate"><span class="pre">timeJStoPy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.utils.html#cv19gm.utils.cv19timeutils.txt2Datetime"><code class="docutils literal notranslate"><span class="pre">txt2Datetime()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#cv19gm-utils-reproduction-number-module">cv19gm.utils.reproduction_number module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cv19gm.utils.html#module-cv19gm.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</div>
+<div class="section" id="module-cv19gm.cv19sim">
+<span id="cv19gm-cv19sim-module"></span><h2>cv19gm.cv19sim module<a class="headerlink" href="#module-cv19gm.cv19sim" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.CV19SIM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.cv19sim.</span></span><span class="sig-name descname"><span class="pre">CV19SIM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#CV19SIM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.CV19SIM" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.CV19SIM.expose_variable">
+<span class="sig-name descname"><span class="pre">expose_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#CV19SIM.expose_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.CV19SIM.expose_variable" title="Permalink to this definition"></a></dt>
+<dd><p>Expose variables so they can be accessed directly from the main class object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>variable</strong> (<em>string</em>) – Variable to be exposed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.CV19SIM.extract">
+<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#CV19SIM.extract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.CV19SIM.extract" title="Permalink to this definition"></a></dt>
+<dd><p>Extract variables from simulation objects</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.CV19SIM.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#CV19SIM.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.CV19SIM.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.CV19SIM.resume">
+<span class="sig-name descname"><span class="pre">resume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#CV19SIM.resume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.CV19SIM.resume" title="Permalink to this definition"></a></dt>
+<dd><p>Resume:
+Prints a resume of the object with</p>
+<p>Model type:
+Simulated:
+Number of simulations:
+Iterated variables:
+RealData:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>CUT</p></li>
+<li><p>Dates</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.CV19SIM.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#CV19SIM.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.CV19SIM.solve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.iterate">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.cv19sim.</span></span><span class="sig-name descname"><span class="pre">iterate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#iterate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.iterate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.simapply">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.cv19sim.</span></span><span class="sig-name descname"><span class="pre">simapply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#simapply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.simapply" title="Permalink to this definition"></a></dt>
+<dd><p>Builds an array of models instances using the iterable variables array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>[</em><em>dict</em><em> or </em><em>path</em><em>]</em>) – base configuration file</p></li>
+<li><p><strong>model</strong> (<em>cv19model</em>) – compartmental model class</p></li>
+<li><p><strong>inputdata</strong> (<em>cv19data</em>) – (optional) Input data for IC and fitting</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cv19gm.cv19sim.solve">
+<span class="sig-prename descclassname"><span class="pre">cv19gm.cv19sim.</span></span><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/cv19sim.html#solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.cv19sim.solve" title="Permalink to this definition"></a></dt>
+<dd><p>Solves EDOs in models instances</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>cv19model</em>) – cv19model instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cv19gm" title="Permalink to this heading"></a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="cv19gm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cv19gm.data.html" class="btn btn-neutral float-right" title="cv19gm.data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

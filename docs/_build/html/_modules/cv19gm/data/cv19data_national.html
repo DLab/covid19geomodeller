@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm.data.cv19data_national &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">cv19gm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cv19gm.data.cv19data_national</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cv19gm.data.cv19data_national</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">pandas.core.base</span> <span class="kn">import</span> <span class="n">DataError</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.auth</span> <span class="kn">import</span> <span class="n">HTTPBasicAuth</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span> 
+
+<span class="c1"># cv19gm libraries </span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="c1">#from pathlib import Path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">cv19gm.utils.cv19timeutils</span> <span class="kn">import</span> <span class="n">timeJStoPy</span> 
+
+<span class="sd">&quot;&quot;&quot;   </span>
+<span class="sd">   Import and analyse data </span>
+
+
+<span class="sd">    To Do:</span>
+<span class="sd">        * Save data to file </span>
+<span class="sd">        * Load data from file</span>
+<span class="sd">        * Creación de df de información (self.info) sobre los datos (self.data)</span>
+<span class="sd">        * Estandarizar nombres de variables de hospitalización</span>
+<span class="sd">        * Expandir creación de dataframe a todas las funciones de importación</span>
+<span class="sd">        * Función que devuelva serie de tiempo sin nulls. Puede ser necesario para funciones de análisis de datos</span>
+<span class="sd">        * Manually add data ()</span>
+
+<span class="sd">    self.resume:</span>
+<span class="sd">        country,state,county,healthservice, population, initdate, update_date, dataindex</span>
+<span class="sd">    self.datainfo:</span>
+<span class="sd">        endpoint,initdate,enddate,update_date,sim_var, complete name, additional info.</span>
+
+
+<span class="sd">    #CUT Regiones:</span>
+<span class="sd">    </span>
+<span class="sd">    Names = [&#39;Arica y Parinacota&#39;,&#39;Tarapacá&#39;,&#39;Antofagasta&#39;,&#39;Atacama&#39;,&#39;Coquimbo&#39;,&#39;Valparaíso&#39;,&#39;Metropolitana&#39;,&#39;O’Higgins&#39;,&#39;Maule&#39;,&#39;Ñuble&#39;,&#39;Biobío&#39;,&#39;Araucanía&#39;,&#39;Los Ríos&#39;,&#39;Los Lagos&#39;,&#39;Aysén&#39;,&#39;Magallanes&#39;]</span>
+<span class="sd">    cut =   [&#39;15&#39;,                &#39;01&#39;,      &#39;02&#39;,         &#39;03&#39;,     &#39;04&#39;,      &#39;05&#39;,        &#39;13&#39;,           &#39;06&#39;,       &#39;07&#39;,   &#39;16&#39;,   &#39;08&#39;,    &#39;09&#39;,       &#39;14&#39;,      &#39;10&#39;,       &#39;11&#39;,   &#39;12&#39;] </span>
+
+<span class="sd">    nametocut = {}  </span>
+<span class="sd">    cuttoname = {} </span>
+<span class="sd">    for i in range(len(Names)): </span>
+<span class="sd">        nametocut.update({Names[i]:cut[i]})  </span>
+<span class="sd">        cuttoname.update({cut[i]:Names[i]})         </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="help"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.help">[docs]</a><span class="k">def</span> <span class="nf">help</span><span class="p">():</span>
+    <span class="n">aux</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            Functions: </span>
+
+<span class="s2">          &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dfappend"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.dfappend">[docs]</a><span class="k">def</span> <span class="nf">dfappend</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">values</span><span class="p">,</span><span class="n">days</span><span class="p">,</span><span class="n">dataname</span><span class="p">):</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">aux</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)]</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">days</span><span class="p">:</span>
+        <span class="n">aux</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span>
+    <span class="n">auxdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">dataname</span><span class="p">:</span><span class="n">aux</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span><span class="n">auxdf</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImportData"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData">[docs]</a><span class="k">class</span> <span class="nc">ImportData</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DLab Import Data Library</span>
+<span class="sd">        input: </span>
+<span class="sd">            - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">            - initdate: [datetime object] Initial date</span>
+<span class="sd">        output:</span>
+<span class="sd">            - ImportData Object.</span>
+
+<span class="sd">        Usage Example: </span>
+<span class="sd">        a = ImportData(tstate=&#39;13&#39;, initdate=datetime(2020,5,15))</span>
+<span class="sd">        a.importdata()</span>
+
+<span class="sd">         </span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">enddate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="n">localdata</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">localdata</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">localdata</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">localdata</span><span class="p">)</span>
+                <span class="c1">#self.load(localdata)</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">localdata</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">localdata</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DataError</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tdelta</span> <span class="o">=</span> <span class="n">enddate</span> <span class="o">-</span> <span class="n">initdate</span> 
+            <span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">initdate</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tdelta</span><span class="o">.</span><span class="n">days</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">]</span> 
+            <span class="n">days</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tdelta</span><span class="o">.</span><span class="n">days</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;days&#39;</span><span class="p">:</span><span class="n">days</span><span class="p">,</span><span class="s1">&#39;dates&#39;</span><span class="p">:</span><span class="n">dates</span><span class="p">})</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;15&#39;</span><span class="p">,</span><span class="s1">&#39;01&#39;</span><span class="p">,</span><span class="s1">&#39;02&#39;</span><span class="p">,</span><span class="s1">&#39;03&#39;</span><span class="p">,</span><span class="s1">&#39;04&#39;</span><span class="p">,</span><span class="s1">&#39;05&#39;</span><span class="p">,</span><span class="s1">&#39;13&#39;</span><span class="p">,</span><span class="s1">&#39;06&#39;</span><span class="p">,</span><span class="s1">&#39;07&#39;</span><span class="p">,</span><span class="s1">&#39;16&#39;</span><span class="p">,</span><span class="s1">&#39;08&#39;</span><span class="p">,</span><span class="s1">&#39;09&#39;</span><span class="p">,</span><span class="s1">&#39;14&#39;</span><span class="p">,</span><span class="s1">&#39;10&#39;</span><span class="p">,</span><span class="s1">&#39;11&#39;</span><span class="p">,</span><span class="s1">&#39;12&#39;</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span> <span class="o">=</span> <span class="n">initdate</span>
+        
+    <span class="c1"># --------------------------- #</span>
+    <span class="c1">#    Importar toda la data    #</span>
+    <span class="c1"># --------------------------- #</span>
+
+<div class="viewcode-block" id="ImportData.import_data"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.import_data">[docs]</a>    <span class="k">def</span> <span class="nf">import_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_population_mcyt</span><span class="p">()</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_infected_active_mcyt</span><span class="p">()</span>                 
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_infected_accumulated_mcyt</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_infected_daily_mcyt</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_infected_mcyt_infdiario</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_hosp_icu_mcyt</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_deaths_deis_mcyt</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_vacc_infected_mcyt</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">imp_vaccinated_mcyt</span><span class="p">()</span> 
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImportData.calculateIC"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.calculateIC">[docs]</a>    <span class="k">def</span> <span class="nf">calculateIC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pIv_det</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">pV2</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">infected</span><span class="o">=</span><span class="s1">&#39;InformeEPI&#39;</span><span class="p">,</span><span class="n">pOmicron</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating Initial conditions&#39;</span><span class="p">)</span>
+
+        <span class="n">R0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Br</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">UCI_use_covid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Iv0_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Iv0</span>
+        <span class="n">Iv0</span> <span class="o">=</span> <span class="n">Iv0_det</span><span class="o">/</span><span class="n">pIv_det</span>        
+        <span class="n">Iv_d0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Iv_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">pIv_det</span>
+        <span class="n">Iv_ac0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Iv_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">pIv_det</span>
+
+        <span class="n">Iv_d0_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Iv_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Iv_ac0_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Iv_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sv0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v3</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">v2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">pV2</span> <span class="o">-</span> <span class="n">Iv_ac0</span>
+
+        <span class="k">if</span> <span class="n">infected</span> <span class="o">==</span> <span class="s1">&#39;InformeEPI&#39;</span><span class="p">:</span>
+            <span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">I_ac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">infected</span> <span class="o">==</span> <span class="s1">&#39;InformeDiario&#39;</span><span class="p">:</span>
+            <span class="n">I_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_infd_rmean</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">I_ac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_infd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>            
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">IC</span> <span class="o">=</span>  <span class="p">{</span><span class="s1">&#39;initdate&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">initdate</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span><span class="s1">&#39;population&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">,</span><span class="s1">&#39;Sv&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Sv0</span><span class="p">,</span><span class="s1">&#39;I&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">I_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">pOmicron</span><span class="p">,</span><span class="s1">&#39;I_d&#39;</span><span class="p">:</span><span class="n">I_d</span><span class="o">*</span><span class="n">pOmicron</span><span class="p">,</span>
+        <span class="s1">&#39;I_ac&#39;</span><span class="p">:</span><span class="n">I_ac</span><span class="p">,</span><span class="s1">&#39;Iv&#39;</span><span class="p">:</span><span class="n">Iv0</span><span class="o">*</span><span class="n">pOmicron</span><span class="p">,</span><span class="s1">&#39;Iv_d&#39;</span><span class="p">:</span><span class="n">Iv_d0</span><span class="o">*</span><span class="n">pOmicron</span><span class="p">,</span><span class="s1">&#39;Iv_ac&#39;</span><span class="p">:</span><span class="n">Iv_ac0</span><span class="p">,</span><span class="s1">&#39;H_cap&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">UCI_capacity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">UCI_use_noncovid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;H&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">UCI_use_covid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;H_d&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">UCI_d</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;D&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Br</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;D_d&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Dr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;R&#39;</span><span class="p">:</span><span class="n">R0</span><span class="p">}</span>                
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ImportData.calculateIC_SEIR"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.calculateIC_SEIR">[docs]</a>    <span class="k">def</span> <span class="nf">calculateIC_SEIR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">infected</span><span class="o">=</span><span class="s1">&#39;InformeEPI&#39;</span><span class="p">,</span><span class="n">CrossImmunity</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating Initial conditions&#39;</span><span class="p">)</span>
+
+        <span class="n">R0</span> <span class="o">=</span> <span class="n">CrossImmunity</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I_ac_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Br</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">infected</span> <span class="o">==</span> <span class="s1">&#39;InformeEPI&#39;</span><span class="p">:</span>
+            <span class="n">I_d_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">I_ac_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">infected</span> <span class="o">==</span> <span class="s1">&#39;InformeDiario&#39;</span><span class="p">:</span>
+            <span class="n">I_d_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_d_infd_rmean</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">I_ac_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_infd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>            
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">IC</span> <span class="o">=</span>  <span class="p">{</span><span class="s1">&#39;initdate&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">initdate</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span><span class="s1">&#39;population&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">,</span><span class="s1">&#39;I_det&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">I_r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;I_d_det&#39;</span><span class="p">:</span><span class="n">I_d_det</span><span class="p">,</span><span class="s1">&#39;I_ac_det&#39;</span><span class="p">:</span><span class="n">I_ac_det</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">:</span><span class="n">R0</span><span class="p">}</span>                
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">)</span></div>
+
+    <span class="c1"># ---------------------------- #</span>
+    <span class="c1">#         Save Data            #</span>
+    <span class="c1"># ---------------------------- #</span>
+<div class="viewcode-block" id="ImportData.save"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving Data&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+    <span class="c1"># ---------------------------- #</span>
+    <span class="c1">#         Load Data            #</span>
+    <span class="c1"># ---------------------------- #</span>
+<div class="viewcode-block" id="ImportData.load"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
+        <span class="c1"># Drop na values</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading Data&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="c1"># Process the data - create de corresponding variables and dataframes:</span>
+        <span class="k">return</span></div>
+
+
+    <span class="c1"># ------------------------------ #</span>
+    <span class="c1">#       Add Data Manually        #</span>
+    <span class="c1"># ------------------------------ #</span>
+<div class="viewcode-block" id="ImportData.add_data"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.add_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">days</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">initdate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Adding Data&#39;</span><span class="p">)</span>
+        <span class="c1"># We use initdate in the case they give a days vector and it doesn&#39;t fit the actual data size        </span>
+        
+               
+        <span class="k">return</span></div>
+
+    <span class="c1"># -------------------------------- #</span>
+    <span class="c1">#            Population            #</span>
+    <span class="c1"># -------------------------------- #</span>
+
+<div class="viewcode-block" id="ImportData.imp_population_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_population_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_population_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv&#39;</span><span class="p">,</span><span class="n">tstate</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>     
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Import Population</span>
+<span class="sd">            This Function imports the selected area population from the Minciencia Github Repository </span>
+
+<span class="sd">            input: </span>
+<span class="sd">                - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">                - endpoint [string](opcional)</span>
+<span class="sd">            output:</span>
+<span class="sd">                - population [int] </span>
+
+<span class="sd">            Variables when used as Object:</span>
+<span class="sd">                self.population</span>
+
+<span class="sd">            Usage as function:</span>
+<span class="sd">            population = importPopulationMinCiencia(tstate = &#39;13101&#39;,initdate=datetime(2020,5,15))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>            
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Population&#39;</span><span class="p">)</span> 
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;State code missing&quot;</span><span class="p">)</span>
+
+       
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>            
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">population</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">population</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">population</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">population</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">population</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">4</span><span class="p">])</span>
+               
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">population</span> <span class="o">=</span> <span class="n">population</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">population</span></div>
+
+
+    <span class="c1"># ---------------------------------------- #</span>
+    <span class="c1">#    Datos Infectados activos Minciencia   #</span>
+    <span class="c1"># ---------------------------------------- #</span>
+<div class="viewcode-block" id="ImportData.imp_infected_active_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_active_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_infected_active_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tstate</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto19/CasosActivosPorComuna.csv&#39;</span><span class="p">,</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;I&#39;</span> <span class="p">):</span>     
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Import Active infected Minciencia</span>
+<span class="sd">            input: </span>
+<span class="sd">                - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">                - initdate: datetime object with the initial date</span>
+<span class="sd">                - endpoint (optional): </span>
+<span class="sd">            output: </span>
+<span class="sd">                - I_minciencia_r: Real acumulated deaths</span>
+<span class="sd">                - I_minciencia_r_tr: days from simulation first day</span>
+<span class="sd">                - I_minciencia_r_dates: data dates</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Active Infected by Minciencia&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;State code missing&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>  
+
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>            
+            <span class="n">I_minciencia_r</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>            
+            <span class="n">I_minciencia_r</span> <span class="o">=</span> <span class="n">I_minciencia_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">I_minciencia_r</span> <span class="o">=</span> <span class="n">I_minciencia_r</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">I_minciencia_r</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">I_minciencia_r</span> <span class="o">=</span> <span class="n">I_minciencia_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">I_minciencia_r</span> <span class="o">=</span> <span class="n">I_minciencia_r</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+
+        <span class="c1">#self.I_minciencia_r = aux.loc[aux[&#39;Codigo region&#39;]==int(self.tstate[:2])].iloc[:,5:].sum()</span>
+        
+
+        <span class="n">I_minciencia_r_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">I_minciencia_r</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_minciencia_r</span><span class="p">))]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_minciencia_r_dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">I_minciencia_r</span> <span class="o">=</span> <span class="n">I_minciencia_r</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_minciencia_r_dates</span> <span class="o">=</span> <span class="n">I_minciencia_r_dates</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_minciencia_r_tr</span> <span class="o">=</span> <span class="p">[(</span><span class="n">I_minciencia_r_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_minciencia_r</span><span class="p">))]</span>
+        
+
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c1"># Update database</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;updating database&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dfappend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">I_minciencia_r</span><span class="p">,</span><span class="n">I_minciencia_r_tr</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>            
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_r</span> <span class="o">=</span> <span class="n">I_minciencia_r</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_r_dates</span> <span class="o">=</span> <span class="n">I_minciencia_r_dates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_r_tr</span> <span class="o">=</span> <span class="n">I_minciencia_r_tr</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">I_minciencia_r</span><span class="p">,</span> <span class="n">I_minciencia_r_tr</span><span class="p">,</span> <span class="n">I_minciencia_r_dates</span> </div>
+
+ 
+    <span class="c1"># -------------------------------- #</span>
+    <span class="c1">#      Accumulated Infected        #</span>
+    <span class="c1"># -------------------------------- #</span>
+<div class="viewcode-block" id="ImportData.imp_infected_accumulated_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_accumulated_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_infected_accumulated_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tstate</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv&#39;</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;I_ac&#39;</span><span class="p">):</span>     
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Import acumulated infected</span>
+<span class="sd">            input: </span>
+<span class="sd">                - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">                - initdate: datetime object with the initial date</span>
+<span class="sd">                - endpoint (opcional): </span>
+<span class="sd">            output: </span>
+<span class="sd">                - I_ac_r: Real Acumulated infected</span>
+<span class="sd">                - I_ac_r_tr: days from simulation first day</span>
+<span class="sd">                - I_ac_r_dates: data dates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Accumulated Infected&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;State code missing&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>
+        
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>            
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>            
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>                        
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aux</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        
+        <span class="n">I_ac_r_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">I_ac_r</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_ac_r</span><span class="p">))]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_ac_r_dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_ac_r_dates</span> <span class="o">=</span> <span class="n">I_ac_r_dates</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_ac_r_tr</span> <span class="o">=</span> <span class="p">[(</span><span class="n">I_ac_r_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_ac_r</span><span class="p">))]</span>     
+
+         
+               
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c1"># Update database</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;updating database&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dfappend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">I_ac_r</span><span class="p">,</span><span class="n">I_ac_r_tr</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>              
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_ac_r</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_r_dates</span> <span class="o">=</span> <span class="n">I_ac_r_dates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_r_tr</span> <span class="o">=</span> <span class="n">I_ac_r_tr</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_ac_r</span><span class="p">),</span><span class="n">I_ac_r_tr</span><span class="p">,</span><span class="n">I_ac_r_dates</span></div>
+
+
+    <span class="c1"># ------------------------------------------ #</span>
+    <span class="c1">#      Daily infected Smoothed MinCiencia    #</span>
+    <span class="c1"># ------------------------------------------ #</span>
+<div class="viewcode-block" id="ImportData.imp_infected_daily_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_daily_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_infected_daily_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tstate</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto1/Covid-19.csv&#39;</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;I_d&#39;</span> <span class="p">):</span>     
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Import daily infected</span>
+<span class="sd">            input: </span>
+<span class="sd">                - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">                - initdate: datetime object with the initial date</span>
+<span class="sd">                - endpoint (optional): </span>
+<span class="sd">            output: </span>
+<span class="sd">                - I_d_r: Real Daily infected</span>
+<span class="sd">                - I_d_r_tr: days from simulation first day</span>
+<span class="sd">                - I_d_r_dates: data dates</span>
+<span class="sd">            usage </span>
+<span class="sd">                I_d_r, I_d_r_tr, I_d_r_dates = importDailyInfected(tstate = &#39;13101&#39;,initdate = datetime(2020,5,15))      </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Daily Infected&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;State code missing&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>
+                        
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>            
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>            
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>                        
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Codigo region&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Codigo comuna&#39;</span><span class="p">]</span><span class="o">==</span><span class="nb">int</span><span class="p">(</span><span class="n">tstate</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        
+        <span class="n">I_ac_r_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">I_ac_r</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_ac_r</span><span class="p">))]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_ac_r_dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">I_ac_r</span> <span class="o">=</span> <span class="n">I_ac_r</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_ac_r_dates</span> <span class="o">=</span> <span class="n">I_ac_r_dates</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_ac_r_tr</span> <span class="o">=</span> <span class="p">[(</span><span class="n">I_ac_r_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_ac_r</span><span class="p">))]</span>    
+
+        <span class="c1"># Create daily infected from Interpolating and diferentiating the acumulated infected</span>
+        <span class="n">I_d_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">I_ac_r_tr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])),</span><span class="n">I_ac_r_tr</span><span class="p">,</span><span class="n">I_ac_r</span><span class="p">))</span>
+        <span class="n">I_d_r_tr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_d_r</span><span class="p">)))</span>
+        <span class="n">I_d_r_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">initdate</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">I_d_r_tr</span><span class="p">))]</span>
+
+        <span class="k">if</span> <span class="n">initdate</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">15</span><span class="p">):</span>
+            <span class="n">outliers_init</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+            <span class="n">outliers_end</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">19</span><span class="p">)</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+
+        <span class="n">I_d_r_smooth</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">I_d_r</span><span class="p">)</span>
+        <span class="n">I_d_r_smooth</span> <span class="o">=</span> <span class="n">I_d_r_smooth</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">win_type</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">std</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c1"># Update database</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;updating database&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dfappend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_d_r_smooth</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">I_d_r_tr</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>              
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_d_r_smooth</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_r_tr</span> <span class="o">=</span> <span class="n">I_d_r_tr</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_r_dates</span> <span class="o">=</span> <span class="n">I_d_r_dates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_r_raw</span> <span class="o">=</span> <span class="n">I_d_r</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">I_d_r_smooth</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">I_d_r_tr</span><span class="p">,</span> <span class="n">I_d_r_dates</span></div>
+
+
+
+    <span class="c1"># ----------------------------------------------------- #</span>
+    <span class="c1">#            Daily infected &quot;informe diario&quot;            #</span>
+    <span class="c1"># ----------------------------------------------------- #</span>
+<div class="viewcode-block" id="ImportData.imp_infected_mcyt_infdiario"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_infected_mcyt_infdiario">[docs]</a>    <span class="k">def</span> <span class="nf">imp_infected_mcyt_infdiario</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/MinCiencia/Datos-COVID19/raw/master/output/producto5/TotalesNacionales.csv&#39;</span><span class="p">,</span><span class="n">rav</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import national infected from the &quot;informe diario&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            self (object, optional): Object to add the data. Defaults to None.</span>
+<span class="sd">            initdate (datetime.datetime, optional): initial date. Defaults to None.</span>
+<span class="sd">            endpoint (str, optional): endpoint. Defaults to &#39;https://github.com/MinCiencia/Datos-COVID19/raw/master/output/producto5/TotalesNacionales.csv&#39;.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: [description]</span>
+<span class="sd">            Exception: [description]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            [type]: [description]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Daily infected with backpropagated correction&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>
+        
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+        
+        <span class="n">I_ac_infd</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">I_d_infd</span> <span class="o">=</span> <span class="n">aux</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">dates_infd</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:][</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aux</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))]</span>
+        
+        <span class="n">I_d_infd_rmean</span> <span class="o">=</span> <span class="n">I_d_infd</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">rav</span><span class="p">,</span><span class="n">win_type</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">std</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dates_infd</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">I_d_infd</span> <span class="o">=</span> <span class="n">I_d_infd</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_ac_infd</span> <span class="o">=</span> <span class="n">I_ac_infd</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">dates_infd</span> <span class="o">=</span> <span class="n">dates_infd</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">I_d_infd_rmean</span> <span class="o">=</span> <span class="n">I_d_infd_rmean</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+
+        <span class="n">t_infd</span> <span class="o">=</span> <span class="p">[(</span><span class="n">dates_infd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dates_infd</span><span class="p">))]</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c1"># Update database</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;updating database&#39;</span><span class="p">)</span>
+            <span class="c1">#self.data = dfappend(self.data,I_d_r_smooth,I_d_r_tr,name)              </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_infd</span> <span class="o">=</span> <span class="n">I_d_infd</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_ac_infd</span> <span class="o">=</span> <span class="n">I_ac_infd</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">I_d_infd_rmean</span> <span class="o">=</span> <span class="n">I_d_infd_rmean</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t_infd</span> <span class="o">=</span> <span class="n">t_infd</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dates_infd</span> <span class="o">=</span> <span class="n">dates_infd</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">I_d_infd</span><span class="p">,</span> <span class="n">I_ac_infd</span><span class="p">,</span> <span class="n">I_d_infd_rmean</span><span class="p">,</span> <span class="n">t_infd</span><span class="p">,</span> <span class="n">dates_infd</span></div>
+                
+
+    <span class="c1"># --------------------------------------------------------- #</span>
+    <span class="c1">#                 Ocupación Hospitalaria                    #</span>
+    <span class="c1"># --------------------------------------------------------- #    </span>
+
+    <span class="c1"># ----------------------------- #</span>
+    <span class="c1">#    Datos Ocupacion de Camas   #</span>
+    <span class="c1"># ----------------------------- #</span>
+<div class="viewcode-block" id="ImportData.imp_hosp_icu_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_hosp_icu_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_hosp_icu_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tstate</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto58/Camas_UCI_diarias.csv&quot;</span><span class="p">,</span><span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;UCI_capacity&#39;</span><span class="p">,</span><span class="s1">&#39;UCI_use_covid&#39;</span><span class="p">,</span><span class="s1">&#39;UCI_use_noncovid&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Import ICU Bed Occupation data per region.</span>
+<span class="sd">        Currently it just supports states, but soon I&#39;ll add Health Services as the minimum territorial data.</span>
+<span class="sd">        input:</span>
+<span class="sd">            - tstate: región</span>
+<span class="sd">            - initdate: Fecha de inicio</span>
+<span class="sd">            - endpoint: Data endpoint</span>
+<span class="sd">        output:</span>
+<span class="sd">            - sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot, </span>
+<span class="sd">             (data frame, fechas, dias desde inicio sim, Hospitalizados, capacidad hospitalizados, ventilados, capacidad ventilados) </span>
+<span class="sd">        </span>
+<span class="sd">        Normal Usage:</span>
+<span class="sd">            sochimi, sochimi_dates, sochimi_tr, Hr, Hr_tot, Vr, Vr_tot = importSOCHIMI(tstate = &#39;13&#39;, initdate = datetime(2020,5,15))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;State code missing&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>
+
+        <span class="n">cuttoname</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;15&#39;</span><span class="p">:</span> <span class="s1">&#39;Arica y Parinacota&#39;</span><span class="p">,</span> <span class="s1">&#39;01&#39;</span><span class="p">:</span> <span class="s1">&#39;Tarapacá&#39;</span><span class="p">,</span> <span class="s1">&#39;02&#39;</span><span class="p">:</span> <span class="s1">&#39;Antofagasta&#39;</span><span class="p">,</span> <span class="s1">&#39;03&#39;</span><span class="p">:</span> <span class="s1">&#39;Atacama&#39;</span><span class="p">,</span> <span class="s1">&#39;04&#39;</span><span class="p">:</span> <span class="s1">&#39;Coquimbo&#39;</span><span class="p">,</span> <span class="s1">&#39;05&#39;</span><span class="p">:</span> <span class="s1">&#39;Valparaíso&#39;</span><span class="p">,</span> <span class="s1">&#39;13&#39;</span><span class="p">:</span> <span class="s1">&#39;Metropolitana&#39;</span><span class="p">,</span> <span class="s1">&#39;06&#39;</span><span class="p">:</span> <span class="s1">&#39;O’Higgins&#39;</span><span class="p">,</span> <span class="s1">&#39;07&#39;</span><span class="p">:</span> <span class="s1">&#39;Maule&#39;</span><span class="p">,</span> <span class="s1">&#39;16&#39;</span><span class="p">:</span> <span class="s1">&#39;Ñuble&#39;</span><span class="p">,</span> <span class="s1">&#39;08&#39;</span><span class="p">:</span> <span class="s1">&#39;Biobío&#39;</span><span class="p">,</span> <span class="s1">&#39;09&#39;</span><span class="p">:</span> <span class="s1">&#39;Araucanía&#39;</span><span class="p">,</span> <span class="s1">&#39;14&#39;</span><span class="p">:</span> <span class="s1">&#39;Los Ríos&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">:</span> <span class="s1">&#39;Los Lagos&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">:</span> <span class="s1">&#39;Aysén&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">:</span> <span class="s1">&#39;Magallanes&#39;</span><span class="p">}</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        
+        <span class="c1">#[&#39;Camas UCI habilitadas&#39;,&#39;Camas UCI ocupadas COVID-19&#39;,&#39;Camas UCI ocupadas no COVID-19&#39;]</span>
+        
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">tstate</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="p">[</span><span class="n">tstate</span><span class="p">]</span>
+            
+        <span class="n">counties</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tstate</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span> <span class="p">]</span>
+        <span class="k">if</span> <span class="n">counties</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This method doesn</span><span class="se">\&#39;</span><span class="s1">t support comunas for Chile&#39;</span><span class="p">)</span>
+        
+        <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tstate</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">statenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">cuttoname</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">states</span><span class="p">]</span>
+
+        <span class="n">capacity</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">occupied_covid</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">occupied_non_covid</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">statenames</span><span class="p">:</span>
+            <span class="n">capacity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Serie&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Camas UCI habilitadas&#39;</span><span class="p">))]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="n">occupied_covid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Serie&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Camas UCI ocupadas COVID-19&#39;</span><span class="p">))]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="n">occupied_non_covid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[((</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Serie&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Camas UCI ocupadas no COVID-19&#39;</span><span class="p">))]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:])</span>
+        
+            
+        <span class="n">capacity</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">capacity</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">occupied_covid</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">occupied_covid</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">occupied_non_covid</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">occupied_non_covid</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> 
+
+        <span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">dates</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">))]</span>        
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+
+        <span class="n">UCI_capacity</span> <span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">capacity</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
+        <span class="n">UCI_use_covid</span> <span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">occupied_covid</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
+        <span class="n">UCI_use_noncovid</span> <span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">occupied_non_covid</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
+
+        <span class="n">UCI_dates</span> <span class="o">=</span> <span class="n">dates</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">UCI_tr</span> <span class="o">=</span> <span class="p">[(</span><span class="n">UCI_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UCI_dates</span><span class="p">))]</span>
+
+        <span class="c1"># New daily hospitalized</span>
+        <span class="n">endpoint2</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/MinCiencia/Datos-COVID19/raw/master/output/producto91/Ingresos_UCI.csv&#39;</span>
+        <span class="n">UCI_d</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint2</span><span class="p">)</span>
+        <span class="n">UCI_d_dates</span> <span class="o">=</span> <span class="n">UCI_d</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">UCI_d_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">UCI_d_dates</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UCI_d_dates</span><span class="p">))]</span>       
+        <span class="n">UCI_d</span> <span class="o">=</span> <span class="n">UCI_d</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">UCI_d_dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">UCI_d</span> <span class="o">=</span> <span class="n">UCI_d</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">UCI_d_dates</span> <span class="o">=</span> <span class="n">UCI_d_dates</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">UCI_d_tr</span> <span class="o">=</span> <span class="p">[(</span><span class="n">UCI_d_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UCI_d_dates</span><span class="p">))]</span>
+       
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c1"># Update database</span>
+            <span class="c1">#print(&#39;updating database&#39;)</span>
+            <span class="c1">#self.data = dfappend(self.data,UCI_capacity,UCI_tr,name[0])  </span>
+            <span class="c1">#self.data = dfappend(self.data,UCI_use_covid,UCI_tr,name[1])  </span>
+            <span class="c1">#self.data = dfappend(self.data,UCI_use_noncovid,UCI_tr,name[2])              </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_capacity</span> <span class="o">=</span> <span class="n">UCI_capacity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_use_covid</span> <span class="o">=</span> <span class="n">UCI_use_covid</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_use_noncovid</span> <span class="o">=</span> <span class="n">UCI_use_noncovid</span>                        
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_dates</span> <span class="o">=</span> <span class="n">UCI_dates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_tr</span> <span class="o">=</span> <span class="n">UCI_tr</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_d</span> <span class="o">=</span> <span class="n">UCI_d</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_d_dates</span> <span class="o">=</span> <span class="n">UCI_d_dates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UCI_d_tr</span> <span class="o">=</span> <span class="n">UCI_d_tr</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">UCI_capacity</span><span class="p">,</span><span class="n">UCI_use_covid</span><span class="p">,</span><span class="n">UCI_use_noncovid</span><span class="p">,</span><span class="n">UCI_dates</span><span class="p">,</span><span class="n">UCI_tr</span><span class="p">,</span><span class="n">UCI_d</span><span class="p">,</span><span class="n">UCI_d_dates</span><span class="p">,</span><span class="n">UCI_d_tr</span></div>
+
+
+    <span class="c1"># -------------------------------------- #</span>
+    <span class="c1">#          Deaths (DEIS) MinCiencia      #</span>
+    <span class="c1"># -------------------------------------- #</span>
+<div class="viewcode-block" id="ImportData.imp_deaths_deis_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_deaths_deis_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_deaths_deis_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tstate</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv&#39;</span><span class="p">,</span><span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;D_confirmed&#39;</span><span class="p">,</span><span class="s1">&#39;D_suspected&#39;</span><span class="p">,</span><span class="s1">&#39;D_ac_confirmed&#39;</span><span class="p">,</span><span class="s1">&#39;D_ac_suspected&#39;</span><span class="p">]):</span>     
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Por ahora solo para data nacional</span>
+
+<span class="sd">            Import Accumulated Deaths</span>
+<span class="sd">            input: </span>
+<span class="sd">                - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">                - initdate: datetime object with the initial date</span>
+<span class="sd">                - endpoint (optional): </span>
+<span class="sd">            output: </span>
+<span class="sd">                - Br: Real accumulated deaths</span>
+<span class="sd">                - Br_tr: days from simulation first day</span>
+<span class="sd">                - Br_dates: data dates</span>
+<span class="sd">            Usage:</span>
+<span class="sd">                Br,Br_tr,Br_dates = importAccumulatedDeaths(self=None,tstate = &#39;13&#39;,initdate = datetime(2020,5,15))</span>
+<span class="sd">            </span>
+<span class="sd">            Compartir la </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Deaths by DEIS&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;State code missing&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>
+ 
+             
+        <span class="n">D_r_confirmed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_confirmadosPorComuna.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">D_r_suspected</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto50/DefuncionesDEIS_sospechososPorComuna.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">5</span><span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+        <span class="n">D_r_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">D_r_confirmed</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D_r_confirmed</span><span class="o">.</span><span class="n">index</span><span class="p">))]</span>  
+                 
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">D_r_dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="n">D_r_confirmed</span> <span class="o">=</span> <span class="n">D_r_confirmed</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">D_r_suspected</span> <span class="o">=</span> <span class="n">D_r_suspected</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">D_r_dates</span> <span class="o">=</span> <span class="n">D_r_dates</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">D_r_tr</span> <span class="o">=</span> <span class="p">[(</span><span class="n">D_r_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">initdate</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D_r_dates</span><span class="p">))]</span>
+
+        <span class="n">B_r_confirmed</span> <span class="o">=</span> <span class="n">D_r_confirmed</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+        <span class="n">B_r_suspected</span> <span class="o">=</span> <span class="n">D_r_suspected</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c1"># Update database</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;updating database&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dfappend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">D_r_confirmed</span><span class="p">,</span><span class="n">D_r_tr</span><span class="p">,</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dfappend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">D_r_suspected</span><span class="p">,</span><span class="n">D_r_tr</span><span class="p">,</span><span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dfappend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">B_r_confirmed</span><span class="p">,</span><span class="n">D_r_tr</span><span class="p">,</span><span class="n">name</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dfappend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">B_r_suspected</span><span class="p">,</span><span class="n">D_r_tr</span><span class="p">,</span><span class="n">name</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>             
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">Dr</span> <span class="o">=</span> <span class="n">D_r_confirmed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Dr_suspected</span> <span class="o">=</span> <span class="n">D_r_suspected</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Br</span> <span class="o">=</span> <span class="n">B_r_confirmed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Br_suspected</span> <span class="o">=</span> <span class="n">B_r_suspected</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Br_dates</span> <span class="o">=</span> <span class="n">D_r_dates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Br_tr</span> <span class="o">=</span> <span class="n">D_r_tr</span>            
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">D_r_confirmed</span><span class="p">,</span><span class="n">D_r_suspected</span><span class="p">,</span><span class="n">B_r_confirmed</span><span class="p">,</span><span class="n">B_r_suspected</span><span class="p">,</span><span class="n">D_r_dates</span><span class="p">,</span><span class="n">D_r_tr</span></div>
+
+
+    <span class="c1"># ------------------------------------------- #</span>
+    <span class="c1">#      National Vaccinated Infected Data      #</span>
+    <span class="c1"># ------------------------------------------- #</span>
+<div class="viewcode-block" id="ImportData.imp_vacc_infected_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_vacc_infected_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_vacc_infected_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/MinCiencia/Datos-COVID19/raw/master/output/producto90/incidencia_en_vacunados.csv&#39;</span><span class="p">,</span><span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>     
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Product 90 has data of: </span>
+<span class="sd">                * </span>
+<span class="sd">            Import Vaccines</span>
+<span class="sd">            input: </span>
+<span class="sd">                - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">                - initdate: datetime object with the initial date</span>
+<span class="sd">                - endpoint (optional): </span>
+<span class="sd">            output: </span>
+<span class="sd">                - V_1st: First Dose (2 doses vaccine)</span>
+<span class="sd">                - V_complete: complete (1 or 2 doses vaccine)</span>
+<span class="sd">                - V_boost: Boost Dose               </span>
+<span class="sd">                </span>
+<span class="sd">            Usage:</span>
+<span class="sd">                -</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Vaccines&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>        
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span> 
+        <span class="c1">#data[&#39;date&#39;] = [datetime(2021,1,3) + timedelta(days=7*(i-1)) for i in data[&#39;semana_epidemiologica&#39;]]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;semana_epidemiologica&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+        
+        <span class="n">initweek</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">initdate</span> <span class="o">-</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">days</span><span class="o">/</span><span class="mi">7</span><span class="p">)</span>    
+
+        <span class="n">Iv_df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s1">&#39;dos_dosis_comp_casos&#39;</span><span class="p">,</span><span class="s1">&#39;dosis_unica_comp_casos&#39;</span><span class="p">,</span><span class="s1">&#39;dosis_ref_comp_casos&#39;</span><span class="p">]]</span>
+        <span class="n">Inv_df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sin_vac_casos&#39;</span><span class="p">]</span>
+        
+        <span class="n">Iv_s</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dos_dosis_comp_casos&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dosis_unica_comp_casos&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dosis_ref_comp_casos&#39;</span><span class="p">]</span>        
+        
+
+        <span class="n">Iv_d</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Inv_d</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Iv_s</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
+                <span class="n">Iv_d</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mi">7</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Inv_df</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
+                <span class="n">Inv_d</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="mi">7</span><span class="p">))</span>
+
+        <span class="n">Iv_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Iv_d</span><span class="p">))]</span>     
+
+        <span class="n">Iv_d</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Iv_d&#39;</span><span class="p">:</span><span class="n">Iv_d</span><span class="p">},</span><span class="n">index</span><span class="o">=</span><span class="n">Iv_dates</span><span class="p">)</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span><span class="n">win_type</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">std</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+        <span class="n">Inv_d</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Inv_d&#39;</span><span class="p">:</span><span class="n">Inv_d</span><span class="p">},</span><span class="n">index</span><span class="o">=</span><span class="n">Iv_dates</span><span class="p">)</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span><span class="n">win_type</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">std</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">()</span>
+
+        <span class="n">Iv_ac</span> <span class="o">=</span> <span class="n">Iv_d</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+        <span class="n">Inv_ac</span> <span class="o">=</span> <span class="n">Inv_d</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+        
+        <span class="n">Iv_d</span> <span class="o">=</span> <span class="n">Iv_d</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iv_dates</span><span class="p">)</span><span class="o">&gt;</span><span class="n">initdate</span><span class="p">]</span>
+        <span class="n">Iv_ac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iv_ac</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iv_dates</span><span class="p">)</span><span class="o">&gt;</span><span class="n">initdate</span><span class="p">][</span><span class="s1">&#39;Iv_d&#39;</span><span class="p">])</span>
+        <span class="n">Inv_d</span> <span class="o">=</span> <span class="n">Inv_d</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iv_dates</span><span class="p">)</span><span class="o">&gt;</span><span class="n">initdate</span><span class="p">]</span>
+        <span class="n">Inv_ac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Inv_ac</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iv_dates</span><span class="p">)</span><span class="o">&gt;</span><span class="n">initdate</span><span class="p">][</span><span class="s1">&#39;Inv_d&#39;</span><span class="p">])</span>
+
+        <span class="n">Iv_dates</span> <span class="o">=</span> <span class="n">Iv_dates</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iv_dates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]:]</span>
+    
+        <span class="c1"># Active vaccinated infected</span>
+        <span class="n">Iv0</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dos_dosis_comp_casos&#39;</span><span class="p">][</span><span class="n">initweek</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">initweek</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dosis_unica_comp_casos&#39;</span><span class="p">][</span><span class="n">initweek</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">initweek</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dosis_ref_comp_casos&#39;</span><span class="p">][</span><span class="n">initweek</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">initweek</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> 
+        <span class="n">Iv_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Iv_d</span><span class="p">[</span><span class="s1">&#39;Iv_d&#39;</span><span class="p">])</span>
+        <span class="n">Inv_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Inv_d</span><span class="p">[</span><span class="s1">&#39;Inv_d&#39;</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Iv_ac</span> <span class="o">=</span> <span class="n">Iv_ac</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Iv_d</span> <span class="o">=</span> <span class="n">Iv_d</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Iv0</span> <span class="o">=</span> <span class="n">Iv0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Inv_ac</span> <span class="o">=</span> <span class="n">Inv_ac</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Inv_d</span> <span class="o">=</span> <span class="n">Inv_d</span>            
+            <span class="bp">self</span><span class="o">.</span><span class="n">Iv_dates</span> <span class="o">=</span> <span class="n">Iv_dates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Iv_df</span> <span class="o">=</span> <span class="n">Iv_df</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>        
+            <span class="k">return</span> <span class="n">Iv_ac</span><span class="p">,</span><span class="n">Iv_d</span><span class="p">,</span><span class="n">Iv0</span><span class="p">,</span> <span class="n">Inv_d</span><span class="p">,</span><span class="n">Inv_ac</span><span class="p">,</span><span class="n">Iv_dates</span></div>
+
+
+    <span class="c1"># ------------------------------------------- #</span>
+    <span class="c1">#      National Vaccinated Data      #</span>
+    <span class="c1"># ------------------------------------------- #</span>
+<div class="viewcode-block" id="ImportData.imp_vaccinated_mcyt"><a class="viewcode-back" href="../../../cv19gm.data.html#cv19gm.data.cv19data_national.ImportData.imp_vaccinated_mcyt">[docs]</a>    <span class="k">def</span> <span class="nf">imp_vaccinated_mcyt</span><span class="p">(</span><span class="bp">self</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tstate</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">initdate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span><span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/MinCiencia/Datos-COVID19/master/output/producto76/vacunacion.csv&#39;</span><span class="p">,</span><span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>     
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Product 76 has data of: </span>
+<span class="sd">                * </span>
+<span class="sd">            Import Vaccines</span>
+<span class="sd">            input: </span>
+<span class="sd">                - tstate: [string or string list] CUT por comuna o región</span>
+<span class="sd">                - initdate: datetime object with the initial date</span>
+<span class="sd">                - endpoint (optional): </span>
+<span class="sd">            output: </span>
+<span class="sd">                - V_1st: First Dose (2 doses vaccine)</span>
+<span class="sd">                - V_complete: complete (1 or 2 doses vaccine)</span>
+<span class="sd">                - V_boost: Boost Dose               </span>
+<span class="sd">                </span>
+<span class="sd">            Usage:</span>
+<span class="sd">                -</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tstate</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;15&#39;</span><span class="p">,</span><span class="s1">&#39;01&#39;</span><span class="p">,</span><span class="s1">&#39;02&#39;</span><span class="p">,</span><span class="s1">&#39;03&#39;</span><span class="p">,</span><span class="s1">&#39;04&#39;</span><span class="p">,</span><span class="s1">&#39;05&#39;</span><span class="p">,</span><span class="s1">&#39;13&#39;</span><span class="p">,</span><span class="s1">&#39;06&#39;</span><span class="p">,</span><span class="s1">&#39;07&#39;</span><span class="p">,</span><span class="s1">&#39;16&#39;</span><span class="p">,</span><span class="s1">&#39;08&#39;</span><span class="p">,</span><span class="s1">&#39;09&#39;</span><span class="p">,</span><span class="s1">&#39;14&#39;</span><span class="p">,</span><span class="s1">&#39;10&#39;</span><span class="p">,</span><span class="s1">&#39;11&#39;</span><span class="p">,</span><span class="s1">&#39;12&#39;</span><span class="p">]</span> 
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing Vaccines&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">tstate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tstate</span>
+            <span class="n">initdate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initdate</span>
+            <span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tstate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;State code missing&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initdate</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Initial date missing&quot;</span><span class="p">)</span>
+            <span class="n">population</span> <span class="o">=</span> <span class="mi">19120000</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+        
+        <span class="c1"># Vacunas acumuladas</span>
+        <span class="n">v1_ac</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Total&#39;</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Dosis&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Primera&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">v2_ac</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Total&#39;</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Dosis&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Segunda&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">v3_ac</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Total&#39;</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Dosis&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Refuerzo&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Vacunas diarias:</span>
+        <span class="n">v1_d</span> <span class="o">=</span> <span class="n">v1_ac</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+        <span class="n">v2_d</span> <span class="o">=</span> <span class="n">v2_ac</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+        <span class="n">v3_d</span> <span class="o">=</span> <span class="n">v3_ac</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+        
+        <span class="n">v1_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">v1_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">v2_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">v1_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">v3_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">v1_ac</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Personas activas en estado de n dosis</span>
+        <span class="n">v3</span> <span class="o">=</span> <span class="n">v3_ac</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="n">v2_ac</span><span class="o">-</span><span class="n">v3_ac</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">v1_ac</span><span class="o">-</span><span class="n">v2_ac</span>
+        <span class="n">v0</span> <span class="o">=</span> <span class="n">population</span> <span class="o">-</span> <span class="n">v1_ac</span>
+
+        <span class="n">v_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">:][</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">2</span><span class="p">:]))]</span>
+
+        <span class="c1"># Select dates: </span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v_dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">initdate</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">v1_d</span> <span class="o">=</span> <span class="n">v1_d</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">v2_d</span> <span class="o">=</span> <span class="n">v2_d</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">v3_d</span> <span class="o">=</span> <span class="n">v3_d</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+
+        <span class="n">v1_ac</span> <span class="o">=</span> <span class="n">v1_ac</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">v2_ac</span> <span class="o">=</span> <span class="n">v2_ac</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">v3_ac</span> <span class="o">=</span> <span class="n">v3_ac</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">v1</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="n">v2</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+        <span class="n">v3</span> <span class="o">=</span> <span class="n">v3</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span>
+
+        <span class="n">v1</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;1 Dose Active&#39;</span>
+        <span class="n">v2</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;2 Doses Active&#39;</span>
+        <span class="n">v3</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;3 Doses Active&#39;</span>
+
+        <span class="n">v1_d</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;1 Dose application&#39;</span>
+        <span class="n">v2_d</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;2 Doses application&#39;</span>
+        <span class="n">v3_d</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;3 Doses application&#39;</span>
+
+        <span class="n">v1_ac</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;1 Dose accumulated&#39;</span>
+        <span class="n">v2_ac</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;2 Doses accumulated&#39;</span>
+        <span class="n">v3_ac</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;3 Doses accumulated&#39;</span>        
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v1_d</span> <span class="o">=</span> <span class="n">v1_d</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v2_d</span> <span class="o">=</span> <span class="n">v2_d</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v3_d</span> <span class="o">=</span> <span class="n">v3_d</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">v1_ac</span> <span class="o">=</span> <span class="n">v1_ac</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v2_ac</span> <span class="o">=</span> <span class="n">v2_ac</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v3_ac</span> <span class="o">=</span> <span class="n">v3_ac</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">v1</span> <span class="o">=</span> <span class="n">v1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v2</span> <span class="o">=</span> <span class="n">v2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v3</span> <span class="o">=</span> <span class="n">v3</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">v_dates</span> <span class="o">=</span> <span class="n">v_dates</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">,</span><span class="n">v3</span><span class="p">,</span><span class="n">v1_d</span><span class="p">,</span><span class="n">v2_d</span><span class="p">,</span><span class="n">v3_d</span><span class="p">,</span><span class="n">v1_ac</span><span class="p">,</span><span class="n">v2_ac</span><span class="p">,</span><span class="n">v3_ac</span><span class="p">,</span> <span class="n">v_dates</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

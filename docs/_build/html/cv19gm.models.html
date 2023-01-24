@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cv19gm.models package &mdash; cv19gm 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cv19gm.utils package" href="cv19gm.utils.html" />
+    <link rel="prev" title="cv19gm.data package" href="cv19gm.data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> cv19gm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cv19gm</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cv19gm.html">cv19gm package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cv19gm.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.data.html">cv19gm.data package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cv19gm.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cv19gm.utils.html">cv19gm.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.html#module-cv19gm.cv19sim">cv19gm.cv19sim module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cv19gm.html#module-cv19gm">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">cv19gm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">cv19gm</a></li>
+          <li class="breadcrumb-item"><a href="cv19gm.html">cv19gm package</a></li>
+      <li class="breadcrumb-item active">cv19gm.models package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cv19gm.models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="cv19gm-models-package">
+<h1>cv19gm.models package<a class="headerlink" href="#cv19gm-models-package" title="Permalink to this heading"></a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</div>
+<div class="section" id="cv19gm-models-rbm-seir-module">
+<h2>cv19gm.models.RBM_seir module<a class="headerlink" href="#cv19gm-models-rbm-seir-module" title="Permalink to this heading"></a></h2>
+</div>
+<div class="section" id="module-cv19gm.models.seir">
+<span id="cv19gm-models-seir-module"></span><h2>cv19gm.models.seir module<a class="headerlink" href="#module-cv19gm.models.seir" title="Permalink to this heading"></a></h2>
+<p>SEIR Model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.models.seir.</span></span><span class="sig-name descname"><span class="pre">SEIR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SEIR model object:
+Construction:</p>
+<blockquote>
+<div><p>SEIR(self, config = None, inputdata=None)</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.analytics">
+<span class="sig-name descname"><span class="pre">analytics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.analytics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.analytics" title="Permalink to this definition"></a></dt>
+<dd><p>Perform simulation analytics after running it.
+It calculates peaks, prevalence, and will include R(t).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.df_build">
+<span class="sig-name descname"><span class="pre">df_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.df_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.df_build" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a dataframe with the simulation results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.model_SEIR_graph">
+<span class="sig-name descname"><span class="pre">model_SEIR_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.model_SEIR_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.model_SEIR_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.set_equations">
+<span class="sig-name descname"><span class="pre">set_equations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.set_equations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.set_equations" title="Permalink to this definition"></a></dt>
+<dd><p>Sets Diferential Equations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.set_relational_values">
+<span class="sig-name descname"><span class="pre">set_relational_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.set_relational_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.set_relational_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir.SEIR.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir.html#SEIR.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir.SEIR.solve" title="Permalink to this definition"></a></dt>
+<dd><p>Solves ODEs using scipy.integrate
+:param t0: Initial time. Defaults to 0.
+:type t0: int, optional
+:param T: Endtime. Defaults to time given when building the object
+:type T: [type], optional
+:param h: Time step. Defaults to 0.01.
+:type h: float, optional</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.models.seir_meta">
+<span id="cv19gm-models-seir-meta-module"></span><h2>cv19gm.models.seir_meta module<a class="headerlink" href="#module-cv19gm.models.seir_meta" title="Permalink to this heading"></a></h2>
+<p>SEIR Meta-population Model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.models.seir_meta.</span></span><span class="sig-name descname"><span class="pre">SEIRMETA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Phi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Phi_T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>SEIR model object:
+Construction:</p>
+<blockquote>
+<div><p>SEIR(self, config = None, inputdata=None)</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.analytics">
+<span class="sig-name descname"><span class="pre">analytics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.analytics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.analytics" title="Permalink to this definition"></a></dt>
+<dd><p>Perform simulation analytics after running it.
+It calculates peaks, prevalence, and will include R(t).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.global_results_build">
+<span class="sig-name descname"><span class="pre">global_results_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.global_results_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.global_results_build" title="Permalink to this definition"></a></dt>
+<dd><p>Agregated results data frame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.model_SEIR_graph">
+<span class="sig-name descname"><span class="pre">model_SEIR_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.model_SEIR_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.model_SEIR_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.params_df_build">
+<span class="sig-name descname"><span class="pre">params_df_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.params_df_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.params_df_build" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a dataframe with the simulation parameters over time</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.results_build">
+<span class="sig-name descname"><span class="pre">results_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.results_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.results_build" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a dataframe with the simulation results and parameters
+Output structure:
+‘t’,’S’,’E’,’E_d’,’I’,’I_d’,’R’,’R_d’,’beta’,’tE_I’,’tI_R’,’rR_S’,’node’</p>
+<blockquote>
+<div><p>0, …
+1, …</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.set_equations">
+<span class="sig-name descname"><span class="pre">set_equations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.set_equations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.set_equations" title="Permalink to this definition"></a></dt>
+<dd><p>Sets Diferential Equations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.set_initial_values">
+<span class="sig-name descname"><span class="pre">set_initial_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.set_initial_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.set_initial_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_meta.SEIRMETA.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_meta.html#SEIRMETA.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_meta.SEIRMETA.solve" title="Permalink to this definition"></a></dt>
+<dd><p>Solves ODEs using scipy.integrate
+:param t0: Initial time. Defaults to 0.
+:type t0: int, optional
+:param T: Endtime. Defaults to time given when building the object
+:type T: [type], optional
+:param h: Time step. Defaults to 0.01.
+:type h: float, optional</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.models.seir_nb">
+<span id="cv19gm-models-seir-nb-module"></span><h2>cv19gm.models.seir_nb module<a class="headerlink" href="#module-cv19gm.models.seir_nb" title="Permalink to this heading"></a></h2>
+<p>SEIR Model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.models.seir_nb.</span></span><span class="sig-name descname"><span class="pre">SEIR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbsolver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SEIR model object:
+Construction:</p>
+<blockquote>
+<div><p>SEIR(self, config = None, inputdata=None)</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.analytics">
+<span class="sig-name descname"><span class="pre">analytics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.analytics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.analytics" title="Permalink to this definition"></a></dt>
+<dd><p>Perform simulation analytics after running it.
+It calculates peaks, prevalence, and will include R(t).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.df_build">
+<span class="sig-name descname"><span class="pre">df_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.df_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.df_build" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a dataframe with the simulation results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.model_SEIR_graph">
+<span class="sig-name descname"><span class="pre">model_SEIR_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.model_SEIR_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.model_SEIR_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.nbfunctions">
+<span class="sig-name descname"><span class="pre">nbfunctions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.nbfunctions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.nbfunctions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.set_equations">
+<span class="sig-name descname"><span class="pre">set_equations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.set_equations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.set_equations" title="Permalink to this definition"></a></dt>
+<dd><p>Sets Diferential Equations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.set_relational_values">
+<span class="sig-name descname"><span class="pre">set_relational_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.set_relational_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.set_relational_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seir_nb.SEIR.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seir_nb.html#SEIR.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seir_nb.SEIR.solve" title="Permalink to this definition"></a></dt>
+<dd><p>Solves ODEs using scipy.integrate
+:param t0: Initial time. Defaults to 0.
+:type t0: int, optional
+:param T: Endtime. Defaults to time given when building the object
+:type T: [type], optional
+:param h: Time step. Defaults to 0.01.
+:type h: float, optional</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.models.seirhvd">
+<span id="cv19gm-models-seirhvd-module"></span><h2>cv19gm.models.seirhvd module<a class="headerlink" href="#module-cv19gm.models.seirhvd" title="Permalink to this heading"></a></h2>
+<p>SEIRHVD Model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.models.seirhvd.</span></span><span class="sig-name descname"><span class="pre">SEIRHVD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SEIRHVD model object:
+Construction:</p>
+<blockquote>
+<div><p>SEIRHVD(self, config = None, inputdata=None)</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.analytics">
+<span class="sig-name descname"><span class="pre">analytics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.analytics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.analytics" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.df_build">
+<span class="sig-name descname"><span class="pre">df_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.df_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.df_build" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.model_SEIR_graph">
+<span class="sig-name descname"><span class="pre">model_SEIR_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.model_SEIR_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.model_SEIR_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.set_equations">
+<span class="sig-name descname"><span class="pre">set_equations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.set_equations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.set_equations" title="Permalink to this definition"></a></dt>
+<dd><p># ————————— #
+#    Diferential Ecuations    #
+# ————————— #
+Variables:
+S: Susceptibles
+Sv: Vaccinated Susceptibles
+E: Exposed
+I_m: Asymptomatic + mild + severe infected
+I_cr: Critical Infected
+I_v Vaccinated Infected
+Phi: Integrated external flux
+S_f: Susceptible external Flux</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.set_relational_values">
+<span class="sig-name descname"><span class="pre">set_relational_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.set_relational_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.set_relational_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.solve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirhvd.SEIRHVD.underreport">
+<span class="sig-name descname"><span class="pre">underreport</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirhvd.html#SEIRHVD.underreport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirhvd.SEIRHVD.underreport" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the detected cases using the underreport factor</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.models.seirtq">
+<span id="cv19gm-models-seirtq-module"></span><h2>cv19gm.models.seirtq module<a class="headerlink" href="#module-cv19gm.models.seirtq" title="Permalink to this heading"></a></h2>
+<p>SEIRTQ Model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.models.seirtq.</span></span><span class="sig-name descname"><span class="pre">SEIRTQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SEIRTQ model object:
+Construction:</p>
+<blockquote>
+<div><p>SEIRTQ(self, config = None, inputdata=None)</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.analytics">
+<span class="sig-name descname"><span class="pre">analytics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.analytics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.analytics" title="Permalink to this definition"></a></dt>
+<dd><p>Perform simulation analytics after running it.
+It calculates peaks, prevalence, and will include R(t).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.df_build">
+<span class="sig-name descname"><span class="pre">df_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.df_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.df_build" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a dataframe with the simulation results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.model_SEIR_graph">
+<span class="sig-name descname"><span class="pre">model_SEIR_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.model_SEIR_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.model_SEIR_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.set_equations">
+<span class="sig-name descname"><span class="pre">set_equations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.set_equations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.set_equations" title="Permalink to this definition"></a></dt>
+<dd><p>Sets Diferential Equations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.set_relational_values">
+<span class="sig-name descname"><span class="pre">set_relational_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.set_relational_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.set_relational_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.seirtq.SEIRTQ.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/seirtq.html#SEIRTQ.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.seirtq.SEIRTQ.solve" title="Permalink to this definition"></a></dt>
+<dd><p>Solves ODEs using scipy.integrate
+:param t0: Initial time. Defaults to 0.
+:type t0: int, optional
+:param T: Endtime. Defaults to time given when building the object
+:type T: [type], optional
+:param h: Time step. Defaults to 0.01.
+:type h: float, optional</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="cv19gm-models-seirtqm-module">
+<h2>cv19gm.models.seirtqm module<a class="headerlink" href="#cv19gm-models-seirtqm-module" title="Permalink to this heading"></a></h2>
+</div>
+<div class="section" id="module-cv19gm.models.sir">
+<span id="cv19gm-models-sir-module"></span><h2>cv19gm.models.sir module<a class="headerlink" href="#module-cv19gm.models.sir" title="Permalink to this heading"></a></h2>
+<p>SIR Model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cv19gm.models.sir.</span></span><span class="sig-name descname"><span class="pre">SIR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SEIR model object:
+Construction:</p>
+<blockquote>
+<div><p>SEIR(self, config = None, inputdata=None)</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.analytics">
+<span class="sig-name descname"><span class="pre">analytics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.analytics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.analytics" title="Permalink to this definition"></a></dt>
+<dd><p>Perform simulation analytics after running it.
+It calculates peaks, prevalence, and will include R(t).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.df_build">
+<span class="sig-name descname"><span class="pre">df_build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.df_build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.df_build" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a dataframe with the simulation results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.integrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.integrate" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.model_SEIR_graph">
+<span class="sig-name descname"><span class="pre">model_SEIR_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.model_SEIR_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.model_SEIR_graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.set_equations">
+<span class="sig-name descname"><span class="pre">set_equations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.set_equations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.set_equations" title="Permalink to this definition"></a></dt>
+<dd><p>Sets Diferential Equations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.set_relational_values">
+<span class="sig-name descname"><span class="pre">set_relational_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.set_relational_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.set_relational_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cv19gm.models.sir.SIR.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LSODA'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cv19gm/models/sir.html#SIR.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cv19gm.models.sir.SIR.solve" title="Permalink to this definition"></a></dt>
+<dd><p>Solves ODEs using scipy.integrate
+:param t0: Initial time. Defaults to 0.
+:type t0: int, optional
+:param T: Endtime. Defaults to time given when building the object
+:type T: [type], optional
+:param h: Time step. Defaults to 0.01.
+:type h: float, optional</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cv19gm.models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cv19gm.models" title="Permalink to this heading"></a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cv19gm.data.html" class="btn btn-neutral float-left" title="cv19gm.data package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cv19gm.utils.html" class="btn btn-neutral float-right" title="cv19gm.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Samuel Ropert.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
