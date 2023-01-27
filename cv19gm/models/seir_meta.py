@@ -25,7 +25,6 @@ import cv19gm.utils.cv19mobility as cv19mobility
 """ To Do
 * Y tener precargaada la matriz de movilidad como transpuesta
 * Matriz de movilidad de función a tensor
-
 """
 
 class SEIRMETA:  

@@ -96,8 +96,8 @@ def import_mobility(file):
     # Build Mobility Matrix
     return 
 
-def create_mobility():
-    # Create mobility matrix from static matrix, json or a random one if no input is given
+def create_mobility(inputmatrix,symmetric=True):
+    # Create mobility matrix from static matrix, json    
     pass
 
 def mobility_to_tensor(mobfunction,t_end):

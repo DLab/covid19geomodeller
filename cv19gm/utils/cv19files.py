@@ -19,8 +19,6 @@ import data.cv19data as cv19data
 import utils.cv19functions as cv19functions 
 import utils.cv19timeutils as cv19timeutils
 
-
-
 """
 # ------------------------------------------------- #   
 #                                                   #

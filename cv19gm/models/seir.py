@@ -7,27 +7,16 @@ SEIR Model
 import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
-#from datetime import datetime
 from datetime import timedelta
 
 # cv19gm libraries 
-#import os
-#import sys
-#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-#sys.path.insert(1, path)
-
-#import cv19gm.data.cv19data as cv19data
-#import cv19gm.utils.cv19timeutils as cv19timeutils
-#import cv19gm.utils.cv19functions as cv19functions
 import cv19gm.utils.cv19files as cv19files
-
 
 class SEIR:
     """
         SEIR model object:
         Construction:
             SEIR(self, config = None, inputdata=None)
-
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
         self.model = "SEIR"

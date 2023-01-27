@@ -92,7 +92,6 @@ def func_add(*functions):
         return aux
     return f
 
-
 def events(values,days,default=0,*functions):
     """Event creator function. Create a time dependent function that returns the values (or functions) given in the 
     values vector for the intervals specified in the days vector. 
@@ -159,7 +158,6 @@ def events(values,days,default=0,*functions):
     # Create final function adding them all
     out = func_add(*aux_f)    
     return out
-
 
 def piecewise(values,limits = [-np.infty]):
     """Piecewise creator function. Create a smooth time dependent function that returns the values (or functions) given in the 
@@ -284,7 +282,6 @@ def linear_transition(t_init,t_end,initvalue=0,endvalue = 1):
     out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
     return out
 
-
 def quadratic_transition(t_init,t_end,initvalue=0,endvalue = 1,concavity=0):
     """quadraticTransition
     Creates a function which performs a quadratic transition from initvalue to endvalue between t_init and t_end.
@@ -315,7 +312,6 @@ def quadratic_transition(t_init,t_end,initvalue=0,endvalue = 1,concavity=0):
     
     out = lambda t: initvalue*expit(10*(t_init-t)) + f(t)*(expit(10*(t-t_init)) - expit(10*(t-t_end))) + endvalue*expit(10*(t-t_end)) 
     return out    
-
 
 def sigmoidal_transition(t_init,t_end,initvalue=0,endvalue = 1,gw=8):
     """Sigmoidal Transition
@@ -379,7 +375,6 @@ def transition(t_init,t_end,ftype = 'linear', initvalue=0,endvalue = 1, concavit
         out = None
     return out
 
-
 # Saturation function
 def saturation(upperlimit):
     """ Function that builds binary functions which indicates when the sum of the arguments are bigger than the saturation function.
@@ -416,7 +411,6 @@ def saturation(upperlimit):
         return(expit(gw*(f(t)-upperlimit(t))))
     return aux
     
-
 def data_function(data,future):
     """Creates a function that returns the data during its length
 
@@ -438,7 +432,6 @@ def data_function(data,future):
             return auxf(t)
     
     return aux
-
 
 def polyfit(values,time = None,degree=4,endvalue_index = -5):
     """
@@ -470,7 +463,6 @@ def interpolate_data(data):
     # Work in progress
     aux = data
     return aux
-
 
 # Creo que no es necesaria
 def events_append(values,days,new_val,new_days=None,default=0):
