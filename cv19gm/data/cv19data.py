@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from pandas.core.base import DataError
+#from pandas.core.base import DataError
 import requests
 from requests.auth import HTTPBasicAuth
 import pandas as pd
@@ -142,7 +142,8 @@ class ImportData():
             elif type(localdata) == pd.core.frame.DataFrame:
                 self.data = localdata
             else:
-                raise DataError
+                #raise DataError
+                raise Exception('Wrong Credentials')
             
         else:
             tdelta = enddate - initdate 
