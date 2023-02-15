@@ -367,17 +367,17 @@ class SEIRHVD:
             self.Im_d_det = [self.Im_d[i]*self.pI_det(self.t(i)) for i in range(len(self.t))]
             self.Im_ac_det = np.cumsum(self.Im_d_det)
 
-        self.Im_det = self.Im*self.pI_det
-        self.Im_d_det = self.Im_d*self.pI_det
-        self.Im_ac_det = self.Im_ac*self.pI_det
+        self.Im_det = self.Im*self.pI_det(0)
+        self.Im_d_det = self.Im_d*self.pI_det(0)
+        self.Im_ac_det = self.Im_ac*self.pI_det(0)
 
-        self.Icr_det = self.Icr*self.pI_det
-        self.Icr_d_det = self.Icr_d*self.pI_det
-        self.Icr_ac_det = self.Icr_ac*self.pI_det
+        self.Icr_det = self.Icr*self.pI_det(0)
+        self.Icr_d_det = self.Icr_d*self.pI_det(0)
+        self.Icr_ac_det = self.Icr_ac*self.pI_det(0)
 
-        self.Iv_det = self.Iv*self.pIv_det
-        self.Iv_d_det = self.Iv_d*self.pIv_det
-        self.Iv_ac_det = self.Iv_ac*self.pIv_det
+        self.Iv_det = self.Iv*self.pIv_det(0)
+        self.Iv_d_det = self.Iv_d*self.pIv_det(0)
+        self.Iv_ac_det = self.Iv_ac*self.pIv_det(0)
 
 
         self.I_det = self.Im_det + self.Icr_det + self.Iv_det
