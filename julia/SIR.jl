@@ -96,10 +96,7 @@ function infect!(model::Model, agent::Agent, collector::Collector)
     agent.status = :I
     agent.daysToGetWell = model.distGetWell()
     push!(model.infected, agent)
-
-    collector.totals[:S] -= 1
-    collector.totals[:I] += 1
-    collector.daily[:I] += 1
+    exchange!(collector, :S, :I)
 end
 
 function maybeGetWell!(model::Model, agent::Agent, collector::Collector ) 
@@ -111,11 +108,7 @@ end
 function getWell!(model::Model, agent::Agent, collector::Collector ) 
     agent.status = :R
     delete!(model.infected, agent)
-
-    collector.totals[:I] -= 1
-    collector.totals[:R] += 1
-    collector.daily[:R] += 1
-    
+    exchange!(collector, :I, :R)
 end
 
 

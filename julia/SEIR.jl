@@ -90,9 +90,8 @@ function infect!(model::Model, agent::Agent, collector::Collector)
     agent.daysToChangeState = model.distGetInfected()
     push!(model.exposed, agent)
     
-    collector.totals[:S] -= 1
-    collector.totals[:E] += 1
-    collector.daily[:E] += 1
+    exchange!(collector::Collector, :S, :E)
+
 end
 
 function maybeGetSick!(model::Model, agent::Agent, collector::Collector)
@@ -106,10 +105,7 @@ function getSick!(model::Model, agent::Agent, collector::Collector)
     agent.daysToChangeState = model.distGetWell()
     delete!(model.exposed, agent)
     push!(model.infected, agent)
-
-    collector.totals[:E] -= 1
-    collector.totals[:I] += 1
-    collector.daily[:I] += 1
+    exchange!(collector::Collector, :E, :I)
 end
 
 function maybeGetWell!(model::Model, agent::Agent, collector::Collector)
@@ -121,10 +117,7 @@ end
 function getWell!(model::Model, agent::Agent, collector::Collector)
     agent.status = :R
     delete!(model.infected, agent)
-
-    collector.totals[:I] -= 1
-    collector.totals[:R] += 1
-    collector.daily[:R] += 1
+    exchange!(collector::Collector, :I, :R)
 end
 
 

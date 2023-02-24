@@ -189,9 +189,7 @@ function maybeLooseInmunity!(model::Model, agent::Agent, collector::Collector)
 end
 
 function looseInmunity!(model::Model, agent::Agent, collector::Collector)
-    collector.totals[:R, agent.isVaccinated] -= 1
-    collector.totals[:S, false] += 1
-    collector.daily[:S, false] += 1
+    exchange!(collector, (:R, agent.isVaccinated), (:S, false))
 
     delete!(model.compartments[:R], agent)
     push!(model.compartments[:S], agent)
@@ -211,9 +209,7 @@ function maybeDie!(model::Model, agent::Agent, collector::Collector) # true if a
 end
 
 function die!(model::Model, agent::Agent, collector::Collector)
-    collector.totals[agent.status, agent.isVaccinated] -= 1
-    collector.totals[:D, agent.isVaccinated] += 1
-    collector.daily[:D, agent.isVaccinated] += 1
+    exchange!(collector, (agent.status, agent.isVaccinated), (:D, agent.isVaccinated))
 
     delete!(model.compartments[agent.status], agent)
     push!(model.compartments[:D], agent)
@@ -230,9 +226,7 @@ function randHospitalize!(model::Model, agent::Agent, collector::Collector)
 end
 
 function hospitalize!(model::Model, agent::Agent, collector::Collector)
-    collector.totals[agent.status, agent.isVaccinated] -= 1
-    collector.totals[:H, agent.isVaccinated] += 1
-    collector.daily[:H, agent.isVaccinated] += 1
+    exchange!(collector, (agent.status, agent.isVaccinated), (:H, agent.isVaccinated))
 
     delete!(model.compartments[agent.status], agent)
     push!(model.compartments[:H], agent)
@@ -249,9 +243,7 @@ function maybeGetWell!(model::Model, agent::Agent, collector::Collector)
 end
 
 function getWell!(model::Model, agent::Agent, collector::Collector)
-    collector.totals[agent.status, agent.isVaccinated] -= 1
-    collector.totals[:R, agent.isVaccinated] += 1
-    collector.daily[:R, agent.isVaccinated] += 1
+    exchange!(collector, (agent.status, agent.isVaccinated), (:R, agent.isVaccinated))
     
     delete!(model.compartments[agent.status], agent)
     push!(model.compartments[:R], agent)
@@ -267,9 +259,7 @@ function maybeGetSick!(model::Model, agent::Agent, collector::Collector)
 end
 
 function getSick!(model::Model, agent::Agent, collector::Collector)
-    collector.totals[agent.status, agent.isVaccinated] -= 1
-    collector.totals[agent.nextState, agent.isVaccinated] += 1
-    collector.daily[agent.nextState, agent.isVaccinated] += 1
+    exchange!(collector, (agent.status, agent.isVaccinated), (agent.nextState, agent.isVaccinated))
 
     agent.status = agent.nextState #:Im or :Icr
     if agent.status == :Im
@@ -296,9 +286,7 @@ function randVaccinate!(model::Model, collector::Collector)
 end
 
 function vaccinate!(model::Model, agent::Agent, collector::Collector)
-    collector.totals[agent.status, agent.isVaccinated] -= 1
-    collector.totals[agent.status, true] += 1
-    collector.daily[agent.status, true] += 1
+    exchange!(collector, (agent.status, agent.isVaccinated), (agent.status, true))
     agent.isVaccinated = true
 end
 

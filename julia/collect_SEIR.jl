@@ -1,6 +1,9 @@
 module Collect_SEIR
 
-export Collector, Data, collect!, restartDay!
+export Collector, Data, collect!, restartDay!, exchange!
+
+
+#COLLECTOR
 
 mutable struct Collector
     totals::Dict{Symbol, Int}
@@ -62,6 +65,13 @@ function restartDay!(collector::Collector)
     for status in [:S, :E, :I, :R]
         collector.daily[status] = 0
     end
+end
+
+#pass one agent from one state to another
+function exchange!(collector::Collector, from::Symbol, to::Symbol)
+    collector.totals[from] -= 1
+    collector.totals[to] += 1
+    collector.daily[to] += 1
 end
 
 

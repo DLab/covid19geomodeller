@@ -1,7 +1,7 @@
 module Collect_SEIRHVD
 using DataFrames
 
-export Collector, Data, collect!, restartDay!
+export Collector, Data, collect!, restartDay!, exchange!
 
 ## COLLECTOR
 
@@ -74,6 +74,14 @@ function restartDay!(collector::Collector)
             collector.daily[status, vaccinated] = 0
         end
     end
+end
+
+## EXCHANGE
+
+function exchange!(collector::Collector, from::Tuple{Symbol,Bool}, to::Tuple{Symbol,Bool})
+    collector.totals[from] -= 1
+    collector.totals[to] += 1
+    collector.daily[to] += 1
 end
 
 end #module

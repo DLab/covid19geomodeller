@@ -2,7 +2,7 @@
 module Collect_SIR
 using DataFrames
 
-export Collector, Data, collect!, restartDay!
+export Collector, Data, collect!, restartDay!, exchange!
 
 mutable struct Collector
     totals::Dict{Symbol, Int}
@@ -66,6 +66,14 @@ function restartDay!(collector::Collector)
     for status in [:S, :I, :R]
         collector.daily[status] = 0
     end
+end
+
+# EXCHANGE!
+
+function exchange!(collector::Collector, from::Symbol, to::Symbol)
+    collector.totals[to] += 1
+    collector.totals[from] -= 1
+    collector.daily[to] += 1
 end
 
 end # module
