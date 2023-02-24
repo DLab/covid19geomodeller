@@ -1,0 +1,59 @@
+# Pandemic Suite Configuration File		
+
+title = 'Example of a SEIR Configuration File'
+date = '2021-04-20'
+user = 'Default'
+
+[model]
+	name = "Example simulation"
+	id = ''
+	model = 'SIR_ABM'
+	compartments  = ['S','I','R'] 
+	
+	# Differential Equations
+	EDOs = false
+	# Rule based modeling
+	ABM = true
+	ABM_NSim = 1
+
+[data]
+	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
+	datafile = false # File path for importing data from file 
+	importdata = false # Import data from external source
+
+	# parameters to use when importing from external sources 
+	initdate = ''
+	country = ''
+	state = ''
+	county = ''#'13101'
+	healthservice = ''
+	loc_name= '' # optional 
+
+[parameters]
+	[parameters.static]
+	network = false
+	t_init = 0
+	t_end = 500 # Final day
+	stepsPerDay = 5
+		
+	[parameters.dynamic]
+	beta = 0.2
+	alpha = 1
+
+	# -------------------------- #
+	#   Transition Parameters    # 
+	# -------------------------- #	
+	# Transition time between infectious and removed
+        tI_R = 10.0 # 1/gamma
+	
+
+	
+[initialconditions]
+	S = 100_000
+	I = 10
+	R = 0
+		
+	
+
+	
+
