@@ -44,8 +44,8 @@ class SEIR_ABM:
         
         data = Julia.run_SEIR(self.S, self.E, self.I, self.R, 
                               self.alpha, self.beta, 
-                              self.tI_R(0), self.tE_I(0), 5, 
-                              isGraphSpace=self.network, 
+                              self.tI_R(0), self.vI_R(0), self.tE_I(0), self.vE_I(0), 5, 
+                              isGraphSpace=self.network, graphFunc=self.network_func,
                               startDay = self.t_init + 1, days = self.days)
 
 

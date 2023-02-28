@@ -35,7 +35,7 @@ class SIR_ABM:
         Julia.include("./julia/run.jl")
         
         data = Julia.run_SIR(self.S, self.I, self.R, 
-                             self.alpha, self.beta, self.tI_R(0), 5, 
+                             self.alpha, self.beta, self.tI_R(0), self.vI_R(0), 5, 
                              isGraphSpace=self.network,
                              days = self.days, startDay = self.t_init + 1)
         

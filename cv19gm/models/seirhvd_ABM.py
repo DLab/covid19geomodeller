@@ -38,14 +38,25 @@ class SEIRHVD_ABM:
             (True, True): self.beta_vv
         }
         
-        self.distRecover = {
+        self.tRecover = {
             True: self.tImv_R(0),
             False: self.tIm_R(0)
         }
+        self
         
-        self.distCriticalDie = {
+        self.vRecover = {
+            True: self.vImv_R(0),
+            False: self.vIm_R(0)
+        }
+        
+        self.tCriticalDie = {
             True: self.tIv_D(0),
             False: self.tIcr_D(0)
+        }
+        
+        self.vCriticalDie = {
+            True: self.vIv_D(0),
+            False: self.vIcr_D(0)
         }
              
     def run(self):
@@ -62,13 +73,19 @@ class SEIRHVD_ABM:
             self.vac_d,
             
             self.tE_I(0),
-            self.distRecover,
-            self.distCriticalDie,
+            self.vE_I(0),
+            self.tRecover,
+            self.vRecover,
+            self.tCriticalDie,
+            self.vCriticalDie,
             self.tH_D(0),
+            self.vH_D(0),
             self.tH_R(0),
+            self.vH_R(0),
             self.tR_S(0),
+            self.vR_S(0),
             
-            self.stepsPerDay(0), #ARREGLAR
+            self.stepsPerDay,
             self.t_end - self.t_init,
             
             isGraphSpace = self.network,

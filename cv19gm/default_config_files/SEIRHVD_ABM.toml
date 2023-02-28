@@ -46,27 +46,36 @@ user = ''
 	# -------------------------- #
 
 	# Exposed
-		tE_I = 5.0 
+		tE_I = 5.0 # mean time from exposed to infectious
+		vE_I = 2.0 # variance of time from exposed to infectious
 	
 	# Infectious 
         tIm_R = 12.0
+		vIm_R = 2.0
+
 		tImv_R = 12.0
+		vImv_R = 2.0
+
 		tIcr_D = 7.0
+		vIcr_D = 2.0
+
 		tIv_D = 7.0
+		vIv_D = 2.0
 
         pIcr_H = 0.3
-         
 
     # Hospitalized 
 		tH_R = 7.0
+		vH_R = 2.0
+
 		tH_D = 4.0
+		vH_D = 2.0
 
         pH_D = 0.3
 	
 	# Immunity loss 
 		tR_S = 90.0
-
-	stepsPerDay = 5
+		vR_S = 10.0
 	
 
 [initialconditions]

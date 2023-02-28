@@ -14,18 +14,25 @@ function run_SEIR(
     chanceMeetPy::PyObject, 
     chanceInfectPy::PyObject,
     tGetWell::Float64,
+    vGetWell::Float64,
     tGetSick::Float64,
+    vGetSick::Float64,
     stepsPerDay::Int
     ;
     days::Union{Int,Nothing} = nothing,
     startDay::Int = 0,
     isGraphSpace::Bool = false,
+    graphFunc::Union{String, Nothing} = nothing
     )
 
     if isGraphSpace
         SEIR = SEIRg
-        N = S + E + I + R
-        graph = watts_strogatz(N, 4, 0.51)
+        if graphFunc === nothing
+            N = S + E + I + R
+            graph = watts_strogatz(N, 4, 0.51)
+        elseif  validGraphFunc(graphFunc)
+            graph = eval(Meta.parse(graphFunc))
+        end
     else
         SEIR = SEIRa
         graph = nothing
@@ -33,8 +40,8 @@ function run_SEIR(
 
     chanceMeet(day) = pycall(chanceMeetPy, Float64, day)
     chanceInfect(day) = pycall(chanceInfectPy, Float64, day)
-    distGetWell() = rand(Normal(tGetWell, 2.0))
-    distGetInfected() = rand(Normal(tGetSick, 2.0)) 
+    distGetWell() = rand(Normal(tGetWell, vGetWell))
+    distGetInfected() = rand(Normal(tGetSick, vGetSick)) 
     population, exposed, infected = SEIR.build_population(S, E, I, R, ()-> distGetWell()/2, ()-> distGetInfected()/2)
     model = SEIR.Model(population, exposed, infected, chanceInfect, chanceMeet, distGetWell, distGetInfected, stepsPerDay ; graph = graph, startDay = startDay + 1)
     data = SEIR.run_sim!(model, days)
@@ -55,17 +62,23 @@ function run_SIR(
     chanceMeetPy::PyObject, 
     chanceInfectPy::PyObject,
     tInfected::Float64,
+    vInfected::Float64,
     stepsPerDay::Int
     ;
     days::Union{Int,Nothing} = nothing,
     startDay::Int = 0,
-    isGraphSpace::Bool = false
+    isGraphSpace::Bool = false,
+    graphFunc::Union{String, Nothing} = nothing
     )
 
     if isGraphSpace
         SIR = SIRg
-        N = S + I + R
-        graph = watts_strogatz(N, 4, 0.51)
+        if graphFunc === nothing
+            N = S + I + R
+            graph = watts_strogatz(N, 4, 0.51)
+        elseif  validGraphFunc(graphFunc)
+            graph = eval(Meta.parse(graphFunc))
+        end
     else
         SIR = SIRa
         graph = nothing
@@ -73,7 +86,7 @@ function run_SIR(
 
     chanceMeet(day) = pycall(chanceMeetPy, Float64, day)
     chanceInfect(day) = pycall(chanceInfectPy, Float64, day)
-    distGetWell() = rand(Normal(tInfected, 2))
+    distGetWell() = rand(Normal(tInfected, vInfected))
 
     population, infected = SIR.build_population(S, I, R, distGetWell)
     model = SIR.Model(
@@ -105,23 +118,35 @@ function run_SEIRHVD(
     vaccinesPerDayPy::PyObject,
 
     tGetSick::Float64,
+    vGetSick::Float64,
     tsRecover::Dict{Any, Any},
+    vsRecover::Dict{Any, Any},
     tsCriticalDie::Dict{Any, Any},
+    vsCriticalDie::Dict{Any, Any},
     tHospitalDie::Float64,
+    vHospitalDie::Float64,
+
     tHospitalRecover::Float64,
+    vHospitalRecover::Float64,
     tLooseInmunity::Float64,
+    vLooseInmunity::Float64,
 
     stepsPerDay::Int,
     days::Int
     ;
     startDay::Int = 0,
-    isGraphSpace::Bool = false
+    isGraphSpace::Bool = false,
+    graphFunc::Union{String, Nothing} = nothing
     )
     
     if isGraphSpace
         SEIRHVD = SEIRHVDg
-        N = sum(values(nStates))
-        graph = watts_strogatz(N, 4, 0.51)
+        if graphFunc === nothing
+            N = sum(values(nStates))
+            graph = watts_strogatz(N, 4, 0.51)
+        elseif  validGraphFunc(graphFunc)
+            graph = eval(Meta.parse(graphFunc))
+        end
     else
         SEIRHVD = SEIRHVDa
         graph = nothing
@@ -141,21 +166,21 @@ function run_SEIRHVD(
 
     #Distributions
 
-    distGetSick() = rand(Normal(tGetSick, 2.0))
+    distGetSick() = rand(Normal(tGetSick, vGetSick))
 
     distsRecover = Dict(
-        true => () -> rand(Normal(tsRecover[true], 2.0)),
-        false => () -> rand(Normal(tsRecover[false], 2.0))
+        true => () -> rand(Normal(tsRecover[true], vsRecover[true])),
+        false => () -> rand(Normal(tsRecover[false], vsRecover[false]))
     )
 
     distsCriticalDie = Dict(
-        true => () ->rand(Normal(tsCriticalDie[true], 2.0)),
-        false => () -> rand(Normal(tsCriticalDie[false], 2.0))
+        true => () ->rand(Normal(tsCriticalDie[true], vsCriticalDie[true])),
+        false => () -> rand(Normal(tsCriticalDie[false], vsCriticalDie[false]))
     )
 
-    distHospitalDie() = rand(Normal(tHospitalDie, 2.0))
-    distHospitalRecover() = rand(Normal(tHospitalRecover, 2.0))
-    distLooseInmunity() = rand(Normal(tLooseInmunity, 2.0))
+    distHospitalDie() = rand(Normal(tHospitalDie, vHospitalDie))
+    distHospitalRecover() = rand(Normal(tHospitalRecover, vHospitalRecover))
+    distLooseInmunity() = rand(Normal(tLooseInmunity, vLooseInmunity))
 
     #change nStates to Dict{Symbol,Int}
     nStatesSym = Dict{Symbol,Int}()
@@ -198,6 +223,26 @@ function run_SEIRHVD(
         "totals" => data.totals,
         "daily" => data.daily
     )
+end
+
+function validGraphFunc(s::AbstractString)
+    expr = Meta.parse(s)
+    if typeof(expr) != Expr || expr.head != :call
+        return false
+    end
+
+    if !hasproperty(Graphs, expr.args[1])
+        return false
+    end
+
+    #check if all arguments are literals or vectors
+    for arg in expr.args[2:end]
+        if typeof(arg) in [Expr, QuoteNode]
+            return false
+        end 
+    end
+    
+    return true
 end
 
 

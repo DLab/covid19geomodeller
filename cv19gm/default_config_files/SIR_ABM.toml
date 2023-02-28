@@ -43,11 +43,11 @@ user = 'Default'
 	# -------------------------- #
 	#   Transition Parameters    # 
 	# -------------------------- #	
-	# Transition time between infectious and removed
-        tI_R = 10.0 # 1/gamma
+
+  	tI_R = 10.0 # mean time it takes an agent to go from infected to removed
+	vI_R = 2.0 # variance of time it takes an agent to go from infected to removed
 	
 
-	
 [initialconditions]
 	S = 100_000
 	I = 10

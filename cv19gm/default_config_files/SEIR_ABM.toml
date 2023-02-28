@@ -46,13 +46,13 @@ user = 'Default'
 	# -------------------------- #
 	#   Transition Parameters    # 
 	# -------------------------- #	
-	# Transition time between exposed and infectious
-        tE_I = 5.0 # 1/sigma
-	# Transition time between infectious and removed
-        tI_R = 10.0 # 1/gamma
-	
-	# Average Immunity loss rate (1/time)
-	rR_S = 0 
+
+	tE_I = 5.0 # mean time it takes an agent to go from exposed to infectious
+	vE_I = 2.0 # variance of time it takes an agent to go from exposed to infectious
+
+    tI_R = 10.0 # mean time it takes an agent to go from infectious to removed
+	vI_R = 2.0 # variance of time it takes an agent to go from infectious to removed
+
 	
 [initialconditions]
 	# total population in area

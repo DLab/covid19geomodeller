@@ -27,7 +27,12 @@ user = 'Default'
 	state = ''
 	county = ''#'13101'
 	healthservice = ''
-	loc_name= '' # optional 
+	loc_name= '' # optional
+
+	#network parameters
+	network = true # Use a network to model the population
+	network_func = 'watts_strogatz(100_000, 4, 0.51)' #the call to a function from Graphs.jl for building a network
+
 
 [parameters]
 	[parameters.static]
@@ -35,17 +40,15 @@ user = 'Default'
 	t_init = 0
 	t_end = 500 # Final day
 	stepsPerDay = 5
+
 		
 	[parameters.dynamic]
 	beta = 0.2
 	alpha = 1
 
-	# -------------------------- #
-	#   Transition Parameters    # 
-	# -------------------------- #	
-	# Transition time between infectious and removed
-        tI_R = 10.0 # 1/gamma
-	
+
+    tI_R = 10.0 # mean time it takes an agent to go from infected to removed
+	vI_R = 2.0 # variance of time it takes an agent to go from infected to removed
 
 	
 [initialconditions]
