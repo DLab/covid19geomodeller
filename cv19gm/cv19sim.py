@@ -104,7 +104,7 @@ class CV19SIM():
                
         self.vectsolve = np.vectorize(solve)
         
-        if verbose == True:
+        if verbose:
             print(str(np.prod(np.shape(self.sims)))+" models created")
         
     def integrate(self):
