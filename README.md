@@ -2,6 +2,9 @@
 Documentation at:
 https://covid19geomodeller.readthedocs.io/
 
+EPIc Suite website:
+https://cv19gm.org/
+
 ## Install Dependencies
 
 Clone this repository in your computer
