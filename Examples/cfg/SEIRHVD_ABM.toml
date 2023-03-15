@@ -1,0 +1,103 @@
+# Pandemic Suite Configuration File		
+
+title = 'Example of a SEIRHVD_ABM Configuration File'
+date = '2021-06-01'
+user = ''
+
+[model]
+	name = "SEIRHVD_ABM"
+	compartments  = ['S','S_v','E','E_v','Im','Icr','Iv','R','H','D'] # Nombres de los estados
+	
+[data]
+	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
+	datafile = false # File path for importing data from file 
+	importdata = false # Import data from external source
+
+	# parameters to use when importing from external sources 
+	initdate = ''
+	country = ''
+	state = ''
+	county = ''#'13101'
+	loc_name= '' # optional
+
+	#network parameters
+	network = true # Use a network to model the population
+	network_func = 'watts_strogatz(100_000, 4, 0.51)' #the call to a function from Graphs.jl for building a network
+	
+[parameters]
+	[parameters.static]
+	network = false
+	t_init = 0 # Initial day
+	t_end = 1500 # Final day
+	stepsPerDay = 5
+	
+	[parameters.dynamic]
+		
+	# Contagion and movility
+	alpha = 0.2 
+
+	#beta
+	beta_nn = 0.8 #from not vaccinated to not vaccinated
+	beta_nv = 0.8 #from not vaccinated to vaccinated
+	beta_vn = 0.8 #from vaccinated to not vaccinated
+	beta_vv = 0.8 #from vaccinated to vaccinated
+	
+	# Vaccination
+	vac_d = 100 # Vaccines per day
+
+	# -------------------------- #
+	#   Transition Parameters    # 
+	# -------------------------- #
+
+	# Exposed
+		tE_I = 5.0 # mean time from exposed to infectious
+		vE_I = 2.0 # variance of time from exposed to infectious
+	
+	# Infectious 
+        tIm_R = 12.0
+		vIm_R = 2.0
+
+		tImv_R = 12.0
+		vImv_R = 2.0
+
+		tIcr_D = 7.0
+		vIcr_D = 2.0
+
+		tIv_D = 7.0
+		vIv_D = 2.0
+
+        pIcr_H = 0.3
+
+    # Hospitalized 
+		tH_R = 7.0
+		vH_R = 2.0
+
+		tH_D = 4.0
+		vH_D = 2.0
+
+        pH_D = 0.3
+	
+	# Immunity loss 
+		tR_S = 90.0
+		vR_S = 10.0
+	
+
+[initialconditions]
+
+	S = 100_000
+	Sv = 0
+	E = 200
+	Ev = 200
+	Im = 10
+	Ivm = 10
+	Icr = 0
+	Ivcr = 0
+	R = 0
+	H = 0
+	D = 0
+
+	H_cap = 3000 # Capacity
+
+
+
+

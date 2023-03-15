@@ -1,0 +1,68 @@
+# Pandemic Suite Configuration File		
+
+title = 'Example of a SEIR Configuration File'
+date = '2021-04-20'
+user = 'Default'
+
+[model]
+	name = "Example simulation"
+	id = ''
+	model = 'SEIR_ABM'
+	compartments  = ['S','E','I','R'] 
+	
+	# Differential Equations
+	EDOs = false
+	# Rule based modeling
+	ABM = true
+	ABM_NSim = 1
+
+[data]
+	# Real data will set initial conditions and will be available to be plotted and to calculate errors	
+	datafile = false # File path for importing data from file 
+	importdata = false # Import data from external source
+
+	# parameters to use when importing from external sources 
+	initdate = ''
+	country = ''
+	state = ''
+	county = ''#'13101'
+	healthservice = ''
+	loc_name= '' # optional 
+
+	#network parameters
+	network = true # Use a network to model the population
+	network_func = 'watts_strogatz(100_000, 4, 0.51)' #the call to a function from Graphs.jl for building a network
+
+[parameters]
+	[parameters.static]
+
+	t_init = 0
+	t_end = 500 # Final day
+	stepsPerDay = 5
+
+	mu = 0.298 # E(0) = mu*I(0)
+
+
+	[parameters.dynamic]
+	beta = 0.2
+	alpha = 0.3
+
+	
+	# -------------------------- #
+	#   Transition Parameters    # 
+	# -------------------------- #	
+        
+	tE_I = 5.0 # mean time it takes an agent to go from exposed to infectious
+	vE_I = 2.0 # variance of time it takes an agent to go from exposed to infectious
+
+    tI_R = 10.0 # mean time it takes an agent to go from infectious to removed
+	vI_R = 2.0 # variance of time it takes an agent to go from infectious to removed
+
+	
+[initialconditions]
+	S = 99_900
+	E = 100
+	I = 0
+	R = 0
+	
+
