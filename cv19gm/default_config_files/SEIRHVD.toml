@@ -42,7 +42,7 @@ user = 'Default'
 		
 	[parameters.dynamic]
 		
-	# Contagion and movility
+	# Contagion and mobility
 	alpha = 1
 	beta = 0.2
 	beta_v = 0.05
