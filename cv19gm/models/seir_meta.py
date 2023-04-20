@@ -20,7 +20,7 @@ from datetime import timedelta
 #import utils.cv19timeutils as cv19timeutils
 #import utils.cv19functions as cv19functions
 import cv19gm.utils.cv19files as cv19files
-import cv19gm.utils.cv19mobility as cv19mobility
+import cv19gm.utils.cv19mobility_old as cv19mobility_old
 
 """ To Do
 * Y tener precargaada la matriz de movilidad como transpuesta
@@ -61,7 +61,7 @@ class SEIRMETA:
                 
         else:
             print('Missing flux dynamics, using a random matrix instead')
-            self.Phi, self.Phi_T = cv19mobility.rnd_flux_symmetric(self.population,seed=seed, transposed = True)
+            self.Phi, self.Phi_T = cv19mobility_old.rnd_flux_symmetric(self.population,seed=seed, transposed = True)
             
         if verbose:
             print('Initializing parameters and variables')
@@ -164,8 +164,8 @@ class SEIRMETA:
         
         # segunda propuesta 
         elif self.method == 2:
-            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
-            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
+            self.Phi_matrix = cv19mobility_old.mobility_to_tensor(self.Phi,self.tsim)
+            self.Phi_matrix_T = cv19mobility_old.mobility_transposed(self.Phi_matrix)
             np_ones = np.ones(self.nregions)
         
             self.phi_S = lambda t,S,N: self.Phi_matrix_T[int(2*t)]@(S/N) - np.diag(S/N)@self.Phi_matrix[int(2*t)]@np_ones
@@ -175,8 +175,8 @@ class SEIRMETA:
         
         # Tercera propuesta 
         elif self.method == 3:
-            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
-            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
+            self.Phi_matrix = cv19mobility_old.mobility_to_tensor(self.Phi,self.tsim)
+            self.Phi_matrix_T = cv19mobility_old.mobility_transposed(self.Phi_matrix)
             np_ones = np.ones(self.nregions)
 
             self.phi_S = lambda t,S,N: np.dot(self.Phi_matrix_T[int(2*t)],(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi_matrix[int(2*t)]),np_ones)

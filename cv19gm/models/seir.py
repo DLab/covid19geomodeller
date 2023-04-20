@@ -136,8 +136,7 @@ class SEIR:
 
         # --------------------------- #
         #           Infected          #
-        # --------------------------- #                
-        
+        # --------------------------- #
         
         # 3) Active
         self.dI=lambda t,E,I: self.I_f(t) + E/self.tE_I(t) - I/self.tI_R(t)
@@ -163,6 +162,14 @@ class SEIR:
         self.solve(t0=t0,T=T,h=h,method=method)
 
     def run(self,t0=0,T=None,h=0.01,method='LSODA'):
+        """_summary_
+
+        Args:
+            t0 (int, optional): _description_. Defaults to 0.
+            T (_type_, optional): _description_. Defaults to None.
+            h (float, optional): _description_. Defaults to 0.01.
+            method (str, optional): _description_. Defaults to 'LSODA'.
+        """
         #print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h,method=method)
 
