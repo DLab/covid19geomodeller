@@ -20,7 +20,8 @@ from datetime import timedelta
 #import utils.cv19timeutils as cv19timeutils
 #import utils.cv19functions as cv19functions
 import cv19gm.utils.cv19files as cv19files
-import cv19gm.utils.cv19mobility_old as cv19mobility_old
+#import cv19gm.utils.cv19mobility_old as cv19mobility_old
+import cv19gm.utils.cv19mobility as cv19mobility
 
 """ To Do
 * Y tener precargaada la matriz de movilidad como transpuesta
@@ -61,7 +62,8 @@ class SEIRMETA:
                 
         else:
             print('Missing flux dynamics, using a random matrix instead')
-            self.Phi, self.Phi_T = cv19mobility_old.rnd_flux_symmetric(self.population,seed=seed, transposed = True)
+            #self.Phi, self.Phi_T = cv19mobility_old.rnd_flux_symmetric(self.population,seed=seed, transposed = True)
+            self.Phi, self.Phi_T = cv19mobility.create_dynamic_mobility(mobility_model='random', dynamic_pattern='symmetric',populations=self.population, seed=seed, transposed = True)
             
         if verbose:
             print('Initializing parameters and variables')
