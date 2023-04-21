@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import json
-from ipywidgets import interact, FloatSlider
-import matplotlib.pyplot as plt
+#from ipywidgets import interact, FloatSlider
+#import matplotlib.pyplot as plt
 
 """
 # ------------------------------------------------- #   
@@ -348,19 +348,23 @@ def import_mobility(file):
     return 
 
 
+"""
 # ----------------------------------------- #
 #          Mobility Visualization           #
-# ----------------------------------------- #
-
+# ----------------------------------------- #  
+    
 def visualize_dynamic_pattern(dynamic_pattern, init=0, end=24, step=0.5):
-    """Visualize a time-varying mobility matrix function on a daily basis
+"""
+"""
+    Visualize a time-varying mobility matrix function on a daily basis
 
     Args:
         dynamic_pattern (function): Time dependent mobility matrix
         init (int, optional): Initial time [hours]. Defaults to 0.
         end (int, optional): Final time [hours]. Defaults to 24.
         step (float, optional): Slider time-step [hours]. Defaults to 0.5.
-    """
+"""
+"""
     vmin = np.min([dynamic_pattern(i*step)for i in np.linspace(init,end,int((end-init)/step))])
     vmax = np.max([dynamic_pattern(i*step)for i in np.linspace(init,end,int((end-init)/step))])
 # Visualization function
@@ -378,3 +382,5 @@ def visualize_dynamic_pattern(dynamic_pattern, init=0, end=24, step=0.5):
 
     # Interactive plot
     interact(plot_mobility_matrix, t=FloatSlider(min=init, max=end, step=step, value=0, continuous_update=False))
+    
+"""
