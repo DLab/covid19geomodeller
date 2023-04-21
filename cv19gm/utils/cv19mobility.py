@@ -147,6 +147,7 @@ def gravity_model(populations, distances, alpha=1, beta=1, fraction=0.2, **kwarg
     Returns:
         np.array: Mobility matrix based on the gravity model.
     """
+    populations = np.array(populations) # Force numpy array to avoid problems with multiplication
     num_regions = len(populations)
     mobility_matrix = np.zeros((num_regions, num_regions))
 
@@ -171,6 +172,7 @@ def radiation_model(populations, distances, fraction=0.2, **kwargs):
     Returns:
         np.array: Mobility matrix based on the radiation model.
     """
+    populations = np.array(populations) # Force numpy array to avoid problems with multiplication
     num_regions = len(populations)
     mobility_matrix = np.zeros((num_regions, num_regions))
 
@@ -197,12 +199,13 @@ def symmetric_mobility_pattern(mobility_matrix,transposed=False, **kwargs):
     in order to conserve the population throughout the day, avoiding long-term mass migrations
 
     Args:
-        inputmatrix (np.array): Base flux matrix
+        mobility_matrix (np.array): Base flux matrix
         transposed (bool, optional): Returns the transposed matrix
     
     Returns:
         function: Time symmetric flux function
     """
+    mobility_matrix = np.array(mobility_matrix) # Force numpy array
     mobility_matrix_T = mobility_matrix.T
     def Phi(t):        
         if t%1<0.5:
@@ -230,6 +233,7 @@ def sinusoidal_mobility_pattern(mobility_matrix, amplitude=0.5, phase_shift=0, *
     Returns:
         function: Time-varying mobility matrix function.
     """
+    mobility_matrix = np.array(mobility_matrix) # Force numpy array
     mobility_matrix_T = mobility_matrix.T
     
     def time_varying_mobility(t):
@@ -258,6 +262,7 @@ def rush_hour_mobility_pattern(mobility_matrix, peak_amplitude=0.5, off_peak_amp
     Returns:
         function: Time-varying mobility matrix function.
     """
+    mobility_matrix = np.array(mobility_matrix) # Force numpy array
     mobility_matrix_T = mobility_matrix.T
     def time_varying_mobility(t):
         t = t % period
