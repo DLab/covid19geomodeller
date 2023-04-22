@@ -111,7 +111,7 @@ def create_dynamic_mobility(mobility_model, dynamic_pattern, populations, distan
 # --------------------------------- #
 #           Mobility Models         #
 # --------------------------------- # 
-def random_mobility_model(population, fraction=0.5, seed=None,**kwargs):
+def random_mobility_model(population, fraction=0.1, seed=None,**kwargs):
     """Generate a random flux matrix that moves the specified fraction of the population.
     This method uses the dirichlet distribution in order to distribute the population maintaining the total.
 
@@ -133,7 +133,7 @@ def random_mobility_model(population, fraction=0.5, seed=None,**kwargs):
         aux.append(np.insert(rng.dirichlet(np.ones(size - 1), size=1) * population[i] * fraction[i], i, 0))
     return np.array(aux).astype(int)
 
-def gravity_model(populations, distances, alpha=1, beta=1, fraction=0.2, **kwargs):
+def gravity_model(populations, distances, alpha=1, beta=1, fraction=0.15, **kwargs):
     """Calculate the gravity model mobility matrix.
     The gravity model, inspired by Newton's law of gravitation, is a widely used spatial interaction model in various fields, such as transportation, human migration, and trade. The model assumes that the interaction between two regions (e.g., the number of people moving between them) is directly proportional to the product of their populations (or other attributes, like economic size) and inversely proportional to some power of the distance between them.
     
@@ -161,7 +161,7 @@ def gravity_model(populations, distances, alpha=1, beta=1, fraction=0.2, **kwarg
     return mobility_matrix.astype(int)
 
 
-def radiation_model(populations, distances, fraction=0.2, **kwargs):
+def radiation_model(populations, distances, fraction=0.1, **kwargs):
     """Calculate the radiation model mobility matrix.
 
     Args:
