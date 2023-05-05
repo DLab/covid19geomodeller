@@ -4,23 +4,13 @@
 SEIR Meta-population Model
 """
 
-from unittest import result
 import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
 from datetime import timedelta
 
-# cv19gm libraries 
-#import os
-#import sys
-#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-#sys.path.insert(1, path)
-
-#import data.cv19data as cv19data
-#import utils.cv19timeutils as cv19timeutils
 #import utils.cv19functions as cv19functions
 import cv19gm.utils.cv19files as cv19files
-#import cv19gm.utils.cv19mobility_old as cv19mobility_old
 import cv19gm.utils.cv19mobility as cv19mobility
 
 """ To Do
@@ -111,17 +101,17 @@ class SEIRMETA:
         # --------------------------- #
        
         # 0) dS/dt:
-        self.dS=lambda t,S,I,R,N: - np.diag(S*I/N)@self.beta(t) + self.rR_S(t)*R  + self.phi_S(t,S,N)
+        self.dS=lambda t,S,I,R,N: - np.diag(S*I/N)@(self.alpha(t)*self.beta(t)) + self.rR_S(t)*R  + self.phi_S(t,S,N)
         
         # --------------------------- #
         #           Exposed           #
         # --------------------------- #     
         
         # 1) dE/dt
-        self.dE = lambda t,S,E,I,N: np.diag(S*I/N)@self.beta(t) - E/self.tE_I(t) + self.phi_E(t,E,N)
+        self.dE = lambda t,S,E,I,N: np.diag(S*I/N)@(self.alpha(t)*self.beta(t)) - E/self.tE_I(t) + self.phi_E(t,E,N)
  
         # 2) Daily dE/dt
-        self.dE_d = lambda t,S,E,E_d,I,N: np.diag(S*I/N)@self.beta(t) + self.phi_E(t,E,N) - E_d
+        self.dE_d = lambda t,S,E,E_d,I,N: np.diag(S*I/N)@(self.alpha(t)*self.beta(t)) + self.phi_E(t,E,N) - E_d
 
         # --------------------------- #
         #           Infected          #
@@ -149,26 +139,28 @@ class SEIRMETA:
         # --------------------------- #
         #         People Flux         #
         # --------------------------- # 
-        
-        if self.method == 0:        
-        # Version original
-            self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np.ones(self.nregions)
-            self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np.ones(self.nregions)
-            self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np.ones(self.nregions)
-            self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np.ones(self.nregions)
-
-        elif self.method == 1:        
-        # Primera propuesta
+        # Original        
+        if self.method == 0:            
             np_ones = np.ones(self.nregions)
             self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np_ones
             self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np_ones
             self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np_ones
             self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np_ones
         
-        # segunda propuesta 
+        # Proposal 1
+        # Uisng np.dot for matrix multiplication
+        elif self.method == 1:
+            np_ones = np.ones(self.nregions)
+            self.phi_S = lambda t,S,N: np.dot(self.Phi_T(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
+            self.phi_E = lambda t,E,N: np.dot(self.Phi_T(t),(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi(t)),np_ones)
+            self.phi_I = lambda t,I,N: np.dot(self.Phi_T(t),(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi(t)),np_ones)
+            self.phi_R = lambda t,R,N: np.dot(self.Phi_T(t),(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi(t)),np_ones)       
+       
+        # Proposal 2
+        # Like first, but transforming mobility matrix into a tensor. This one loses time granularity in the mobility matrix
         elif self.method == 2:
-            self.Phi_matrix = cv19mobility_old.mobility_to_tensor(self.Phi,self.tsim)
-            self.Phi_matrix_T = cv19mobility_old.mobility_transposed(self.Phi_matrix)
+            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
+            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
             np_ones = np.ones(self.nregions)
         
             self.phi_S = lambda t,S,N: self.Phi_matrix_T[int(2*t)]@(S/N) - np.diag(S/N)@self.Phi_matrix[int(2*t)]@np_ones
@@ -176,10 +168,11 @@ class SEIRMETA:
             self.phi_I = lambda t,I,N: self.Phi_matrix_T[int(2*t)]@(I/N) - np.diag(I/N)@self.Phi_matrix[int(2*t)]@np_ones
             self.phi_R = lambda t,R,N: self.Phi_matrix_T[int(2*t)]@(R/N) - np.diag(R/N)@self.Phi_matrix[int(2*t)]@np_ones        
         
-        # Tercera propuesta 
-        elif self.method == 3:
-            self.Phi_matrix = cv19mobility_old.mobility_to_tensor(self.Phi,self.tsim)
-            self.Phi_matrix_T = cv19mobility_old.mobility_transposed(self.Phi_matrix)
+        # Proposal 3
+        # Like the second one but using np.dot for matrix multiplication  
+        elif self.method == 2:
+            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
+            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
             np_ones = np.ones(self.nregions)
 
             self.phi_S = lambda t,S,N: np.dot(self.Phi_matrix_T[int(2*t)],(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi_matrix[int(2*t)]),np_ones)
@@ -187,16 +180,9 @@ class SEIRMETA:
             self.phi_I = lambda t,I,N: np.dot(self.Phi_matrix_T[int(2*t)],(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi_matrix[int(2*t)]),np_ones)
             self.phi_R = lambda t,R,N: np.dot(self.Phi_matrix_T[int(2*t)],(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi_matrix[int(2*t)]),np_ones)
                 
-        # Cuarta propuesta 
+	    # Proposal4 (Alejo's)
+        # Phi(t)=Phi_T(t)   
         elif self.method == 4:
-            np_ones = np.ones(self.nregions)
-            self.phi_S = lambda t,S,N: np.dot(self.Phi_T(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
-            self.phi_E = lambda t,E,N: np.dot(self.Phi_T(t),(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi(t)),np_ones)
-            self.phi_I = lambda t,I,N: np.dot(self.Phi_T(t),(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi(t)),np_ones)
-            self.phi_R = lambda t,R,N: np.dot(self.Phi_T(t),(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi(t)),np_ones)
-
-	# Quinta propuesta, Phi(t)=Phi_T(t)
-        elif self.method == 5:
             np_ones = np.ones(self.nregions)
             self.phi_S = lambda t,S,N: np.dot(self.Phi(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
             self.phi_E = lambda t,E,N: np.dot(self.Phi(t),(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi(t)),np_ones)
@@ -209,7 +195,6 @@ class SEIRMETA:
         self.solve(t0=t0,T=T,h=h)
 
     def run(self,t0=0,T=None,h=0.01):
-        #print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h)
 
     # Scipy
@@ -283,9 +268,10 @@ class SEIRMETA:
          1, ...
           
         """
-        names = ['t','S','E','E_d','I','I_d','R','R_d','beta','tE_I','tI_R','rR_S','node']
-        # Parameters
+        names = ['t','S','E','E_d','I','I_d','R','R_d','alpha','beta','tE_I','tI_R','rR_S','node']
         
+        # Parameters
+        alpha_val = [[self.alpha(t)[j] for t in self.t] for j in range(self.nodes)]
         beta_val = [[self.beta(t)[j] for t in self.t] for j in range(self.nodes)]        
         tE_I_val = [self.tE_I(t) for t in self.t]
         tI_R_val = [self.tI_R(t) for t in self.t]
@@ -294,7 +280,7 @@ class SEIRMETA:
         self.results = []
         for i in range(self.nodes):
             node = [i]*len(self.t)
-            self.results.append(pd.DataFrame(dict(zip(names,[self.t,self.S[i],self.E[i],self.E_d[i],self.I[i],self.I_d[i],self.R[i],self.R_d[i],beta_val[i],tE_I_val,tI_R_val,rR_S_val,node]))))        
+            self.results.append(pd.DataFrame(dict(zip(names,[self.t,self.S[i],self.E[i],self.E_d[i],self.I[i],self.I_d[i],self.R[i],self.R_d[i],alpha_val[i],beta_val[i],tE_I_val,tI_R_val,rR_S_val,node]))))        
         self.results = pd.concat(self.results,ignore_index=True).astype(int)
         return
     
@@ -319,7 +305,8 @@ class SEIRMETA:
         Builds a dataframe with the simulation parameters over time
         """
         
-        names = ['t','beta','tE_I','tI_R','rR_S','node']                 
+        names = ['t','alpha','beta','tE_I','tI_R','rR_S','node']  
+        alpha_val = [[self.alpha(t)[j] for t in self.t] for j in range(self.nodes)]               
         beta_val = [[self.beta(t)[j] for t in self.t] for j in range(self.nodes)]
         
         tE_I_val = [self.tE_I(t) for t in self.t]
@@ -329,7 +316,7 @@ class SEIRMETA:
         self.params = []
         for i in range(self.nodes):
             node = [i]*len(self.t)
-            self.params.append(pd.DataFrame(dict(zip(names,[self.t,beta_val[i],tE_I_val,tI_R_val,rR_S_val,node]))))
+            self.params.append(pd.DataFrame(dict(zip(names,[self.t,alpha_val[i],beta_val[i],tE_I_val,tI_R_val,rR_S_val,node]))))
         
         self.params = pd.concat(self.params,ignore_index=True)
         return
