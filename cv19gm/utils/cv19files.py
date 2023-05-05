@@ -31,22 +31,6 @@ To Do:
    
 """
 
-def is_json(var):
-    """Check if the input variable is a JSON string.
-
-    Args:
-        var (str): The input variable to be checked.
-
-    Returns:
-        bool: True if the input is a JSON string, False otherwise.
-    """
-    try:
-        json.loads(var)
-        return True
-    except:
-        return False
-
-
 def loadconfig(sim,config,inputdata,**kwargs):
     # ------------------------------- #
     #        Parameters Load          #
@@ -58,19 +42,14 @@ def loadconfig(sim,config,inputdata,**kwargs):
         sim.cfg.update(config)
     elif type(config) == str: # If config is a filepath
         sim.cfg.update(toml.load(config))
-            
-    copies = {}
 
     # Import fixed variables
     for key,value in sim.cfg['parameters']['static'].items():
+        # Check if the variable is in kwargs
         if key in kwargs:
-            value = kwargs[key]
-            sim.cfg['parameters']['static'][key]=value
-        if type(value) == str and not is_json(value):
-            #print(key+' '+value)
-            copies.update({key:value})
-        else:
-            sim.__dict__.update({key:value})
+            value = kwargs[key] # Overwrite by kwargs values
+            sim.cfg['parameters']['static'][key]=value # Update config with kwargs values        
+        sim.__dict__.update({key:value})
         
     sim.tsim = sim.t_end - sim.t_init
 
@@ -80,10 +59,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
         if key in kwargs:
             value = kwargs[key]
             sim.cfg['parameters']['dynamic'][key] = value
-        if type(value) == str and not is_json(value):
-            copies.update({key:value})
-        else:                            
-            sim.__dict__.update({key:cv19functions.build(value)})
+        sim.__dict__.update({key:cv19functions.build(value)})
         
     # Ephemeris
     if 'ephemeris' in sim.cfg:
@@ -157,10 +133,6 @@ def loadconfig(sim,config,inputdata,**kwargs):
                 value = np.array(value)
             sim.__dict__.update({key:value})
         
-    
-    # Update copies
-    for key,value in copies.items():
-        sim.__dict__.update({key:sim.__dict__[value]})
 
     return
 
