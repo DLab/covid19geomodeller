@@ -352,13 +352,18 @@ def import_mobility(file):
     # Build Mobility Matrix
     return 
 
+def mobility_to_tensor(mobfunction,t_end):
+    return np.array([mobfunction(i/2)for i in range(2*t_end+1)])
+
+def mobility_transposed(matrix):
+    return np.array([matrix[i].transpose() for i in range(len(matrix))])
 
 """
 # ----------------------------------------- #
 #          Mobility Visualization           #
 # ----------------------------------------- #  
     
-def visualize_dynamic_pattern(dynamic_pattern, init=0, end=24, step=0.5):
+def visualize_mobility(dynamic_pattern, init=0, end=24, step=0.5):
 """
 """
     Visualize a time-varying mobility matrix function on a daily basis
