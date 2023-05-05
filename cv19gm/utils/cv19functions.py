@@ -64,6 +64,12 @@ def build(input):
     setattr(locals()['out'],'constructor',str(input))
     return locals()['out']
 
+def build_metapopulation(input):
+    functions = [build(i) for i in input]    
+    def out(t):
+        return np.array([func(t) for func in functions])    
+    return out
+
 # Build + function addition.
 def build_add(*input):
     """

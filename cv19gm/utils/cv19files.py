@@ -43,7 +43,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
     elif type(config) == str: # If config is a filepath
         sim.cfg.update(toml.load(config))
 
-    # Import fixed variables
+    # Import static variables
     for key,value in sim.cfg['parameters']['static'].items():
         # Check if the variable is in kwargs
         if key in kwargs:
@@ -51,15 +51,29 @@ def loadconfig(sim,config,inputdata,**kwargs):
             sim.cfg['parameters']['static'][key]=value # Update config with kwargs values        
         sim.__dict__.update({key:value})
         
+    # t_end and t_init are useful when the simulation time should be relative to others
     sim.tsim = sim.t_end - sim.t_init
 
-    # Build functions
+    # Build dynamic variables
+    #TODO: Simplify this code
+    if "Metapopulation" in sim.compartmentalmodel:
+        # Metapopulation
+        for key,value in sim.cfg['parameters']['dynamic'].items():        
+            if key in kwargs:
+                value = kwargs[key]
+                sim.cfg['parameters']['dynamic'][key] = value
+            
+            if type(value) == list or type(value) == np.ndarray:
+                sim.__dict__.update({key:cv19functions.build_metapopulation(value)})
+            else:
+                sim.__dict__.update({key:cv19functions.build(value)})            
     
-    for key,value in sim.cfg['parameters']['dynamic'].items():        
-        if key in kwargs:
-            value = kwargs[key]
-            sim.cfg['parameters']['dynamic'][key] = value
-        sim.__dict__.update({key:cv19functions.build(value)})
+    else:
+        for key,value in sim.cfg['parameters']['dynamic'].items():        
+            if key in kwargs:
+                value = kwargs[key]
+                sim.cfg['parameters']['dynamic'][key] = value
+            sim.__dict__.update({key:cv19functions.build(value)})
         
     # Ephemeris
     if 'ephemeris' in sim.cfg:
@@ -89,7 +103,6 @@ def loadconfig(sim,config,inputdata,**kwargs):
         #sim.county = sim.inputdata.county             
         #if sim.inputdata.loc_name:
             #sim.loc_name = sim.inputdata.loc_name
-
     
     else:
         # Local file
@@ -103,7 +116,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
             sim.inputdata.import_data()
             sim.data = sim.inputdata.data
         else: 
-            #print('No external data added')
+            # No data added
             sim.data = None
             sim.inputdata = None
 
@@ -112,7 +125,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
     # ------------------------------- #
     sim.initialconditions = sim.cfg['initialconditions']
     for key,value in sim.initialconditions.items():
-        # Overwrite by kwargs values. kwargs values overwrite everything
+        # Overwrite by kwargs values
         if key in kwargs:
             value = kwargs[key]
             if type (value) == list:
@@ -132,8 +145,6 @@ def loadconfig(sim,config,inputdata,**kwargs):
             if type (value) == list:
                 value = np.array(value)
             sim.__dict__.update({key:value})
-        
-
     return
 
 def load_default(sim):
