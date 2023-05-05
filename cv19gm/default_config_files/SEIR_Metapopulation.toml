@@ -45,17 +45,13 @@ user = 'Samuel'
 	beta = [0.1,0.1,0.1]
 	alpha = [1,1,1]
 
-	#Phi = false
-	
-	
 	# -------------------------- #
 	#   Transition Parameters    # 
 	# -------------------------- #	
 	# Transition time between exposed and infectious
-        tE_I = 5.0 # 1/sigma
+    tE_I = 5.0 # 1/sigma
 	# Transition time between infectious and removed
-        tI_R = 10.0 # 1/gamma
-	
+    tI_R = 10.0 # 1/gamma	
 	# Average Immunity loss rate (1/time)
 	rR_S = 0 
 	

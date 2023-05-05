@@ -227,6 +227,7 @@ class SEIRMETA:
 
     def results_build(self):
         """
+        Params shouldn't be int! 
         Builds a dataframe with the simulation results and parameters 
         Output structure: 
         't','S','E','E_d','I','I_d','R','R_d','beta','tE_I','tI_R','rR_S','node'
@@ -273,8 +274,7 @@ class SEIRMETA:
         
         names = ['t','alpha','beta','tE_I','tI_R','rR_S','node']  
         alpha_val = [[self.alpha(t)[j] for t in self.t] for j in range(self.nodes)]               
-        beta_val = [[self.beta(t)[j] for t in self.t] for j in range(self.nodes)]
-        
+        beta_val = [[self.beta(t)[j] for t in self.t] for j in range(self.nodes)]        
         tE_I_val = [self.tE_I(t) for t in self.t]
         tI_R_val = [self.tI_R(t) for t in self.t]
         rR_S_val = [self.rR_S(t) for t in self.t]
