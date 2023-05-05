@@ -21,7 +21,7 @@ class SIR:
 
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
-        self.model = "SIR"
+        self.compartmentalmodel = "SIR"
             
         if not config:
             #raise('Missing configuration file')

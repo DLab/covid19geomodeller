@@ -19,7 +19,7 @@ class SEIRTQ:
 
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
-        self.model = "SEIRTQ"
+        self.compartmentalmodel = "SEIRTQ"
         
         if not config:
             #raise('Missing configuration file')

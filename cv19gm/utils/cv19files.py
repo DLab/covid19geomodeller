@@ -14,7 +14,6 @@ path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(1, path)
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
-
 import data.cv19data as cv19data
 import utils.cv19functions as cv19functions 
 import utils.cv19timeutils as cv19timeutils
@@ -25,8 +24,22 @@ import utils.cv19timeutils as cv19timeutils
 #            Configuration File manager             #
 #                                                   #
 # ------------------------------------------------- #
+To Do:
+  * Improve this code
+  * Improve get_default_parameters. Looks like the current way is deprecated. 
+  * Fix meta-population dynamic parameters
+   
 """
-def isdict(var):
+
+def is_json(var):
+    """Check if the input variable is a JSON string.
+
+    Args:
+        var (str): The input variable to be checked.
+
+    Returns:
+        bool: True if the input is a JSON string, False otherwise.
+    """
     try:
         json.loads(var)
         return True
@@ -35,24 +48,17 @@ def isdict(var):
 
 
 def loadconfig(sim,config,inputdata,**kwargs):
-    """[summary]
-
-    Args:
-        sim ([type]): [description]
-        config ([type]): [description]
-        inputdata ([type]): [description]
-    """
     # ------------------------------- #
     #        Parameters Load          #
     # ------------------------------- #
     load_default(sim) # Serves for loading optional parameters when they are not defined
     
-    if type(config) == dict:
+    # Update parameters using config file
+    if type(config) == dict: # If config is a dictionary
         sim.cfg.update(config)
-    elif type(config) == str:
+    elif type(config) == str: # If config is a filepath
         sim.cfg.update(toml.load(config))
             
-    # Copies
     copies = {}
 
     # Import fixed variables
@@ -60,21 +66,21 @@ def loadconfig(sim,config,inputdata,**kwargs):
         if key in kwargs:
             value = kwargs[key]
             sim.cfg['parameters']['static'][key]=value
-        if type(value) == str and not isdict(value):
+        if type(value) == str and not is_json(value):
             #print(key+' '+value)
             copies.update({key:value})
         else:
             sim.__dict__.update({key:value})
         
-    
     sim.tsim = sim.t_end - sim.t_init
 
     # Build functions
+    
     for key,value in sim.cfg['parameters']['dynamic'].items():        
         if key in kwargs:
             value = kwargs[key]
             sim.cfg['parameters']['dynamic'][key] = value
-        if type(value) == str and not isdict(value):
+        if type(value) == str and not is_json(value):
             copies.update({key:value})
         else:                            
             sim.__dict__.update({key:cv19functions.build(value)})
@@ -159,14 +165,7 @@ def loadconfig(sim,config,inputdata,**kwargs):
     return
 
 def load_default(sim):
-    """[summary]
-
-    Args:
-        sim ([type]): [description]
-        config ([type]): [description]
-        inputdata ([type]): [description]
-    """
-    sim.cfg = getdefault(sim.model)
+    sim.cfg = getdefault(sim.compartmentalmodel)
 
     # Static variables
     for key,value in sim.cfg['parameters']['static'].items():
@@ -180,12 +179,11 @@ def load_default(sim):
     # Initial conditions        
     sim.initialconditions = sim.cfg['initialconditions']
     for key,value in sim.cfg.items():
-        sim.__dict__.update({key:value})
-    
+        sim.__dict__.update({key:value})    
     return
 
-def getdefault(model):
-    return toml.load(os.path.abspath(package_directory+'/../default_config_files/'+model+'.toml'))    
+def getdefault(compartmentalmodel):
+    return toml.load(os.path.abspath(package_directory+'/../default_config_files/'+compartmentalmodel+'.toml'))    
     
 
 def saveconfig(filename,config):    
@@ -228,8 +226,6 @@ def unwrapconfig(config,**kwargs):
             cfg['parameters']['static'][key]=value
         out.update({key:value})
         
-    
-
     # Build functions
     for key,value in cfg['parameters']['dynamic'].items():        
         if key in kwargs:

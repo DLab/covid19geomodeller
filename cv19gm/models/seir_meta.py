@@ -41,7 +41,7 @@ class SEIRMETA:
             #raise('Missing configuration file')
             #return None
             
-        self.model = "SEIR_Metapopulation"
+        self.compartmentalmodel = "SEIR_Metapopulation"
         self.kwargs = kwargs        
         self.method = method
         # ------------------------------- #
@@ -49,7 +49,8 @@ class SEIRMETA:
         # ------------------------------- #
         self.config = config
         if verbose:
-            print('Loading configuration file')          
+            print('Loading configuration file')
+                      
         cv19files.loadconfig(self,config,inputdata,**kwargs)
         
         # Definition of mobility matrix (Work in progress, it will be done inside the cb19mobility lib)

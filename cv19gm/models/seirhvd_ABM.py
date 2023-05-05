@@ -7,7 +7,7 @@ import cv19gm.utils.cv19files as cv19files
 class SEIRHVD_ABM:
     
     def __init__(self, config = None, inputdata = None, verbose = False,  **kwargs):
-        self.model = "SEIRHVD_ABM"
+        self.compartmentalmodel = "SEIRHVD_ABM"
         
         if not config:
             print('Missing configuration file, using default')

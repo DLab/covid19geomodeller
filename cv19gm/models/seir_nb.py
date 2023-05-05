@@ -25,7 +25,8 @@ class SEIR:
 
     """
     def __init__(self, config = None, inputdata=None,verbose = False, nbsolver = True, **kwargs):
-    
+        self.compartmentalmodel = "SEIR"
+        
         if not config:
             #print('Missing configuration file ')
             raise('Missing configuration file')

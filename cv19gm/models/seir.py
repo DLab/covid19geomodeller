@@ -19,7 +19,7 @@ class SEIR:
             SEIR(self, config = None, inputdata=None)
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
-        self.model = "SEIR"
+        self.compartmentalmodel = "SEIR"
         
         if not config:
             print('Missing configuration file, using default')

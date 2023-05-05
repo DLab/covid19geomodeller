@@ -7,7 +7,7 @@ import cv19gm.utils.cv19files as cv19files
 class SIR_ABM:
     
     def __init__(self, config = None, inputdata = None, verbose = False,  **kwargs):
-        self.model = "SIR_ABM"
+        self.compartmentalmodel = "SIR_ABM"
         
         if not config:
             print('Missing configuration file, using default')

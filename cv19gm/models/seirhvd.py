@@ -24,7 +24,7 @@ class SEIRHVD:
 
     """
     def __init__(self, config=None, inputdata=None,verbose = False,**kwargs):
-        self.model = 'SEIRHVD'
+        self.compartmentalmodel = 'SEIRHVD'
         
         if not config:
             print('Missing configuration file, using default')
