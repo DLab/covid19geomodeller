@@ -14,8 +14,7 @@ import cv19gm.utils.cv19files as cv19files
 import cv19gm.utils.cv19mobility as cv19mobility
 
 """ To Do
-* Y tener precargaada la matriz de movilidad como transpuesta
-* Matriz de movilidad de función a tensor
+
 """
 
 class SEIRMETA:  
@@ -26,11 +25,9 @@ class SEIRMETA:
 
     """
     def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, Phi_T = None, seed=None, method = 0, **kwargs):    
-        if not config:
-            print('Missing configuration file')
-            #raise('Missing configuration file')
-            #return None
-            
+        if verbose and not config:
+            print('Warning: Using default configuration file')
+         
         self.compartmentalmodel = "SEIR_Metapopulation"
         self.kwargs = kwargs        
         self.method = method
@@ -52,8 +49,8 @@ class SEIRMETA:
                 self.Phi_T = lambda t: Phi(t).transpose()
                 
         else:
-            print('Missing flux dynamics, using a random matrix instead')
-            #self.Phi, self.Phi_T = cv19mobility_old.rnd_flux_symmetric(self.population,seed=seed, transposed = True)
+            if verbose:
+                print('Warning: Missing human mobility matrix, using a random matrix instead')
             self.Phi, self.Phi_T = cv19mobility.create_dynamic_mobility(mobility_model='random', dynamic_pattern='symmetric',populations=self.population, seed=seed, transposed = True)
             
         if verbose:
@@ -101,17 +98,17 @@ class SEIRMETA:
         # --------------------------- #
        
         # 0) dS/dt:
-        self.dS=lambda t,S,I,R,N: - np.diag(S*I/N)@(self.alpha(t)*self.beta(t)) + self.rR_S(t)*R  + self.phi_S(t,S,N)
+        self.dS=lambda t,S,I,R,N: - np.dot(np.diag(S*I/N),(self.alpha(t)*self.beta(t))) + self.rR_S(t)*R  + self.phi_S(t,S,N)
         
         # --------------------------- #
         #           Exposed           #
         # --------------------------- #     
         
         # 1) dE/dt
-        self.dE = lambda t,S,E,I,N: np.diag(S*I/N)@(self.alpha(t)*self.beta(t)) - E/self.tE_I(t) + self.phi_E(t,E,N)
+        self.dE = lambda t,S,E,I,N: np.dot(np.diag(S*I/N),(self.alpha(t)*self.beta(t))) - E/self.tE_I(t) + self.phi_E(t,E,N)
  
         # 2) Daily dE/dt
-        self.dE_d = lambda t,S,E,E_d,I,N: np.diag(S*I/N)@(self.alpha(t)*self.beta(t)) + self.phi_E(t,E,N) - E_d
+        self.dE_d = lambda t,S,E,E_d,I,N: np.dot(np.diag(S*I/N),(self.alpha(t)*self.beta(t))) + self.phi_E(t,E,N) - E_d
 
         # --------------------------- #
         #           Infected          #
@@ -139,50 +136,19 @@ class SEIRMETA:
         # --------------------------- #
         #         People Flux         #
         # --------------------------- # 
-        # Original        
-        if self.method == 0:            
-            np_ones = np.ones(self.nregions)
-            self.phi_S = lambda t,S,N: self.Phi(t).transpose()@(S/N) - np.diag(S/N)@self.Phi(t)@np_ones
-            self.phi_E = lambda t,E,N: self.Phi(t).transpose()@(E/N) - np.diag(E/N)@self.Phi(t)@np_ones
-            self.phi_I = lambda t,I,N: self.Phi(t).transpose()@(I/N) - np.diag(I/N)@self.Phi(t)@np_ones
-            self.phi_R = lambda t,R,N: self.Phi(t).transpose()@(R/N) - np.diag(R/N)@self.Phi(t)@np_ones
-        
-        # Proposal 1
-        # Uisng np.dot for matrix multiplication
-        elif self.method == 1:
+        # Method 0
+        # Original system of equations
+        if self.method == 0:
             np_ones = np.ones(self.nregions)
             self.phi_S = lambda t,S,N: np.dot(self.Phi_T(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
             self.phi_E = lambda t,E,N: np.dot(self.Phi_T(t),(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi(t)),np_ones)
             self.phi_I = lambda t,I,N: np.dot(self.Phi_T(t),(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi(t)),np_ones)
             self.phi_R = lambda t,R,N: np.dot(self.Phi_T(t),(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi(t)),np_ones)       
        
-        # Proposal 2
-        # Like first, but transforming mobility matrix into a tensor. This one loses time granularity in the mobility matrix
-        elif self.method == 2:
-            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
-            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
-            np_ones = np.ones(self.nregions)
-        
-            self.phi_S = lambda t,S,N: self.Phi_matrix_T[int(2*t)]@(S/N) - np.diag(S/N)@self.Phi_matrix[int(2*t)]@np_ones
-            self.phi_E = lambda t,E,N: self.Phi_matrix_T[int(2*t)]@(E/N) - np.diag(E/N)@self.Phi_matrix[int(2*t)]@np_ones
-            self.phi_I = lambda t,I,N: self.Phi_matrix_T[int(2*t)]@(I/N) - np.diag(I/N)@self.Phi_matrix[int(2*t)]@np_ones
-            self.phi_R = lambda t,R,N: self.Phi_matrix_T[int(2*t)]@(R/N) - np.diag(R/N)@self.Phi_matrix[int(2*t)]@np_ones        
-        
-        # Proposal 3
-        # Like the second one but using np.dot for matrix multiplication  
-        elif self.method == 2:
-            self.Phi_matrix = cv19mobility.mobility_to_tensor(self.Phi,self.tsim)
-            self.Phi_matrix_T = cv19mobility.mobility_transposed(self.Phi_matrix)
-            np_ones = np.ones(self.nregions)
-
-            self.phi_S = lambda t,S,N: np.dot(self.Phi_matrix_T[int(2*t)],(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi_matrix[int(2*t)]),np_ones)
-            self.phi_E = lambda t,E,N: np.dot(self.Phi_matrix_T[int(2*t)],(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi_matrix[int(2*t)]),np_ones)
-            self.phi_I = lambda t,I,N: np.dot(self.Phi_matrix_T[int(2*t)],(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi_matrix[int(2*t)]),np_ones)
-            self.phi_R = lambda t,R,N: np.dot(self.Phi_matrix_T[int(2*t)],(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi_matrix[int(2*t)]),np_ones)
                 
-	    # Proposal4 (Alejo's)
-        # Phi(t)=Phi_T(t)   
-        elif self.method == 4:
+	    # Method 1 
+        # This method replaces Phi_t = Phi(t), which is not correct, but it's much faster and I don't understand why
+        elif self.method == 1:
             np_ones = np.ones(self.nregions)
             self.phi_S = lambda t,S,N: np.dot(self.Phi(t),(S/N)) - np.dot(np.dot(np.diag(S/N),self.Phi(t)),np_ones)
             self.phi_E = lambda t,E,N: np.dot(self.Phi(t),(E/N)) - np.dot(np.dot(np.diag(E/N),self.Phi(t)),np_ones)
