@@ -16,6 +16,7 @@ Todo: [ ] Build resume function
         * variables a iterar
         * Condiciones iniciales reales 
 Todo: [ ] Build a new module for multiple simulations. 
+Todo: [ ] Add metapopulation models
 Todo: [ ] Make variables accessible from parent object
 Todo: [ ] simplificar la vectorización de la función de integración
 Todo: [ ] Paralelizar la integración de las EDOs dentro de lo posible
@@ -40,7 +41,7 @@ class CV19SIM():
             
         aux = cv19files.unwrapconfig(config,**kwargs)        
         if not compartmentalmodel:
-            compartmentalmodel = aux['model']['model']
+            compartmentalmodel = aux['model']['name']
         
         if compartmentalmodel == 'SEIR':
             self.modelname = compartmentalmodel
