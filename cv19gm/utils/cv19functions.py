@@ -15,15 +15,20 @@ import ast
 #                                                   #
 # ------------------------------------------------- #
 
-To Do:    
-    * Agregar tipos de subidas y bajadas al Events function 
+ToDo:
+    * Merge build and build_metapopulation
+    
 """
 def build(input):
+    """Build a function for using it as a dynamical paraeter.
+
+    Args:
+        input (str,dic,func,tuple,list,bool): 
+
+    Returns:
+        function(t): cv19gm function for dynamic parameters
     """
-    Function builder
-    # crear un iterador que recorra el input y cree la función a partir de un comando exec:
-    # Acepta diccionarios o strings con forma de diccionario
-    """
+
     
     if type(input)==str:
         #input_dict = json.loads(input)
@@ -65,6 +70,14 @@ def build(input):
     return locals()['out']
 
 def build_metapopulation(input):
+    """Function builder for metapopulation models.
+
+    Args:
+        input: Arg to be transformed into a function
+
+    Returns:
+        function: cv19gm function for dynamic parameters
+    """
     functions = [build(i) for i in input]    
     def out(t):
         return np.array([func(t) for func in functions])    
