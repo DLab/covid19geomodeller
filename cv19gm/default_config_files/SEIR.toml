@@ -5,7 +5,7 @@ date = '2022-12-1' # YY-MM-DD
 user = 'Default'
 
 [model]
-	name = "Example simulation"
+	name = 'SEIR'
 	id = ''
 	model = 'SEIR'
 	compartments  = ['S','E','I','R'] 

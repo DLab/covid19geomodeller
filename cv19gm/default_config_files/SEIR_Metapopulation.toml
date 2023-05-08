@@ -1,13 +1,13 @@
 # Pandemic Suite Configuration File		
 
-title = 'Example of a SEIR Configuration File'
+title = 'SEIR Metapopulation default configuration File'
 date = '2021-04-20'
 user = 'Samuel'
 
 [model]
-	name = "Example simulation"
+	name = 'SEIR_META'
 	id = ''
-	model = 'SEIRMETA'
+	model = 'SEIR_META'
 	compartments  = ['S','E','I','R']
 	
 
