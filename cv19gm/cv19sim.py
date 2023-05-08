@@ -1,18 +1,6 @@
 import numpy as np
 import pandas as pd
 import toml
-#from datetime import datetime
-#from datetime import timedelta
-
-
-#import os
-#import sys
-#path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-#sys.path.insert(1, path)
-
-#import cv19gm.data.cv19data as cv19data
-#import cv19gm.utils.cv19timeutils as cv19timeutils
-#import cv19gm.utils.cv19functions as cv19functions
 
 import cv19gm.utils.cv19files as cv19files
 from copy import deepcopy
@@ -23,27 +11,27 @@ from copy import deepcopy
 CV19SIM interphaces the user with all the cv19gm library tools.
 It also adds the capability of performing multiple simulations in order to study the behavior of some parameters.  
 
-Todo: [ ] Construir una función resumen que imprima las características principales
+Todo: [ ] Build resume function
         * tipo de modelo
         * variables a iterar
         * Condiciones iniciales reales 
-Todo: [ ] Sacar variables para hacerlas accesibles desde el objeto principal
+Todo: [ ] Build a new module for multiple simulations. 
+Todo: [ ] Make variables accessible from parent object
 Todo: [ ] simplificar la vectorización de la función de integración
 Todo: [ ] Paralelizar la integración de las EDOs dentro de lo posible
-Todo: [x] Agregar SEIRHVD
 Todo: [ ] Solve está siendo aplicado más de una vez. Ver donde ocurre eso! 
 
 """
 
 class CV19SIM():
-    def __init__(self,config = None, inputdata = None, model=None, verbose=False,**kwargs):
+    def __init__(self,config = None, inputdata = None, compartmentalmodel=None, verbose=False,**kwargs):
         
         # Leer el archivo de configuracion
         if not config:
-            if not model:
+            if not compartmentalmodel:
                 raise Exception("Missing compartmental model definition")
-            print("Using default configuration file for "+model+" model")
-            config = cv19files.getdefault(model)
+            print("Using default configuration file for "+compartmentalmodel+" model")
+            config = cv19files.getdefault(compartmentalmodel)
         else:
             if not type(config) == dict:
                 config = toml.load(config)
@@ -51,28 +39,28 @@ class CV19SIM():
                 config = deepcopy(config)
             
         aux = cv19files.unwrapconfig(config,**kwargs)        
-        if not model:
-            model = aux['model']['model']
+        if not compartmentalmodel:
+            compartmentalmodel = aux['model']['model']
         
-        if model == 'SEIR':
-            self.modelname = model
+        if compartmentalmodel == 'SEIR':
+            self.modelname = compartmentalmodel
             from cv19gm.models.seir import SEIR
-            model = SEIR
+            compartmentalmodel = SEIR
              
-        elif model == 'SEIRHVD':
-            self.modelname = model
+        elif compartmentalmodel == 'SEIRHVD':
+            self.modelname = compartmentalmodel
             from cv19gm.models.seirhvd import SEIRHVD
-            model = SEIRHVD
+            compartmentalmodel = SEIRHVD
 
-        elif model == 'SIR':
-            self.modelname = model
+        elif compartmentalmodel == 'SIR':
+            self.modelname = compartmentalmodel
             from cv19gm.models.sir import SIR
-            model = SIR
+            compartmentalmodel = SIR
 
-        elif model == 'SEIRTQ':
-            self.modelname = model
+        elif compartmentalmodel == 'SEIRTQ':
+            self.modelname = compartmentalmodel
             from cv19gm.models.seirtq import SEIRTQ
-            model = SEIRTQ
+            compartmentalmodel = SEIRTQ
         else:
             raise('Incorrect model')
 
@@ -95,10 +83,10 @@ class CV19SIM():
                 if key in kwargs:
                     kwargs.pop(key)
             expandediterables = iterate(self.iterables,verbose=verbose)
-            buildsim = simapply(config,model,inputdata,**kwargs)            
+            buildsim = simapply(config,compartmentalmodel,inputdata,**kwargs)            
             self.sims = buildsim(expandediterables)
         else:
-            self.sims = [model(config,inputdata,**kwargs)]
+            self.sims = [compartmentalmodel(config,inputdata,**kwargs)]
             if verbose:
                 print('Simulating over 1 level and 1 element')
                
@@ -146,7 +134,7 @@ class CV19SIM():
         setattr(self,variable, np.reshape(list(map(lambda sim: sim.__dict__[variable],self.sims.flatten())),np.shape(self.sims)))
         return
         
-def simapply(config,model,inputdata,**kwargs):
+def simapply(config,compartmentalmodel,inputdata,**kwargs):
     """Builds an array of models instances using the iterable variables array
 
     Args:
@@ -155,7 +143,7 @@ def simapply(config,model,inputdata,**kwargs):
         inputdata (cv19data): (optional) Input data for IC and fitting
     """
     def aux(x):
-        return(model(config,inputdata,**kwargs,**x))
+        return(compartmentalmodel(config,inputdata,**kwargs,**x))
     aux2 = np.vectorize(aux)
     return(aux2)
 
