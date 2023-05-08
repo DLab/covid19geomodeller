@@ -1,11 +1,11 @@
 # Pandemic Suite Configuration File		
 
-title = 'Example of a SEIRHVD Configuration File'
-date = '2021-06-01'
+title = 'SEIR-SEIRHVD comparison'
+date = ''
 user = ''
 
 [model]
-	name = "SEIR-SEIRHVD comparison"
+	name = "SEIRHVD"
 	model = "SEIRHVD"	
 	compartments  = ['S','S_v','E','E_v','Im','Icr','Iv','R','H','D'] # Nombres de los estados
 	

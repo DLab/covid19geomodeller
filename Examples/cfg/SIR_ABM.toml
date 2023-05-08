@@ -1,11 +1,11 @@
 # Pandemic Suite Configuration File		
 
-title = 'Example of a SEIR Configuration File'
+title = 'Example of a SIR ABM Configuration File'
 date = '2021-04-20'
 user = 'Default'
 
 [model]
-	name = "Example simulation"
+	name = 'SIR_ABM'
 	id = ''
 	model = 'SIR_ABM'
 	compartments  = ['S','I','R'] 

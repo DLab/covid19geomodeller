@@ -1,11 +1,11 @@
 # Pandemic Suite Configuration File		
 
-title = 'Example of a SEIR Configuration File'
+title = 'Example of a SEIRTQ Configuration File'
 date = '2021-04-20'
 user = 'Samuel'
 
 [model]
-	name = "Example simulation"
+	name = 'SEIRTQ'
 	id = ''
 	model = 'SEIRTQ'
 	compartments  = ['S','E','I','R','T','Q'] 

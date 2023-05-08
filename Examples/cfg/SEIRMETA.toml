@@ -5,11 +5,11 @@ date = '2021-04-20'
 user = 'Samuel'
 
 [model]
-	name = "Example simulation"
+	name = 'SEIR_META'
 	id = ''
-	model = 'SEIRMETA'
-	compartments  = ['S','E','I','R'] 
-	
+	model = 'SEIR_META'
+	compartments  = ['S','E','I','R']
+
 	# Differential Equations
 	EDOs = true
 	# Rule based modeling
@@ -35,33 +35,21 @@ user = 'Samuel'
 	t_init = 0
 	t_end = 500 # Final day	
 	
-	# Saturation dynamic
-	k_I = 0
-	k_R = 0
+	mu = [1.0,1.0,1.0] # E(0) = mu*I(0)
 
-	#popfraction = [1,1,1] # Fraction of the total population that take part on the dynamic at the beginning
-
-	mu = [1.0,0.8,1.2] # E(0) = mu*I(0)
-	
 	# Subreport
 	pI_det = 1
 	
 	[parameters.dynamic]
 	beta = [0.2,0.15,0.125]
 	alpha = [1,1,1]
-
-	#Phi = false
 	
-	
-	# -------------------------- #
-	#   Transition Parameters    # 
-	# -------------------------- #	
 	# Transition time between exposed and infectious
         tE_I = 5.0 # 1/sigma
 	# Transition time between infectious and removed
         tI_R = 10.0 # 1/gamma
 	
-	# Average Immunity loss rate (1/time)
+	# Average Immunity loss rate (1/time). 0 = no loss of immunity
 	rR_S = 0 
 	
 [initialconditions]

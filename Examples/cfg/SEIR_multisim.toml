@@ -33,22 +33,22 @@ user = 'Samuel'
 	k_I = 0
 	k_R = 0
 
-	seroprevfactor = 1
-	expinfection = 0
+	seroprevfactor = 1 # Fraction of the total population that take part on the dynamic at the beginning
+	expinfection = 0 # Factor in which exposed infect, default is 0
 
-	mu = 0.298
+	mu = 0.298 # E(0) = mu*I(0)
 	
 	# Subreport
 	pI_det = 1		
 	
 	[parameters.dynamic]
-	beta = 0.2
-	alpha = '{"function":"events","values":[1,0.5,0.8],"days":[[0,100],[100,130],[130,500]]}'  # Refer to function constructor library
+	beta = [0.1,0.2]
+	alpha = [1,2,3]
 	
 	# External flux rates over time 
-	S_f = 0#'{"function":"events","values":[10000,-10000],"days":[[190,200],[210,220]]}'
+	S_f = 0#'{"function":"Events","values":[10000,-10000],"days":[[190,200],[210,220]]}'
 	E_f = 0
-	I_f = '{"function":"events","values":[10000],"days":[[30,50]]}'
+	I_f = 0
 	R_f = 0	
 	
 	# -------------------------- #
@@ -73,18 +73,20 @@ user = 'Samuel'
 	# Note: In case real and detected values are >0, real value will be used
 	# Active Infected
 	I = 0	# Real Infected
-	#I_det = 6000	# Detected Infected
+	I_det = 6000	# Detected Infected
 
 	# New daily Infected
 	I_d = 0
-	#I_d_det = 3000	
+	I_d_det = 3000	
 	
 	# Accumulated Infected	
 	I_ac = 0
-	#I_ac_det = 15000
+	I_ac_det = 15000
 
 	# Leave E and E_d as false for using mu
 	E = false
 	E_d = false
+	
+
 	
 
