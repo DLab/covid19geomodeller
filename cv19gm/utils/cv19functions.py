@@ -17,7 +17,7 @@ import ast
 
 ToDo:
     * Merge build and build_metapopulation
-    
+    * Simplify build function
 """
 def build(input):
     """Build a function for using it as a dynamical paraeter.
@@ -28,12 +28,15 @@ def build(input):
     Returns:
         function(t): cv19gm function for dynamic parameters
     """
-
-    
     if type(input)==str:
         #input_dict = json.loads(input)
-        print('input dict')
+        #print('input dict')
         input_dict = ast.literal_eval(input)
+        if isinstance(input_dict, (int, float, complex)):
+            def out(t):
+                return input_dict
+            setattr(locals()['out'],'constructor',str(input_dict))            
+            return out
     elif type(input)==dict:
         input_dict = input.copy()
     elif callable(input):
