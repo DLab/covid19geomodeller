@@ -38,7 +38,7 @@ class SEIRHVD:
         
         if verbose:
             print('Loading configuration file')
-        cv19files.loadconfig(self,config=config,model=self.model,inputdata=inputdata,**kwargs) # Load configuration file
+        cv19files.loadconfig(self,config=config,inputdata=inputdata,**kwargs) # Load configuration file
         
         # Hospital capacity:        
         if verbose:
