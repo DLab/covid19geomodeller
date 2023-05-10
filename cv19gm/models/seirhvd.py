@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 SEIRHVD Model
+TODO:
+    *   Stop vaccinating when there's no people left to vaccinate (or raise an error)
+    *   
 """
 
 import numpy as np
@@ -25,7 +28,7 @@ class SEIRHVD:
     """
     def __init__(self, config=None, inputdata=None,verbose = False,**kwargs):
         self.compartmentalmodel = 'SEIRHVD'
-        
+        self.verbose = verbose
         if not config:
             print('Missing configuration file, using default')
             #return None
@@ -39,17 +42,7 @@ class SEIRHVD:
         if verbose:
             print('Loading configuration file')
         cv19files.loadconfig(self,config=config,inputdata=inputdata,**kwargs) # Load configuration file
-        
-        # Hospital capacity:        
-        if verbose:
-            print('Building hospital capacity model')        
-        
-        # Use data
-        if type(self.cfg['initialconditions']['H_cap'])==str:            
-            self.H_cap = cv19functions.polyfit(self.data[self.H_cap],time=self.data[self.H_cap+'_t'])            
-
-        self.H_sat = cv19functions.saturation(self.H_cap)
-        
+                
         if verbose:
             print('Initializing parameters and variables')
         self.set_relational_values()
@@ -66,8 +59,18 @@ class SEIRHVD:
     #  Valores Iniciales  #
     # ------------------- #
     def set_relational_values(self):
+        # Hospital capacity:        
+        if self.verbose:
+            print('Building hospital capacity model')        
+        
+        # Use data
+        if type(self.cfg['initialconditions']['H_cap'])==str:            
+            self.H_cap = cv19functions.polyfit(self.data[self.H_cap],time=self.data[self.H_cap+'_t'])            
+
+        self.H_sat = cv19functions.saturation(self.H_cap)
+                
         #Initial Population
-        # Valores globales  
+        # Global values
         if hasattr(self, 'popfraction'):
             self.populationfraction = self.popfraction
         if not hasattr(self,'populationfraction'):
@@ -257,7 +260,7 @@ class SEIRHVD:
         if self.verbose:
             print('Solving EDOs')
 
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), self.initcond,method=method,t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.model_equations,(t0,T), self.initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -303,7 +306,7 @@ class SEIRHVD:
         return
 
 
-    def model_SEIR_graph(self,t,y):
+    def model_equations(self,t,y):
         ydot=np.zeros(len(y))
         ydot[0]=self.dS(t,y[0],y[6],y[8],y[10],y[16],y[18])
         ydot[1]=self.dSv(t,y[1],y[6],y[8],y[10],y[16],y[18])
@@ -335,8 +338,6 @@ class SEIRHVD:
         ydot[18]=self.dPhi(t)
         return(ydot)
 
-         
-        
 
     def analytics(self):
         #Cálculo de la fecha del Peak  
@@ -444,18 +445,6 @@ class SEIRHVD:
 
 
     """
-
-    def calculate_indicators(self):
-        self.R_ef
-        self.SHFR
-
-        # SeroPrevalence Calculation
-
-        # Errors (if real data)
-
-        # Active infected
-        print('wip')
-
     def resume(self):        
         print("Resumen de resultados:")
         qtype = ""
