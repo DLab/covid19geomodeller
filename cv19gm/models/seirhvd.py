@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 SEIRHVD Model
-TODO:
-    *   Stop vaccinating when there's no people left to vaccinate (or raise an error)
-    *   
+TODO: Stop vaccinating when there's no people left to vaccinate (or raise an error)
+TODO: Improve underreport calculation    
 """
 
 import numpy as np
@@ -31,21 +30,15 @@ class SEIRHVD:
         self.verbose = verbose
         if not config:
             print('Missing configuration file, using default')
-            #return None
-
-        # ------------------------------- #
-        #        Parameters Load          #
-        # ------------------------------- #
-        self.verbose = verbose
-        #self.config = config  
-        
+            
+        # Load Parameters   
         if verbose:
             print('Loading configuration file')
         cv19files.loadconfig(self,config=config,inputdata=inputdata,**kwargs) # Load configuration file
                 
         if verbose:
             print('Initializing parameters and variables')
-        self.set_relational_values()
+        self.set_initial_values()
         if verbose:
             print('Building equations')            
         self.set_equations()
@@ -54,11 +47,10 @@ class SEIRHVD:
 
         if verbose:
             print('SEIRHVD object created')
+            
+        self.verbose = verbose
 
-    # ------------------- #
-    #  Valores Iniciales  #
-    # ------------------- #
-    def set_relational_values(self):
+    def set_initial_values(self):
         # Hospital capacity:        
         if self.verbose:
             print('Building hospital capacity model')        
@@ -131,7 +123,6 @@ class SEIRHVD:
         if not hasattr(self,'D_f'):
             self.D_f = lambda t:0               
                     
-
     def set_equations(self):
         """
         # --------------------------- #
@@ -227,16 +218,10 @@ class SEIRHVD:
         # 18) External Flux:
         self.dPhi = lambda t: self.S_f(t) + self.Sv_f(t) + self.E_f(t) + self.Ev_f(t) + self.Im_f(t) + self.Icr_f(t) + self.Iv_f(t) + self.H_f(t) + self.D_f(t) + self.R_f(t) 
 
-
-    def integrate(self,t0=0,T=None,h=0.01,method='LSODA'):
-        print('The use of integrate() is now deprecated. Use solve() instead.')
-        self.solve(t0=t0,T=T,h=h,method=method)
-
     def run(self,t0=0,T=None,h=0.01,method='LSODA'):
         #print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h,method=method)
 
-    # Scipy
     def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         #integrator function that star form t0 and finish with T with h as
         #timestep. If there aren't inital values in [t0,mu*(self.I_ac)T] function doesn't
@@ -260,7 +245,7 @@ class SEIRHVD:
         if self.verbose:
             print('Solving EDOs')
 
-        sol = solve_ivp(self.model_equations,(t0,T), self.initcond,method=method,t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.solver_equations,(t0,T), self.initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -305,8 +290,7 @@ class SEIRHVD:
         self.solved = True
         return
 
-
-    def model_equations(self,t,y):
+    def solver_equations(self,t,y):
         ydot=np.zeros(len(y))
         ydot[0]=self.dS(t,y[0],y[6],y[8],y[10],y[16],y[18])
         ydot[1]=self.dSv(t,y[1],y[6],y[8],y[10],y[16],y[18])
@@ -338,31 +322,10 @@ class SEIRHVD:
         ydot[18]=self.dPhi(t)
         return(ydot)
 
-
-    def analytics(self):
-        #Cálculo de la fecha del Peak  
-        self.peakindex = np.where(self.I==max(self.I))[0][0]
-        self.peak = max(self.I)
-        self.peak_t = self.t[self.peakindex]
-        if self.initdate:
-            self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
-            self.peak_date = self.initdate+timedelta(days=int(round(self.peak_t)))
-        else:
-            self.dates = [None for i in range(len(self.t))]
-            self.peak_date = None
-
-        # Prevalence:
-        self.prevalence_total = self.I_ac/self.population
-        self.prevalence_susc = np.array([self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))])
-        self.prevalence_det = np.array([self.I_ac_det[i]/(self.S[i]+self.E[i]+self.I_det[i]+self.R[i]) for i in range(len(self.I_ac))])
-
-        self.CFR = np.array([self.pH_D(t)*self.pE_Icr(t) for t in self.t])
-
     def underreport(self):
         """Calculates the detected cases using the underreport factor
         """
-        # ToDo: Revisar el cálculo del subreporte
-
+        # ToDo: Many things to improve here
         if False:
             self.Im_det = [self.Im[i]*self.pI_det(self.t(i)) for i in range(len(self.t))]
             self.Im_d_det = [self.Im_d[i]*self.pI_det(self.t(i)) for i in range(len(self.t))]
@@ -384,8 +347,7 @@ class SEIRHVD:
         self.I_det = self.Im_det + self.Icr_det + self.Iv_det
         self.I_d_det = self.Im_d_det + self.Icr_d_det + self.Iv_d_det
         self.I_ac_det = self.Im_ac_det + self.Icr_ac_det + self.Iv_ac_det
-        
-      
+          
     def df_build(self):        
         self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
         names = ['S','Sv','E','E_d','Ev','Ev_d','Im','Im_d','Icr','Icr_d','Iv','Iv_d','H','H_d','D','D_d','R','R_d','Phi']
@@ -443,24 +405,21 @@ class SEIRHVD:
         self.results = pd.concat([self.results,aux,aux2,self.params,self.prevalence],axis=1)
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
 
+    def analytics(self):
+        #Cálculo de la fecha del Peak  
+        self.peakindex = np.where(self.I==max(self.I))[0][0]
+        self.peak = max(self.I)
+        self.peak_t = self.t[self.peakindex]
+        if self.initdate:
+            self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
+            self.peak_date = self.initdate+timedelta(days=int(round(self.peak_t)))
+        else:
+            self.dates = [None for i in range(len(self.t))]
+            self.peak_date = None
 
-    """
-    def resume(self):        
-        print("Resumen de resultados:")
-        qtype = ""
-        for i in range(self.numescenarios):
-            if self.inputarray[i][-1]==0:
-                qtype = "Cuarentena total"
-            if self.inputarray[i][-1]>0:
-                qtype ="Cuarentena Dinámica"            
+        # Prevalence:
+        self.prevalence_total = self.I_ac/self.population
+        self.prevalence_susc = np.array([self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))])
+        self.prevalence_det = np.array([self.I_ac_det[i]/(self.S[i]+self.E[i]+self.I_det[i]+self.R[i]) for i in range(len(self.I_ac))])
 
-            print("Escenario "+str(i))
-            print("Tipo de Cuarentena: "+qtype+'\nmov_rem: '+str(self.inputarray[i][2])+'\nmov_max: '+str(self.inputarray[i][2])+
-            "\nInicio cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime('%Y/%m/%d')+"\nFin cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime('%Y/%m/%d'))
-            print("Peak infetados \n"+"Peak value: "+str(self.peak[i])+"\nPeak date: "+str(self.peak_date[i]))
-            print("Fallecidos totales:"+str(max(self.B[i])))
-            print("Fecha de colapso hospitalario \n"+"Camas: "+self.H_colapsedate[i]+"\nVentiladores: "+self.V_colapsedate[i])
-            print("\n")
-    """
-
-        
+        self.CFR = np.array([self.pH_D(t)*self.pE_Icr(t) for t in self.t])        

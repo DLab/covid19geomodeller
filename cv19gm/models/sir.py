@@ -15,50 +15,41 @@ import utils.cv19files as cv19files
 
 class SIR:  
     """
-        SEIR model object:
+        SIR model object:
         Construction:
-            SEIR(self, config = None, inputdata=None)
+            SIR(self, config = None, inputdata=None)
 
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
         self.compartmentalmodel = "SIR"
-            
+        self.verbose = verbose
+                    
         if not config:
-            #raise('Missing configuration file')
             print('Missing configuration file, using default')
-            #return None
-        
-        # ------------------------------- #
-        #         Parameters Load         #
-        # ------------------------------- #
-        self.verbose = verbose        
-        if verbose:
+     
+        # Load Parameters
+        if self.verbose:
             print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
         self.tsim = self.t_end - self.t_init
         
-        if verbose:
+        if self.verbose:
             print('Initializing parameters and variables')
-        self.set_relational_values()
-        if verbose:
+        self.set_initial_values()
+        if self.verbose:
             print('Building equations')          
         self.set_equations()
 
         self.solved = False
-        if verbose:
+        if self.verbose:
             print('SIR object created')
-
-    # ------------------- #
-    #  Valores Iniciales  #
-    # ------------------- #
-   
-    def set_relational_values(self):
+        
+    def set_initial_values(self):
         # Active infected
         if hasattr(self,'I_det'):
             self.I = self.I_det/self.pI_det
         else:
             self.I_det = self.I*self.pI_det
-
 
         # New daily Infected
         if hasattr(self,'I_d_det'):
@@ -66,14 +57,12 @@ class SIR:
         else:
             self.I_d_det = self.I_d*self.pI_det
 
-
         # Accumulated Infected
         if hasattr(self,'I_ac_det'):
             self.I_ac = self.I_ac_det/self.pI_det
         else:
             self.I_ac_det = self.I_ac*self.pI_det
 
-       
         # Valores globales
         if not hasattr(self,'popfraction'):
             self.popfraction = 1
@@ -103,14 +92,12 @@ class SIR:
         # --------------------------- #
         #        Susceptibles         #
         # --------------------------- #
-       
         # 0) dS/dt:
         self.dS=lambda t,S,I,R: self.S_f(t) - self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) + self.rR_S(t)*R
         
         # --------------------------- #
         #           Infected          #
         # --------------------------- #     
-        
         # 1) dI/dt
         self.dI = lambda t,S,I,R: self.I_f(t) + self.alpha(t)*self.beta(t)*S*I/(self.N+self.k_I*I + self.k_R*R) - I/self.tI_R(t)
  
@@ -120,7 +107,6 @@ class SIR:
         # --------------------------- #
         #         Recovered           #
         # --------------------------- #  
-        
         # 3) Total recovered
         self.dR=lambda t,I,R: self.R_f(t) + I/self.tI_R(t) - self.rR_S(t)*R
 
@@ -130,15 +116,10 @@ class SIR:
         # 5) External Flux:
         self.dFlux = lambda t: self.S_f(t) + self.I_f(t) + self.R_f(t) 
 
-    def integrate(self,t0=0,T=None,h=0.01,method='LSODA'):
-        print('The use of integrate() is now deprecated. Use solve() instead.')
-        self.solve(t0=t0,T=T,h=h,method=method)
-
     def run(self,t0=0,T=None,h=0.01,method='LSODA'):
         #print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h,method=method)
 
-    # Scipy
     def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         """
         Solves ODEs using scipy.integrate
@@ -160,7 +141,7 @@ class SIR:
         self.t=np.arange(t0,T+h,h)
         initcond = np.array([self.S,self.I,self.I_d,self.R,0,0]) # [S0,I0,I_d0,R0,R_d0,Flux0]
         
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.solver_equations,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -185,7 +166,7 @@ class SIR:
 
         return 
 
-    def model_SEIR_graph(self,t,y):
+    def solver_equations(self,t,y):
         ydot=np.zeros(len(y))
         ydot[0]=self.dS(t,y[0],y[1],y[3])
         ydot[1]=self.dI(t,y[0],y[1],y[3])
@@ -194,30 +175,7 @@ class SIR:
         ydot[4]=self.dR_d(t,y[1],y[4])
         ydot[5]=self.dFlux(t)
         return(ydot)
-
-    def analytics(self):
-        """
-        Perform simulation analytics after running it.
-        It calculates peaks, prevalence, and will include R(t). 
-        """
-        #Cálculo de la fecha del Peak  
-        self.peakindex = np.where(self.I==max(self.I))[0][0]
-        self.peak = max(self.I)
-        self.peak_t = self.t[self.peakindex]
-        if self.initdate:
-            self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
-            self.peak_date = self.initdate+timedelta(days=round(self.peak_t)) 
-        else:
-            self.dates = [None for i in range(len(self.t))]
-            self.peak_date = None            
-
-        # Prevalence: 
-        self.prevalence_total = self.I_ac/self.population
-        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
-        self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
-        return
-       
-    
+           
     def df_build(self):
         """
         Builds a dataframe with the simulation results
@@ -249,55 +207,25 @@ class SIR:
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
         return    
 
+    def analytics(self):
+        """
+        Perform simulation analytics after running it.
+        It calculates peaks, prevalence, and will include R(t). 
+        """
+        #Cálculo de la fecha del Peak  
+        self.peakindex = np.where(self.I==max(self.I))[0][0]
+        self.peak = max(self.I)
+        self.peak_t = self.t[self.peakindex]
+        if self.initdate:
+            self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
+            self.peak_date = self.initdate+timedelta(days=round(self.peak_t)) 
+        else:
+            self.dates = [None for i in range(len(self.t))]
+            self.peak_date = None            
 
-
-    """
-     def df_build(self):
-        
-        #Builds a dataframe with the simulation results
-        
-        self.results = pd.DataFrame({'t':self.t,'dates':self.dates})
-        names = ['S','I','I_d','R','R_d','Flux']
-        aux = pd.DataFrame(np.transpose(self.sol.y),columns=names)       
-
-        names2 = ['I_ac','R_ac','I_det','I_d_det','I_ac_det','prevalence_total','prevalence_susc','prevalence_det']
-        vars2 = [self.I_ac,self.R_ac,self.I_det,self.I_d_det,self.I_ac_det,self.prevalence_total,self.prevalence_susc,self.prevalence_det]
-        aux2 = pd.DataFrame(np.transpose(vars2),columns=names2)
-
-        self.results = pd.concat([self.results,aux,aux2],axis=1)
-        self.results = self.results.astype({'S': int,'I': int,'I_d': int,'R': int,'R_d': int,'I_ac': int,'R_ac': int,'I_det': int,'I_d_det': int,'I_ac_det': int})
-
-        self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
+        # Prevalence: 
+        self.prevalence_total = self.I_ac/self.population
+        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
+        self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
         return
 
- 
-    def calculateindicators(self):
-        self.R_ef
-        self.SHFR
-
-        # SeroPrevalence Calculation
-
-        # Errors (if real data)
-
-        # Active infected
-        print('wip')
-
-    def resume(self):        
-        print("Resumen de resultados:")
-        qtype = ""
-        for i in range(self.numescenarios):
-            if self.inputarray[i][-1]==0:
-                qtype = "Cuarentena total"
-            if self.inputarray[i][-1]>0:
-                qtype ="Cuarentena Dinámica"            
-
-            print("Escenario "+str(i))
-            print("Tipo de Cuarentena: "+qtype+'\nmov_rem: '+str(self.inputarray[i][2])+'\nmov_max: '+str(self.inputarray[i][2])+
-            "\nInicio cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime('%Y/%m/%d')+"\nFin cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime('%Y/%m/%d'))
-            print("Peak infetados \n"+"Peak value: "+str(self.peak[i])+"\nPeak date: "+str(self.peak_date[i]))
-            print("Fallecidos totales:"+str(max(self.B[i])))
-            print("Fecha de colapso hospitalario \n"+"Camas: "+self.H_colapsedate[i]+"\nVentiladores: "+self.V_colapsedate[i])
-            print("\n")
-    """
-
-        

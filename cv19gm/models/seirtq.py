@@ -20,36 +20,28 @@ class SEIRTQ:
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
         self.compartmentalmodel = "SEIRTQ"
+        self.verbose = verbose
         
         if not config:
-            #raise('Missing configuration file')
             print('Missing configuration file, using default')
     
-        
-        # ------------------------------- #
-        #         Parameters Load         #
-        # ------------------------------- #
-        #self.config = config
-        if verbose:
+        # Load Parameters
+        if self.verbose:
             print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
         
-        if verbose:
+        if self.verbose:
             print('Initializing parameters and variables')
-        self.set_relational_values()
-        if verbose:
+        self.set_initial_values()
+        if self.verbose:
             print('Building equations')          
         self.set_equations()
 
         self.solved = False
-        if verbose:
+        if self.verbose:
             print('SEIR object created')
-
-    # ------------------- #
-    #  Valores Iniciales  #
-    # ------------------- #
-   
-    def set_relational_values(self):
+  
+    def set_initial_values(self):
         # Underrreporting 
         # Active infected
         if hasattr(self,'I_det'):
@@ -114,9 +106,7 @@ class SEIRTQ:
             self.I_f = lambda t:0 
         if not hasattr(self,'R_f'):
             self.R_f = lambda t:0
-
         
-
     def set_equations(self):
         """        
         Sets Diferential Equations
@@ -169,15 +159,9 @@ class SEIRTQ:
         # 10) External Flux: // Revisar esto! 
         self.dN = lambda t: self.S_f(t) + self.E_f(t) + self.I_f(t) + self.R_f(t) + self.T_f(t)
 
-
-    def integrate(self,t0=0,T=None,h=0.01):
-        print('The use of integrate() is now deprecated. Use solve() instead.')
-        self.solve(t0=t0,T=T,h=h)
-
     def run(self,t0=0,T=None,h=0.01):
         self.solve(t0=t0,T=T,h=h)
 
-    # Scipy
     def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         """
         Solves ODEs using scipy.integrate
@@ -199,7 +183,7 @@ class SEIRTQ:
         self.t=np.arange(t0,T+h,h)
         initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,self.R_d,self.T,self.T_d,self.Q,self.N]) # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
         
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.model_equations,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -230,7 +214,7 @@ class SEIRTQ:
         self.solved = True
         return 
 
-    def model_SEIR_graph(self,t,y):
+    def model_equations(self,t,y):
         ydot=np.zeros(len(y))
         ydot[0]=self.dS(t,y[0],y[3],y[5],y[7],y[10])
         ydot[1]=self.dE(t,y[0],y[1],y[3],y[7],y[10])

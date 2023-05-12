@@ -1,27 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-SEIR Meta-population Model
+SEIR Meta-populations Model
 """
 
 import numpy as np
 from scipy.integrate import solve_ivp
 import pandas as pd
-from datetime import timedelta
 
-#import utils.cv19functions as cv19functions
 import cv19gm.utils.cv19files as cv19files
 import cv19gm.utils.cv19mobility as cv19mobility
 
-""" To Do
+""" 
+ToDo
+    * Add accumulated variables
+    * Simplify results_build using params_build 
+    * Optimize code (remove unnecessary variables)
 
 """
 
 class SEIRMETA:  
     """|
-        SEIR model object:
+        SEIRMETA model object:
         Construction:
-            SEIR(self, config = None, inputdata=None)
+            SEIRMETA(self, config = None, inputdata=None)
 
     """
     def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, Phi_T = None, seed=None, method = 0, **kwargs):    
@@ -40,7 +42,7 @@ class SEIRMETA:
                       
         cv19files.loadconfig(self,config,inputdata,**kwargs)
         
-        # Definition of mobility matrix (Work in progress, it will be done inside the cb19mobility lib)
+        # Mobility matrix
         if Phi:
             self.Phi = Phi
             if Phi_T:
@@ -64,10 +66,6 @@ class SEIRMETA:
         if verbose:
             print('SEIR object created')
 
-    # ------------------- #
-    #  Valores Iniciales  #
-    # ------------------- #
-   
     def set_initial_values(self):
         # Exposed
         #The np.array cast is transitory hopefuly:
@@ -88,7 +86,6 @@ class SEIRMETA:
         self.S = self.N-self.E-self.I-self.R
         self.nodes = len(self.population) # Amount of nodes /meta-populations
     
-
     def set_equations(self):
         """        
         Sets Diferential Equations
@@ -155,15 +152,9 @@ class SEIRMETA:
             self.phi_I = lambda t,I,N: np.dot(self.Phi(t),(I/N)) - np.dot(np.dot(np.diag(I/N),self.Phi(t)),np_ones)
             self.phi_R = lambda t,R,N: np.dot(self.Phi(t),(R/N)) - np.dot(np.dot(np.diag(R/N),self.Phi(t)),np_ones)
     
-                    
-    def integrate(self,t0=0,T=None,h=0.01):
-        print('The use of integrate() is now deprecated. Use solve() instead.')
-        self.solve(t0=t0,T=T,h=h)
-
     def run(self,t0=0,T=None,h=0.01):
         self.solve(t0=t0,T=T,h=h)
 
-    # Scipy
     def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         """
         Solves ODEs using scipy.integrate
@@ -183,9 +174,9 @@ class SEIRMETA:
         
         self.t=np.arange(t0,T+h,h)
         self.R_d = np.zeros(self.nregions)
-        initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,self.R_d,self.N]).flatten() # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
+        initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,self.R_d,self.N]).flatten()
         
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.solver_equations,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t         
@@ -204,15 +195,13 @@ class SEIRMETA:
         #self.I_ac = np.cumsum(self.I_d) + self.I_ac # second term is the initial condition
         #self.R_ac = np.cumsum(self.R_d)
 
-        #self.analytics()
         self.results_build()
         self.global_results_build()
-        #self.underreport()
         self.solved = True
 
         return 
 
-    def model_SEIR_graph(self,t,y):
+    def solver_equations(self,t,y):
         y = y.reshape(8, self.nregions) #8 is the number of equations
         ydot=np.zeros(np.shape(y))
         ydot[0]=self.dS(t,y[0],y[3],y[5],y[7])
@@ -266,7 +255,6 @@ class SEIRMETA:
         self.global_results = pd.DataFrame(np.array([self.t,self.S_tot,self.E_tot,self.E_d_tot,self.I_tot,self.I_d_tot,self.R_tot,self.R_d_tot]).transpose(),columns=names).astype(int)        
         return        
         
-
     def params_df_build(self):
         """
         Builds a dataframe with the simulation parameters over time
@@ -286,57 +274,3 @@ class SEIRMETA:
         
         self.params = pd.concat(self.params,ignore_index=True)
         return
-    
-    
-
-    def analytics(self):
-        """
-        Perform simulation analytics after running it.
-        It calculates peaks, prevalence, and will include R(t). 
-        """
-        #Cálculo de la fecha del Peak  
-        self.peakindex = np.where(self.I==max(self.I))[0][0]
-        self.peak = max(self.I)
-        self.peak_t = self.t[self.peakindex]
-        if self.initdate:
-            self.dates = [self.initdate+timedelta(int(self.t[i])) for i in range(len(self.t))]
-            self.peak_date = self.initdate+timedelta(days=int(round(self.peak_t)))
-        else:
-            self.dates = [None for i in range(len(self.t))]
-            self.peak_date = None            
-
-        # Prevalence: 
-        self.prevalence_total = self.I_ac/self.population
-        self.prevalence_susc = [self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]
-        self.prevalence_det = [self.pI_det*self.I_ac[i]/(self.S[i]+self.E[i]+self.I[i]+self.R[i]) for i in range(len(self.I_ac))]                         
-        return
-           
-
-    """ 
-    def calculateindicators(self):
-        self.R_ef
-        self.SHFR
-        # SeroPrevalence Calculation
-        # Errors (if real data)
-        # Active infected
-        print('wip')
-
-    def resume(self):        
-        print("Resumen de resultados:")
-        qtype = ""
-        for i in range(self.numescenarios):
-            if self.inputarray[i][-1]==0:
-                qtype = "Cuarentena total"
-            if self.inputarray[i][-1]>0:
-                qtype ="Cuarentena Dinámica"            
-
-            print("Escenario "+str(i))
-            print("Tipo de Cuarentena: "+qtype+'\nmov_rem: '+str(self.inputarray[i][2])+'\nmov_max: '+str(self.inputarray[i][2])+
-            "\nInicio cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime('%Y/%m/%d')+"\nFin cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime('%Y/%m/%d'))
-            print("Peak infetados \n"+"Peak value: "+str(self.peak[i])+"\nPeak date: "+str(self.peak_date[i]))
-            print("Fallecidos totales:"+str(max(self.B[i])))
-            print("Fecha de colapso hospitalario \n"+"Camas: "+self.H_colapsedate[i]+"\nVentiladores: "+self.V_colapsedate[i])
-            print("\n")
-    """
-
-        

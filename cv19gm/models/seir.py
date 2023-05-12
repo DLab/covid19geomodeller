@@ -20,34 +20,28 @@ class SEIR:
     """
     def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
         self.compartmentalmodel = "SEIR"
-        
+        self.verbose = verbose
         if not config:
             print('Missing configuration file, using default')
-            #raise('Missing configuration file')
-            #return None
                 
         # ------------------------------- #
         #         Parameters Load         #
         # ------------------------------- #        
-        if verbose:
+        if self.verbose:
             print('Loading configuration file')          
         cv19files.loadconfig(self,config,inputdata,**kwargs)
-        if verbose:
+        if self.verbose:
             print('Initializing parameters and variables')
-        self.set_relational_values()
-        if verbose:
+        self.set_initial_values()
+        if self.verbose:
             print('Building equations')          
         self.set_equations()
 
         self.solved = False
-        if verbose:
+        if self.verbose:
             print('SEIR object created')
-
-    # ------------------- #
-    #  Valores Iniciales  #
-    # ------------------- #
    
-    def set_relational_values(self):
+    def set_initial_values(self):
         # Active infected
         if hasattr(self,'I_det'):
             self.I = self.I_det/self.pI_det
@@ -173,7 +167,6 @@ class SEIR:
         #print('The use of integrate() is now deprecated. Use solve() instead.')
         self.solve(t0=t0,T=T,h=h,method=method)
 
-    # Scipy
     def solve(self,t0=0,T=None,h=0.01,method='LSODA'):
         """
         Solves ODEs using scipy.integrate
@@ -194,7 +187,7 @@ class SEIR:
         self.t=np.arange(t0,T+h,h)
         initcond = np.array([self.S,self.E,self.E_d,self.I,self.I_d,self.R,0,0]) # [S0,E0,E_d0,I0,I_d0,R0,R_d0,Flux0]
         
-        sol = solve_ivp(self.model_SEIR_graph,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
+        sol = solve_ivp(self.solver_equations,(t0,T), initcond,method=method,t_eval=list(range(t0,T)))
         
         self.sol = sol
         self.t=sol.t 
@@ -222,7 +215,7 @@ class SEIR:
 
         return 
 
-    def model_SEIR_graph(self,t,y):
+    def solver_equations(self,t,y):
         ydot=np.zeros(len(y))
         ydot[0]=self.dS(t,y[0],y[1],y[3],y[5])
 
@@ -292,36 +285,3 @@ class SEIR:
         self.resume = pd.DataFrame({'peak':int(self.peak),'peak_t':self.peak_t,'peak_date':self.peak_date},index=[0])
         return    
 
-
-    """
- 
-    def calculateindicators(self):
-        self.R_ef
-        self.SHFR
-
-        # SeroPrevalence Calculation
-
-        # Errors (if real data)
-
-        # Active infected
-        print('wip')
-
-    def resume(self):        
-        print("Resumen de resultados:")
-        qtype = ""
-        for i in range(self.numescenarios):
-            if self.inputarray[i][-1]==0:
-                qtype = "Cuarentena total"
-            if self.inputarray[i][-1]>0:
-                qtype ="Cuarentena Dinámica"            
-
-            print("Escenario "+str(i))
-            print("Tipo de Cuarentena: "+qtype+'\nmov_rem: '+str(self.inputarray[i][2])+'\nmov_max: '+str(self.inputarray[i][2])+
-            "\nInicio cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][4])).strftime('%Y/%m/%d')+"\nFin cuarentena: "+(self.initdate+timedelta(days=self.inputarray[i][5])).strftime('%Y/%m/%d'))
-            print("Peak infetados \n"+"Peak value: "+str(self.peak[i])+"\nPeak date: "+str(self.peak_date[i]))
-            print("Fallecidos totales:"+str(max(self.B[i])))
-            print("Fecha de colapso hospitalario \n"+"Camas: "+self.H_colapsedate[i]+"\nVentiladores: "+self.V_colapsedate[i])
-            print("\n")
-    """
-
-        
