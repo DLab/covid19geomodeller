@@ -527,12 +527,12 @@ class SEQUENTIAL_FIT:
     # ----------------------------------------------------- #
     # Second step: recursing beta fit for short intervals    #
     # ----------------------------------------------------- #
-    def beta_fit(self,actualidx=-1,debug=True):
+    def beta_fit(self,actualidx=-1,debug=False):
         starttime = time.time()
         # Find right beta for the divergence point
         bounds = [[self.bounds_beta[0]],[self.bounds_beta[1]]]
         opti = BETA_PIECEWISE_FIT(cfg = self.cfg, bounds = bounds, I_d_data = self.I_d_data[:actualidx], 
-        t_data = self.t_data[:actualidx],  beta_values=self.beta_values,beta_days=self.beta_days, inputdata = self.inputdata, mu = self.mu,  **self.kwargs)
+            t_data = self.t_data[:actualidx],  beta_values=self.beta_values,beta_days=self.beta_days, inputdata = self.inputdata, mu = self.mu,  **self.kwargs)
 
         # Choose algorithm
         algo = pg.algorithm(pg.nlopt(solver="bobyqa"))
@@ -568,7 +568,7 @@ class SEQUENTIAL_FIT:
     def optimize(self,debug=False):
         # Finding initial values
         start = time.time()
-        self.betamu_fit(debug=False)
+        self.betamu_fit(debug=debug)
         
         # Stop condition: global error under a tolerance or reaching the end of the data
         while self.global_error > self.global_errortol and not self.stop:
@@ -587,7 +587,7 @@ class SEQUENTIAL_FIT:
 
             # 2. Find the best fit for this interval
             self.beta_days.append(idx)
-            self.beta_fit(debug=False,actualidx=self.actualidx)
+            self.beta_fit(debug=debug,actualidx=self.actualidx)
             
             # 3. Check if the solution represents a transition or it is due to noise.
             #    If the betas are too similar we find one that fits this extended range altogether
