@@ -16,9 +16,9 @@ class SEIR:
     """
         SEIR model object:
         Construction:
-            SEIR(self, config = None, inputdata=None)
+            SEIR(self, config = None)
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
+    def __init__(self, config = None, verbose = False, **kwargs):
         self.compartmentalmodel = "SEIR"
         self.verbose = verbose
         if not config:
@@ -29,7 +29,7 @@ class SEIR:
         # ------------------------------- #        
         if self.verbose:
             print('Loading configuration file')          
-        cv19files.loadconfig(self,config,inputdata,**kwargs)
+        cv19files.loadconfig(self,config,**kwargs)
         if self.verbose:
             print('Initializing parameters and variables')
         self.set_initial_values()

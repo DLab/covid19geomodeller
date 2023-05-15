@@ -23,10 +23,10 @@ class SEIRMETA:
     """|
         SEIRMETA model object:
         Construction:
-            SEIRMETA(self, config = None, inputdata=None)
+            SEIRMETA(self, config = None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, Phi = None, Phi_T = None, seed=None, method = 0, **kwargs):    
+    def __init__(self, config = None, verbose = False, Phi = None, Phi_T = None, seed=None, method = 0, **kwargs):    
         if verbose and not config:
             print('Warning: Using default configuration file')
          
@@ -40,7 +40,7 @@ class SEIRMETA:
         if verbose:
             print('Loading configuration file')
                       
-        cv19files.loadconfig(self,config,inputdata,**kwargs)
+        cv19files.loadconfig(self,config,**kwargs)
         
         # Mobility matrix
         if Phi:

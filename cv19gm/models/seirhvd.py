@@ -22,10 +22,10 @@ class SEIRHVD:
     """
         SEIRHVD model object:
         Construction:
-            SEIRHVD(self, config = None, inputdata=None)
+            SEIRHVD(self, config = None)
 
     """
-    def __init__(self, config=None, inputdata=None,verbose = False,**kwargs):
+    def __init__(self, config=None, verbose = False,**kwargs):
         self.compartmentalmodel = 'SEIRHVD'
         self.verbose = verbose
         if not config:
@@ -34,7 +34,7 @@ class SEIRHVD:
         # Load Parameters   
         if verbose:
             print('Loading configuration file')
-        cv19files.loadconfig(self,config=config,inputdata=inputdata,**kwargs) # Load configuration file
+        cv19files.loadconfig(self,config=config,**kwargs) # Load configuration file
                 
         if verbose:
             print('Initializing parameters and variables')

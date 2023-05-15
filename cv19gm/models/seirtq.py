@@ -15,10 +15,10 @@ class SEIRTQ:
     """
         SEIRTQ model object:
         Construction:
-            SEIRTQ(self, config = None, inputdata=None)
+            SEIRTQ(self, config = None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
+    def __init__(self, config = None, verbose = False, **kwargs):
         self.compartmentalmodel = "SEIRTQ"
         self.verbose = verbose
         
@@ -28,7 +28,7 @@ class SEIRTQ:
         # Load Parameters
         if self.verbose:
             print('Loading configuration file')          
-        cv19files.loadconfig(self,config,inputdata,**kwargs)
+        cv19files.loadconfig(self,config,**kwargs)
         
         if self.verbose:
             print('Initializing parameters and variables')

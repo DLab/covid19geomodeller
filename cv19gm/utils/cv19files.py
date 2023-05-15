@@ -31,7 +31,7 @@ To Do:
    
 """
 
-def loadconfig(sim,config,inputdata,**kwargs):
+def loadconfig(sim,config,inputdata=None,**kwargs):
     # ------------------------------- #
     #        Parameters Load          #
     # ------------------------------- #

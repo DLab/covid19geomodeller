@@ -17,10 +17,10 @@ class SIR:
     """
         SIR model object:
         Construction:
-            SIR(self, config = None, inputdata=None)
+            SIR(self, config = None)
 
     """
-    def __init__(self, config = None, inputdata=None,verbose = False, **kwargs):
+    def __init__(self, config = None, verbose = False, **kwargs):
         self.compartmentalmodel = "SIR"
         self.verbose = verbose
                     
