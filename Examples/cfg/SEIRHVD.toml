@@ -33,7 +33,12 @@ user = ''
 	populationfraction = 1 # Fraction of the total population that take part on the dynamic at the beginning
 
 	mu = 0.8 # E(0) = mu*I(0)
-	
+
+	# Subreport: Detected infected are calculated from the real infected given in the IC
+	pI_det = 1	
+	pIcr_det = 1
+	pIm_det = 1
+	pIv_det = 1
 	
 	[parameters.dynamic]
 		
@@ -72,34 +77,29 @@ user = ''
 	tEv_Iv = 3.0 
 
 	# Infectious (asymptomatic + mild + severe)
-        tIm_R = 5.0 
+	tIm_R = 5.0 
 	
 	# Infectious (critical)
-        tIcr_H = 5.0
+	tIcr_H = 5.0
     
 	# Infectious (vaccinated)
-        pIv_R = 0.99
-        tIv_R = 12.0 
+	pIv_R = 0.99
+	tIv_R = 12.0 
 
-        pIv_H = 0.01
-        tIv_H = 7.0
-        
-        # Hospitalized (IMV)
-        pH_R = 0.7
-        tH_R = 11
-        
-        pH_D = 0.3
-        tH_D = 11
+	pIv_H = 0.01
+	tIv_H = 7.0
+	
+	# Hospitalized (IMV)
+	pH_R = 0.7
+	tH_R = 11
+	
+	pH_D = 0.3
+	tH_D = 11
 	
 	# Immunity loss 
 	pR_S = 0 # probability
 	tR_S = 90 # time
 	
-	# Subreport: Detected infected are calculated from the real infected given in the IC
-	pI_det = 1	
-	pIcr_det = 1
-	pIm_det = 1
-	pIv_det = 1
 
 	
 [initialconditions]

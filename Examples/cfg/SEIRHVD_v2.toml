@@ -34,7 +34,12 @@ user = ''
 
 	mu = 0.298 # E(0) = mu*I(0)
 	
-	
+	# Subreport: Detected infected are calculated from the real infected given in the IC
+	pIcr_det = 1	
+	pIm_det = 1
+	pIv_det = 1
+	pI_det = 1	
+		
 	[parameters.dynamic]
 		
 	# Contagion and movility
@@ -95,11 +100,7 @@ user = ''
 	pR_S = 0 # probability
 	tR_S = 90 # time
 	
-	# Subreport: Detected infected are calculated from the real infected given in the IC
-	pIcr_det = 1	
-	pIm_det = 1
-	pIv_det = 1
-	pI_det = 1	
+
 
 	
 	
