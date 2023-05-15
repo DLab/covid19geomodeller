@@ -30,7 +30,7 @@ class SIR:
         # Load Parameters
         if self.verbose:
             print('Loading configuration file')          
-        cv19files.loadconfig(self,config,inputdata,**kwargs)
+        cv19files.loadconfig(self,config,**kwargs)
         self.tsim = self.t_end - self.t_init
         
         if self.verbose:
