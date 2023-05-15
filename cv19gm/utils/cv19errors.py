@@ -6,20 +6,6 @@ import numpy as np
 #     Error measuring functions    #
 # -------------------------------- #
 """
-def cv19errorbuild(input):
-    """
-    Function builder
-    # crear un iterador que recorra el input y cree la función a partir de un comando exec:
-    # Acepta diccionarios o strings con forma de diccionario
-    """
-    if callable(input):        
-        return input
-    
-    elif type(input)==str:        
-        print('input dict')
-        return locals()[input]
-
-
 # -------------------------------- #
 #          Global Errors           #
 # -------------------------------- #
@@ -30,7 +16,6 @@ def ITWE(sim, data, t_data=None, rho=1):
         t_data = list(range(len(data)))
     err = [((data[i] - sim[t_data[i]]) ** 2) / (1 + t_data[i]) ** rho for i in range(len(data))]
     return np.sqrt(np.mean(np.array(err) ** 2))
-
 
 def ITWE_log(sim, data, t_data=None, rho=1):
     # Log Inverse time weighted error
@@ -112,3 +97,19 @@ def LRCE(sim, data, t_data=None):
         t_data = list(range(len(data)))
     return np.cumsum([(data[i] - sim[t_data[i]]) / (1 + data[i]) for i in range(len(data))])
     
+    
+# -------------------------------- #
+#        Residual Metrics          #
+# -------------------------------- #
+def cv19errorbuild(input):
+    """
+    Function builder. Used to create a function from a configuration file
+    # crear un iterador que recorra el input y cree la función a partir de un comando exec:
+    # Acepta diccionarios o strings con forma de diccionario
+    """
+    if callable(input):        
+        return input
+    
+    elif type(input)==str:        
+        print('input dict')
+        return locals()[input]
