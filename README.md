@@ -13,7 +13,7 @@ Open a terminal and go to repository's directory.
 
 Execute:
 
-`python setup.py install`
+`pip install .`
 
 
 
