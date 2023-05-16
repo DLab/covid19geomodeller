@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
-from scipy import signal
-import matplotlib.pyplot as plt
-from scipy.special import expit
-import json
 import pandas as pd
 import toml
 
 import os
-import sys
-path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(1, path)
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
-import data.cv19data as cv19data
-import utils.cv19functions as cv19functions 
-import utils.cv19timeutils as cv19timeutils
+import cv19gm.data.cv19data as cv19data
+import cv19gm.utils.cv19functions as cv19functions 
+import cv19gm.utils.cv19timeutils as cv19timeutils
 
 """
 # ------------------------------------------------- #   
@@ -26,8 +19,9 @@ import utils.cv19timeutils as cv19timeutils
 # ------------------------------------------------- #
 To Do:
   * Improve this code
-  * Improve get_default_parameters. Looks like the current way is deprecated. 
+  * Input data is not working yet in here
   * Fix meta-population dynamic parameters
+  * 
    
 """
 
