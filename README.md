@@ -26,7 +26,7 @@ Execute:
 ```
 Home/  
 ├── Examples/  
-├── Data/ (En duda)  
+├── Data/
 ├── SRC/  
    ├── SEIR/  
    ├── SEIRHVD/  
