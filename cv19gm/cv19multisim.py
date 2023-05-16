@@ -8,10 +8,10 @@ from copy import deepcopy
 CV19MULTISIM 
 Performs multiple simulations for sensitivity analysis on single population models.
 
-
+Todo: [ ] Show the axis to which the parameter belongs
 Todo: [ ] Simplify the code
 Todo: [ ] Build resume function
-Todo: [ ] Make variables accessible from parent object
+Todo: [ ] Make variables and analytics accessible directly from parent object
 Todo: [ ] Add metapopulation models (?)
 """
 
