@@ -181,7 +181,7 @@ def events(values,days,default=0,*functions):
     out = func_add(*aux_f)    
     return out
 
-def piecewise(values,limits = [-np.infty]):
+def piecewise(values,limits = [-np.inf]):
     """Piecewise creator function. Create a smooth time dependent function that returns the values (or functions) given in the 
     values vector for the intervals specified through the limits vector. In order to make this function differentiable, we use a sigmoid to have a smooth change between values. This produces that the 
     value at the limit is equal to the mean between both sides.

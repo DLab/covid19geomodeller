@@ -192,18 +192,18 @@ class CV19PARAMFIT:
             for i in range(len(self.opti.beta_funct["days"]))
         ]
         if xaxis == "days":
-            plt.plot(self.sim.sims[0].t, self.sim.sims[0].I_d, label="Simulation")
+            plt.plot(self.sim.t, self.sim.I_d, label="Simulation")
             plt.scatter(self.t_data, self.I_d_data, label="Data")
             plt.xlabel("Days")
             for i in np.array(interval_array):
                 plt.axvline(i, linestyle="dashed", color="grey")
         elif xaxis == "dates":
-            plt.plot(self.sim.sims[0].dates, self.sim.sims[0].I_d, label="Simulation")
+            plt.plot(self.sim.dates, self.sim.I_d, label="Simulation")
             plt.scatter(self.dates_data, self.I_d_data, label="Data")
             plt.xlabel("Dates")
             for i in np.array(interval_array):
                 plt.axvline(
-                    self.sim.sims[0].dates[int(i)], linestyle="dashed", color="grey"
+                    self.sim.dates[int(i)], linestyle="dashed", color="grey"
                 )
 
         plt.ylabel("New cases")
@@ -262,9 +262,9 @@ class BETA_FIT:
     def fitness(self, x):
         sim = CV19SIM(self.cfg, beta=x, **self.kwargs)
         sim.solve()
-        self.ITWE_error = ITWE(sim.sims[0].I_d, self.I_d, self.t, alpha=self.alpha)
-        self.RMSE_error = RMSE(sim.sims[0].I_d, self.I_d, self.t)
-        self.p2p_error = P2PE(sim.sims[0].I_d, self.I_d, self.t)
+        self.ITWE_error = ITWE(sim.I_d, self.I_d, self.t, alpha=self.alpha)
+        self.RMSE_error = RMSE(sim.I_d, self.I_d, self.t)
+        self.p2p_error = P2PE(sim.I_d, self.I_d, self.t)
         return [self.ITWE_error]
 
     def get_bounds(self):  # mandatory function of Pygmo2
@@ -303,7 +303,7 @@ class BETAMU_FIT:
         # optimized.
         sim = CV19SIM(self.cfg, beta=x[0], mu=x[1], I_d = self.I_d_data[0],**self.kwargs)
         sim.solve()
-        err = self.error(sim.sims[0].I_d, self.I_d_data, t_data=self.t_data)
+        err = self.error(sim.I_d, self.I_d_data, t_data=self.t_data)
         return [err]
 
     def get_bounds(self):  # mandatory function of Pygmo2
@@ -320,7 +320,7 @@ class BETA_PIECEWISE_FIT:
     """_summary_
     # beta_days includes the last transition date, the objetive of this method is to find the best value for this transition.
     """
-    def __init__(self,cfg, bounds, I_d_data, t_data = None,  beta_values = [], beta_days = [-np.infty], error="RMSE", **kwargs):
+    def __init__(self,cfg, bounds, I_d_data, t_data = None,  beta_values = [], beta_days = [-np.inf], error="RMSE", **kwargs):
         
         self.I_d_data = I_d_data  # Data new cases 
         if type(t_data) == type(None):
@@ -345,7 +345,7 @@ class BETA_PIECEWISE_FIT:
         beta = cv19functions.piecewise(values=self.beta_values+[x],limits = self.beta_days)
         sim = CV19SIM(self.cfg, beta=beta, I_d = self.I_d_data[0], **self.kwargs)
         sim.solve()
-        self.RMSE_error = RMSE(sim.sims[0].I_d, self.I_d_data, self.t_data)
+        self.RMSE_error = RMSE(sim.I_d, self.I_d_data, self.t_data)
         return [self.RMSE_error]
 
     def get_bounds(self):  # mandatory function of Pygmo2
@@ -413,10 +413,10 @@ class INTERVAL_FIT:
         )  # x[i] takes values between limits define by "bounds"
         sims.solve()  # run simulation
         idx = np.searchsorted(
-            sims.sims[0].t, self.t_data
+            sims.t, self.t_data
         )  # to adjust data to simulation (data are each three days)
         res = LA.norm(
-            self.I_d_data - sims.sims[0].I_d[idx]
+            self.I_d_data - sims.I_d[idx]
         )  # Norm between data and simulation. This is the fitness.
         return [res]
 
@@ -513,7 +513,7 @@ class SEQUENTIAL_FIT:
         # Try to avoid simulating again
         self.sim = CV19SIM(self.cfg,I_d = self.I_d_data[0],beta=self.beta_values[0],mu=self.mu,inputdata = self.inputdata, **self.kwargs)
         self.sim.solve()
-        self.global_error = self.global_errfunct(self.sim.sims[0].I_d, self.I_d_data, t_data=self.t_data)
+        self.global_error = self.global_errfunct(self.sim.I_d, self.I_d_data, t_data=self.t_data)
         self.global_error_hist.append(self.global_error)
 
         end = time.time()
@@ -551,7 +551,7 @@ class SEQUENTIAL_FIT:
         self.sim = CV19SIM(self.cfg,I_d = self.I_d_data[0],beta=self.beta,mu=self.mu,inputdata=self.inputdata,**self.kwargs)
         self.sim.solve()
 
-        self.global_error = self.global_errfunct(self.sim.sims[0].I_d, self.I_d_data, t_data=self.t_data)
+        self.global_error = self.global_errfunct(self.sim.I_d, self.I_d_data, t_data=self.t_data)
         self.global_error_hist.append(self.global_error)
         
         endtime = time.time()
@@ -613,7 +613,7 @@ class SEQUENTIAL_FIT:
 
     def plot(self, xaxis="days"):
         if xaxis == "days":
-            plt.plot(self.sim.sims[0].t, self.sim.sims[0].I_d, label="Simulation")
+            plt.plot(self.sim.t, self.sim.I_d, label="Simulation")
             plt.scatter(self.t_data, self.I_d_data, label="Data",color='tab:red')
             plt.xlabel("Days")
             for i in np.array(self.beta_days):
@@ -621,12 +621,12 @@ class SEQUENTIAL_FIT:
         
         elif xaxis == "dates":
             import matplotlib.dates as mdates
-            plt.plot(self.sim.sims[0].dates, self.sim.sims[0].I_d, label="Simulation")
+            plt.plot(self.sim.dates, self.sim.I_d, label="Simulation")
             plt.scatter(self.dates_data, self.I_d_data, label="Data",color='tab:red')
             plt.xlabel("Dates")
             for i in np.array(self.beta_days):
                 plt.axvline(
-                    self.sim.sims[0].dates[int(i)], linestyle="dashed", color="grey"
+                    self.sim.dates[int(i)], linestyle="dashed", color="grey"
                 )
             plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
             plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=10))
@@ -647,11 +647,11 @@ class SEQUENTIAL_FIT:
 
         if step > 0:
             beta_values = self.beta_values[:step]
-            beta_days = [-np.infty] if step == 0 else self.beta_days[:step]
+            beta_days = [-np.inf] if step == 0 else self.beta_days[:step]
             beta = cv19functions.piecewise(values=beta_values,limits=beta_days) 
             sim = CV19SIM(self.cfg,I_d = self.I_d_data[0],beta=beta,mu=self.mu,inputdata=self.inputdata,**self.kwargs)
             sim.solve()
-            plt.plot(sim.sims[0].t,sim.sims[0].I_d,label='Step: '+str(step))
+            plt.plot(sim.t,sim.I_d,label='Step: '+str(step))
 
             for i in beta_days:
                 plt.axvline(i,linestyle='dashed',color='grey')
@@ -672,12 +672,12 @@ class SEQUENTIAL_FIT:
         
         plt.scatter(self.t_data, self.I_d_data, label="Data",color='grey',s=20)
         beta_values = [self.beta_values[0]]
-        beta_days = [-np.infty]
+        beta_days = [-np.inf]
         for i in range(steps):
             beta = cv19functions.piecewise(values=beta_values,limits=beta_days) 
             sim = CV19SIM(self.cfg,I_d = self.I_d_data[0],beta=beta,mu=self.mu,inputdata=self.inputdata,**self.kwargs)
             sim.solve()
-            plt.plot(sim.sims[0].t,sim.sims[0].I_d,linestyle='dashed',label='Iter: '+str(i))
+            plt.plot(sim.t,sim.I_d,linestyle='dashed',label='Iter: '+str(i))
             beta_values.append(self.beta_values[i+1])
             if i==0:
                 beta_days = [self.beta_days[i]]
@@ -689,7 +689,7 @@ class SEQUENTIAL_FIT:
         beta = cv19functions.piecewise(values=beta_values,limits=beta_days) 
         sim = CV19SIM(self.cfg,I_d = self.I_d_data[0],beta=beta,mu=self.mu,inputdata=self.inputdata,**self.kwargs)
         sim.solve()
-        plt.plot(sim.sims[0].t,sim.sims[0].I_d,label='Final')
+        plt.plot(sim.t,sim.I_d,label='Final')
 
         plt.xlabel("Days", size=15)
         plt.ylabel("New Cases", size=15)
@@ -706,7 +706,7 @@ def tendency_change(I_d_data, t_data=None, cfg=None, sim = None, l_err_tol=100, 
         sim.solve()
     
     # Add options for calculating local error
-    l_err = errorfunction(sim.sims[0].I_d,I_d_data,t_data) # Local Absolute error
+    l_err = errorfunction(sim.I_d,I_d_data,t_data) # Local Absolute error
     aux = np.where(np.array(l_err)>l_err_tol)[0] # first index over error tolerance
     changeindex = aux[0] if len(aux)>0 else len(I_d_data)-1
 
@@ -752,7 +752,7 @@ def data_management(self, I_d_data, t_data, dates_data, tstate, initdate, cv19gm
             raise Exception("Missing data to fit")
 
             
-def beta_fit(bounds,cfg,I_d_data,t_data,beta_values=[], beta_days = [-np.infty],actualidx=-1,debug=True,global_errfunct=RMSE,**kwargs):
+def beta_fit(bounds,cfg,I_d_data,t_data,beta_values=[], beta_days = [-np.inf],actualidx=-1,debug=True,global_errfunct=RMSE,**kwargs):
     starttime = time.time()
     # Find right beta for the divergence point
     bounds = [[bounds[0]],[bounds[1]]]
@@ -778,7 +778,7 @@ def beta_fit(bounds,cfg,I_d_data,t_data,beta_values=[], beta_days = [-np.infty],
     sim.solve()
 
     global_errfunct = cv19errorbuild(global_errfunct)
-    global_error = global_errfunct(sim.sims[0].I_d, I_d_data, t_data=t_data)
+    global_error = global_errfunct(sim.I_d, I_d_data, t_data=t_data)
     endtime = time.time()
     
     if debug:
