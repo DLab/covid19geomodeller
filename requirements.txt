@@ -1,0 +1,15 @@
+numpy
+pandas
+datetime
+multiprocess
+joblib
+scipy
+dill
+requests
+pathlib
+flask
+flask_cors
+matplotlib
+ipython
+pygmo
+waitress
